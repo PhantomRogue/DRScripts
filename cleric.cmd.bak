@@ -1,0 +1,188 @@
+#All Magiks
+
+echo To Skip to Specific Training, .cleric CastAug/CastWard/CastUtil
+
+goto $charactername
+
+Korlash:
+var AugSpell IVM
+var AugMana 16
+var UtilSpell EOTB
+var UtilMana 15
+var WardSpell CH
+var WardMana 10
+var camb armb
+var cambCharge 5
+put remove %camb
+if_1 gosub %1
+goto Looper
+
+
+Hixin:
+var AugSpell CV
+var AugMana 5
+var UtilSpell PG
+var UtilMana 5
+var WardSpell CV
+var WardMana 6
+var camb ank
+var cambCharge 1
+put remove %camb
+if_1 gosub %1
+goto Looper
+
+
+
+Yosto:
+var AugSpell obfuscation
+var AugMana 12
+var UtilSpell EOTB
+var UtilMana 5
+var WardSpell MAF
+var WardMana 4
+var camb armb
+var cambCharge 3
+put remove %camb
+if_1 gosub %1
+goto Looper
+
+Smawkins:
+var AugSpell subs
+var AugMana 5
+var UtilSpell ignite
+var UtilMana 5
+var WardSpell ES
+var WardMana 6
+var camb ank
+var cambCharge 1
+put remove %camb
+if_1 gosub %1
+goto Looper
+
+
+Hintoc:
+var AugSpell mapp
+var AugMana 16
+var UtilSpell GAF
+var UtilMana 17
+var WardSpell MPP
+var WardMana 19
+var camb pend
+var cambCharge 5
+if_1 gosub %1
+goto Looper
+
+Doz:
+var AugSpell ease
+var AugMana 4
+var UtilSpell hoj
+var UtilMana 1
+var WardSpell maf
+var WardMana 2
+var camb cambrinth.ring
+var cambCharge 1
+put remove %camb
+if_1 gosub %1
+goto Looper
+
+
+Vedalken:
+var AugSpell seer
+var AugMana 8
+var UtilSpell seer
+var UtilMana 8
+var WardSpell PSY
+var WardMana 12
+var camb orb
+var cambCharge 2
+put remove %camb
+if_1 gosub %1
+goto Looper
+
+exit:
+put #parse MagicTrainComplete
+exit
+
+Looper:
+if $Augmentation.LearningRate < 30 then gosub CastAug
+if $Utility.LearningRate < 30 then gosub CastUtil
+if $Warding.LearningRate < 30 then gosub CastWard
+if $Augmentation.LearningRate > 29 && $Warding.LearningRate > 29 && $Utility.LearningRate > 29 then goto exit
+goto Looper
+
+
+CastAug:
+gosub charge %camb
+gosub cast %AugSpell %AugMana
+if $Augmentation.LearningRate > 30 then return
+if $charactername = Hintoc then put pray keren
+#if $charactername = Hixin then put predict weather
+goto CastAug
+
+CastWard:
+gosub charge %camb
+gosub cast %WardSpell %WardMana
+if $Warding.LearningRate > 30 then return
+if $charactername = Hintoc then put pray keren
+#if $charactername = Hixin then put predict weather
+goto CastWard
+
+CastUtil:
+gosub charge %camb
+gosub cast %UtilSpell %UtilMana
+if $Utility.LearningRate > 30 then return
+if $charactername = Hintoc then put pray keren
+#if $charactername = Hixin then put predict weather
+goto CastUtil
+
+
+charge:
+pause
+put charge my %camb %cambCharge
+match charge2 absorbs
+match charge You fail
+match focus Your harnessed energy dissipates
+match focus resists,
+match charge ...wait
+match pause60 You strain
+match pause60 You strain
+matchwait
+
+charge2:
+pause
+put charge my %camb %cambCharge
+match focus absorbs
+match charge2 You fail
+match focus resists,
+match focus Your harnessed energy dissipates
+match charge2 ...wait
+match pause60 You strain
+matchwait
+
+focus:
+pause
+put invoke my %camb
+match Return ready
+match focus but fail.
+match focus ...wait
+match Return intact
+match pause60 You strain
+matchwait
+
+cast:
+pause
+put pre $1 $2
+match castnow You feel fully pre
+match cast ...wait
+matchwait
+
+castnow:
+put cast
+goto Return
+
+pause60:
+pause 60
+goto Return
+
+Return:
+return
