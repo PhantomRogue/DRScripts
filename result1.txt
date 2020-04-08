@@ -1,0 +1,1142 @@
+{
+	"properties": {
+		"min_cap" : { "valueType": "number" },
+		"max_cap" : { "valueType": "number" },
+		"body_type" : { "valueType": "text" },
+		"map" : { "valueType": "text" },
+		"undead" : { "valueType": "text" },
+		"backstabbable" : { "valueType": "text" },
+		"gems" : { "valueType": "text" },
+		"coins" : { "valueType": "text" },
+		"boxes" : { "valueType": "text" },
+		"skinnable" : { "valueType": "text" }
+	},
+	"items": [
+		{
+			"label": "Blood-thirsty Lascar",
+			"min_cap": [2000],
+			"max_cap": [260],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Pirate Buccaneer",
+			"min_cap": [2000],
+			"max_cap": [260],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Goblin Bowman",
+			"min_cap": [2000],
+			"max_cap": [170],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Abominable Umbral Race",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"boxes": ["true"]
+		},
+		{
+			"label": "Asketian Harbinger",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["true"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Asketian Herald",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Invasion"],
+			"undead": ["true"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Bone mammoth",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["quadruped"],
+			"map": ["Invasion"],
+			"backstabbable": ["false"]
+		},
+		{
+			"label": "Botuk Hei",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Cadaverous Fiend",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Cloud Rat",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Corsair",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Hara'jaal","Qi'Reshalia"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Cross-eyed Libger",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"backstabbable": ["true"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Cyan Mist",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"],
+			"backstabbable": ["false"]
+		},
+		{
+			"label": "Pirate Deckhand",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Dragon Priest Imperial Warden",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Dung Beetle",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["insect"],
+			"undead": ["false"],
+			"backstabbable": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Dwarf-Like Creature",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["insect"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Elpalzi Captain",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Elpalzi Commander",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Elpalzi Elder General",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Elpalzi Mage",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Elpalzi Major",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Elpalzi Officer",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Elpalzi Scout",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Elpalzi Soldier",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Elpalzi Swordsman",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Elpalzi Veteran",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Emaciated Figure",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Ersatz",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["false"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Faenrae Chanter",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Quest","Invasion"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Faenrae Executioner",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["true"],
+			"backstabbable": ["true"]
+		},
+		{
+			"label": "Farshel Sibowen",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Fell Mage",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"],
+			"backstabbable": ["true"]
+		},
+		{
+			"label": "Fiendish Creature",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Folsi Immola",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Forest Bandit",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"backstabbable": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Gargantuan Korograth",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["quadruped"],
+			"undead": ["false"],
+			"backstabbable": ["false"],
+			"skinnable": ["true"]
+		},
+		{
+			"label": "Gelv Cyclops",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["true"]
+		},
+		{
+			"label": "Gentle Marmozel",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Gestalt Draugen",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Ghastly Behemoth",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Ghastly Race",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Giant Adder",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["ophidian"],
+			"undead": ["false"],
+			"backstabbable": ["false"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Glass Construct",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["true"],
+			"backstabbable": ["true"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Gloomy Race",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Goblin Archer",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Goblin Berserker",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Goblin Chieftain",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Goblin Mercenary",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Goblin Prince",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Goblin Warlord",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Invasion"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Goblin Warrior",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Gorbesh Archer",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Gorbesh Captain",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Gorbesh Commander",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Gorbesh Enchanter",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Gorbesh Line Soldier",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Gorbesh Mage",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Greater Skeleton",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["true"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Hiro Bear",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["quadruped"],
+			"map": ["Quest"],
+			"backstabbable": ["false"],
+			"skinnable": ["true"]
+		},
+		{
+			"label": "Horse (creature)",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["quadruped"],
+			"map": ["Horse Clan","Ilithi"],
+			"undead": ["false"],
+			"backstabbable": ["false"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["true"]
+		},
+		{
+			"label": "Inky Race",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Jaguar",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["quadruped"],
+			"map": ["Invasion"],
+			"undead": ["false"],
+			"backstabbable": ["false"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["true"]
+		},
+		{
+			"label": "Jeol Moradu",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Raven's Point","Forfedhdar"],
+			"backstabbable": ["true"]
+		},
+		{
+			"label": "Kather Shaman",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Quest"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Kather Warrior",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Quest"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Kather Watcher",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Lesser North Wind Banshee",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"map": ["Invasion"],
+			"undead": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Maeldryth",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Meshor Fox",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"skinnable": ["true"]
+		},
+		{
+			"label": "Moaning Figure",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Mummer",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["false"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Ogre Bruiser",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["false"]
+		},
+		{
+			"label": "Ogre Deadeye",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["false"]
+		},
+		{
+			"label": "Ogre Hunter",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["false"],
+			"gems": ["false"],
+			"coins": ["false"]
+		},
+		{
+			"label": "Ogre Smasher",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["false"]
+		},
+		{
+			"label": "Ogre Toxophilite",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["false"]
+		},
+		{
+			"label": "Ogre Warlord",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["false"]
+		},
+		{
+			"label": "Olensari Mihmanan",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Orc Marauder",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"map": ["Therengia"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Par'i Heitak",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"map": ["Taisidon"]
+		},
+		{
+			"label": "Pirate (2)",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Pirate Crossbowman",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["false"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Pirate Mariner",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Pirate Mercenary",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Pirate Netman",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Plated Serpent",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Poho Moglin",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Race Shadow",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "S'Kra Kor Shaman",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"map": ["Taisidon"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "S'Kra Kor Villager",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Taisidon"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "S'Kra Kor Warrior",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Taisidon"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "S'lai Archer",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Zoluren"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["true"]
+		},
+		{
+			"label": "S'lai Crossbowman",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Zoluren"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["true"]
+		},
+		{
+			"label": "S'lai Footsoldier",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Zoluren"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["true"]
+		},
+		{
+			"label": "S'lai Warrior",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Zoluren"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["true"]
+		},
+		{
+			"label": "Pirate Sailor",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["false"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Selkie",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"map": ["Ratha","Qi'Reshalia"],
+			"undead": ["false"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Shadowy Race",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Skeletal Mass",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Slender Ribbon Adder",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["ophidian"],
+			"map": ["Invasion"],
+			"undead": ["false"],
+			"backstabbable": ["false"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Spriggan",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Invasion"],
+			"undead": ["true"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Sun-darkened Bosun",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Tanri Immola",
+			"min_cap": [2000],
+			"max_cap": [0]
+		},
+		{
+			"label": "Tenebraeling",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Titanic Bone Monstrosity",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Tortured Soul (2)",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Dirge","Zoluren"],
+			"undead": ["true"],
+			"backstabbable": ["true"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Twisted Skeletal Hound",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["skeletal"],
+			"undead": ["true"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Undead Dragon Priest",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["true"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Velver",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"map": ["Fornsted Village","Invasion","Therengia"],
+			"undead": ["true"],
+			"backstabbable": ["true"],
+			"coins": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Winged Black Marble Gargoyle",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"map": ["Invasion"],
+			"undead": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "World Dragon Priest",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"body_type": ["biped"],
+			"undead": ["false"],
+			"backstabbable": ["true"],
+			"gems": ["true"],
+			"coins": ["true"],
+			"boxes": ["true"],
+			"skinnable": ["false"]
+		},
+		{
+			"label": "Wraithlike Race",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Xala'shar Archer",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Xala'shar Lookout",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Xala'shar Overseer",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Xala'shar Shredder",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Xala'shar Slayer",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Xala'shar Thrall",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Xala'shar Vanquisher",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Xala'shar Vindicator",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"undead": ["true"]
+		},
+		{
+			"label": "Young Desumos",
+			"min_cap": [2000],
+			"max_cap": [0],
+			"map": ["Taisidon"],
+			"gems": ["false"],
+			"coins": ["false"],
+			"boxes": ["false"],
+			"skinnable": ["true"]
+		}
+	]
+}
