@@ -1,6 +1,12 @@
 action send 1 $lastcommand when ^\.\.\.wait|^Sorry, you may only type
 action send $lastcommand when ^You are still stunned
 action goto DONE when eval $health < 55
+action math TotalGems add 1 when You open your pouch and put the 
+action math TotalBoxes add 1 when in your spidersilk bag
+action math Plats add $1 when You pick up (\d+) platinum
+action math Golds add $1 when You pick up (\d+) gold
+action math Silvers add $1 when You pick up (\d+) silver
+
 
 
 var gems1 agate|alexandrite|amber|amethyst|andalusite|aquamarine|bead|beryl|bloodgem|bloodstone|carnelian|chrysoberyl|carnelian|chalcedony|platinum bar|copper bar|silver bar|gold bar
@@ -15,8 +21,14 @@ var boltloot drake-fang bolt|flint-tipped bolt|crossbow bolt|basilisk bolt|soot-
 var coins gold coins|silver coins|bronze coins|platinum coins|gold coin|silver coin|bronze coin|platinum coin
 var boxloot trunk|box|casket|coffer|crate|chest|skippet|caddy|strongbox
 
+
 put wie glad
 
+setvariable TotalGems 0
+setvariable TotalBoxes 0
+setvariable Plats 0
+setvariable Golds 0
+setvariable Silvers 0
 
 start:
 put tb
@@ -31,6 +43,12 @@ put quit
 
 
 Kill_hide:
+
+put #statusbar 2 Money: %Plats p %Golds g %Silvers s
+put #statusbar 3 Gems: %TotalGems
+put #statusbar 4 Boxes: %TotalBoxes
+pause 1
+
 put face next
 pause
 goto Advance
@@ -168,7 +186,7 @@ if (matchre ("$roomobjs", "\b(%coins|%junkloot)\b(,|\.| and)")) then goto GET_CO
 if (matchre ("$roomobjs", "\b(%arrowloot)\b(,|\.| and)")) then goto GET_ARROWS
 if (matchre ("$roomobjs", "\b(%boltloot)\b(,|\.| and)")) then goto GET_BOLTS
 if (matchre ("$roomobjs", "\b(%metal1|%metal2)\b(,|\.| and)")) then goto GetAndPut
-if (matchre ("$roomobjs", "\b(%boxloot)\b(,|\.| and)")) then goto GetBoxes
+if (matchre ("$roomobjs", "\b(%boxloot)\b(,|\.| and)") && (%TotalBoxes < 11)) then goto GetBoxes
 ReturnFun:
 return
 

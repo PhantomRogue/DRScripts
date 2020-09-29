@@ -11,6 +11,7 @@ action put #beep when grins
 action put #beep when waves to You
 action put #beep when waves at You
 action put #beep when winks at You
+action put #beep when You can use RESPOND
 action put #beep when shakes You
 action put #beep when leans on You
 action send stand when $prone = 1
@@ -130,6 +131,18 @@ else var DoNecroHealing No
 
 goto %ScriptType
 
+Lew:
+Lewix:
+var SkipHide No
+var BowHide Yes
+setvariable weapons shortbow|bastard sword|cusk|bastard sword
+setvariable WSkill Bow|Large_Edged|Light_Thrown|Twohanded_Edged
+var DEBIL HB.1
+var SPELL ec.2
+goto goon
+
+
+
 Doz:
 var SkipHide Yes
 setvariable weapons bastard sword|PM|bastard sword|crossbow
@@ -197,7 +210,7 @@ var BowHide Yes
 setvariable weapons sabre|PM|latchbow
 setvariable WSkill Small_Edged|Targeted_Magic|Crossbow
 var DEBIL pv.2
-var SPELL sv.4
+var SPELL acs.4
 goto goon
 
 
@@ -207,7 +220,7 @@ var SkipHide No
 var BowHide Yes
 setvariable weapons sabre|PM|latchbow
 setvariable WSkill Small_Edged|Targeted_Magic|Crossbow
-var DEBIL pv.5
+var DEBIL pv.6
 var SPELL sv.7
 goto goon
 
@@ -349,7 +362,7 @@ if $Guild = "Cleric" then gosub Pray
 if %BackstabFull != "Yes" && $Tactics.LearningRate < 25 then gosub TacticsTrain
 if $Guild = "Barbarian" then gosub RoarIt
 #if $Guild = "WarriorMage" then gosub DebilCast
-if $Guild = "Cleric" or $Guild = "Warrior Mage" or $Guild = "Necromancer" or $Guild = "Paladin" then gosub DebilCast
+if $Guild = "Cleric" or $Guild = "Warrior Mage" or $Guild = "Necromancer" or $Guild = "Paladin" or $charactername = Lewix then gosub DebilCast
 if %WeaponType = "Magic" then gosub Magic_Kill
 else if %WeaponType = "Thrown" then gosub Throw_Kill
 else if %WeaponType = "Ranged" then gosub Ranged_Kill
@@ -392,6 +405,7 @@ put prep %DEBIL
 match castdebil You feel fully prepared
 match returnc You have no idea how to cast that spell
 match DebilCast lost the spell you were
+match redodebil You have already
 matchwait
 castdebil:
 put cast
@@ -401,6 +415,10 @@ matchwait
 returnc:
 pause 2
 return
+redodebil:
+put rel
+pause .5
+goto DebilCast
 
 fnCast:
 put face next;cast
@@ -539,7 +557,8 @@ if matchre ("$roomobjs", "(%skinnablecritters) ((which|that) appears dead|\(dead
 arrstuffdone:
 if %Necrofied = 0 && $Guild = Necromancer then goto NecroStuff
 pause .5
-put loot
+if $Guild == Ranger then put loot treasure 
+else put loot
 var Necrofied 0
 pause
 gosub Loot 	 
@@ -637,6 +656,12 @@ return
 
 BuffCheck:
 
+if $charactername = Lewix then
+{
+	if $INST = "OFF" then gosub rebuff INST 10
+	if $STW = "OFF" then gosub rebuff STW 10
+}
+
 if $charactername = Smawkins then
 {
  if $ES = "OFF" then gosub ReBuff ES 3
@@ -644,14 +669,17 @@ if $charactername = Smawkins then
 
 if $charactername = Korlash then
 {
-	if $OBFUSCATION = "OFF" then gosub ReBuff OBFUSCATION 20
-	if $PHP = "OFF" then gosub ReBuff PHP 20
+	if $OBFUSCATION = "OFF" then gosub ReBuff OBFUSCATION 2 10 10
+	if $PHP = "OFF" then gosub ReBuff PHP 5 10 10
+	if $OBFUSCATION = "OFF" then gosub ReBuff OBFUSCATION 5 5
+	if $CH = "OFF" then gosub ReBuff CH 10 2 2
 }
 
 if $charactername = Yosto then
 {
-	if $OBFUSCATION = "OFF" then gosub ReBuff OBFUSCATION 15
-	if $MAF = "OFF" then gosub ReBuff MAF 15
+	if $OBFUSCATION = "OFF" then gosub ReBuff OBFUSCATION 5 5
+	if $MAF = "OFF" then gosub ReBuff MAF 5 5
+	if $CH = "OFF" then gosub ReBuff CH 10 2 2
 	
 }
 
@@ -659,14 +687,15 @@ if $charactername = Vakroth then
 {
 	if %PROW = "OFF" then gosub Khri Prow
 	if %ELUS = "OFF" then gosub Khri elus
+	if %STRIKE = "OFF" then gosub Khri strike
 	if %FLIGHT = "OFF" then gosub Khri flight
 	if %HASTEN = "OFF" then gosub Khri hasten
 }
 
 if $charactername = Hintoc then
 {
-	if $MAPP = "OFF" then gosub ReBuff MAPP 15	
-	if $MPP = "OFF" then gosub ReBuff MPP 14
+	if $MAPP = "OFF" then gosub ReBuff MAPP 5 7
+	if $MPP = "OFF" then gosub ReBuff MPP 5 8
 }
 
 if $charactername = Hixin then
@@ -711,8 +740,8 @@ if $charactername = Coleman then
 }
 
 return
-
 Khri:
+
 put khri $1
 pause 3
 return
@@ -751,7 +780,7 @@ return
 ReBuff:
 if %HangBack = "On" then put ret
 put prep $1 $2
-pause 2
+pause 6
 put harn $3
 pause 5
 put harn $3
@@ -861,7 +890,7 @@ if $stamina < 80 then goto attpause
 ExpertiseDone:
 match Return balance]
 match Return balanced]
-match waitmelee still stunned
+match rekill still stunned
 match waitmelee You aren't close enough to attack
 match Return referring
 match Return You turn to face
@@ -912,10 +941,10 @@ pause
 goto Hide
 
 Hide:
-match Stalk You melt into
-match Stalk You blend in with
+match Backstab You melt into
+match Backstab You blend in with
 match Hide You can't do that while entangled in a web
-match Stalk Eh?
+match Backstab Eh?
 match Hide notices your attempt
 put hide
 matchwait
@@ -983,7 +1012,7 @@ match AttackIt already debilitated
 match AttackIt out cold!
 match AttackIt is not 
 match Hide Roundtime
-put ambush clout
+put ambush
 setvariable clouted 1
 matchwait
 
@@ -1071,6 +1100,7 @@ loadpause:
 aimback:
 aim:
  put aim
+ pause 1
  goto range_stalk
  
 range_stalk:
@@ -1086,6 +1116,7 @@ StalkTime:
  matchwait
 
 HideTime:
+ pause 1
  put hide
  pause 5
  goto waitforfire
@@ -1182,6 +1213,7 @@ if $mana < 60 then gosub MagicAttack
 	match facenext Your spell fails completely
 	match facenext You are not engaged to anything, so you must specify a target to focus on
 	match Magic_Kill have a spell prepared
+	match Magic_Kill Your concentration slips for a moment, and your spell is lost
 	match Magic_Kill Currently lacking the skill to complete the pattern
 	match facenext I could not find what you were referring to
 	matchre nextup Roundtime|backfire|Your target pattern dissipates because the
@@ -1192,6 +1224,11 @@ if $mana < 60 then gosub MagicAttack
 	goto Magic_Kill
 facenext:
 put face next
+goto Magic_Kill
+
+redocast:
+put rel
+pause 1
 goto Magic_Kill
 
 MagicAttack:

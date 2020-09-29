@@ -5,10 +5,17 @@ action goto Dead when You are a ghost
 action goto Panic when (stunning you|knocking you completely|dealing you a vicious)
 action goto Panic when (You're badly hurt, |You're smashed up,|You're very badly hurt)
 action goto Panic when (You're near death,|You're terribly wounded,|You're very beat up)
+action math GemCount add $1 when quickly fill it with (\d+) gem
+action math Plats add $1 when You pick up (\d+) platinum
+action math Golds add $1 when You pick up (\d+) gold
+
 
 VAR trigger off
 VAR speed normal
 
+setvariable Plats 0
+setvariable Golds 0
+setvariable GemCount 0
 send .ved remove
 pause 10
 
@@ -189,7 +196,7 @@ MATCH disarm Sorry,
 MATCH disarm \.\.\.wait
 match trapid proves too difficult to manipulate
 MATCH disarm did not disarm
-MATCH disarm caused something to shift
+MATCH trapnormal caused something to shift
 Match disarm You work with the trap for a while but are unable to make any progress
 match trapid is not yet fully disarmed
 Match getpick Roundtime
@@ -424,13 +431,10 @@ PUT dismantle my %boxtype
 MATCHWAIT
 
 exp:
-save
-put exp
-waitfor EXP HELP
-if $Disarm_LearningRate > 10 then goto done
-if $LockPicking_LearningRate > 11 then goto done
-if $Appraisal_LearningRate > 10 then setvariable afterget id
-else setvariable afterget app
+echo Total Gems so Far:  %GemCount
+echo Total Money so far:  %Plats Plat %Golds Gold
+echo ------
+pause 2
 goto whatbox
 
 blewit:

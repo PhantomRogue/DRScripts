@@ -7,13 +7,13 @@ goto $charactername
 
 Korlash:
 var AugSpell IVM
-var AugMana 16
+var AugMana 2
 var UtilSpell EOTB
-var UtilMana 15
+var UtilMana 3
 var WardSpell CH
-var WardMana 10
+var WardMana 3
 var camb armb
-var cambCharge 2
+var cambCharge 10
 put remove %camb
 if_1 gosub %1
 goto Looper
@@ -36,13 +36,13 @@ goto Looper
 
 Yosto:
 var AugSpell obfuscation
-var AugMana 12
+var AugMana 10
 var UtilSpell EOTB
-var UtilMana 5
+var UtilMana 6
 var WardSpell MAF
-var WardMana 10
+var WardMana 6
 var camb armb
-var cambCharge 2
+var cambCharge 7
 put remove %camb
 if_1 gosub %1
 goto Looper
@@ -101,12 +101,11 @@ if_1 gosub %1
 goto Looper
 
 checkSpell:
-put discern $1
-pause 10
+#put discern $1
+#pause 10
 #put #var globalvar #evalmath $globalvar - 1
-math ClericMana subtract 4
-echo %ClericMana
-pause 1
+#math ClericMana subtract 4
+#pause 1
 return
 
 exit:
@@ -114,9 +113,9 @@ put #parse MagicTrainComplete
 exit
 
 Looper:
+if $Utility.LearningRate < 25 then gosub FirstCastUtil
 if $Augmentation.LearningRate < 25 then gosub FirstCastAug
 if $Warding.LearningRate < 25 then gosub FirstCastWard
-if $Utility.LearningRate < 25 then gosub FirstCastUtil
 if $Augmentation.LearningRate > 25 && $Warding.LearningRate > 25 && $Utility.LearningRate > 25 then gosub exit
 goto Looper
 
@@ -124,30 +123,30 @@ FirstCastAug:
 gosub checkSpell %AugSpell
 CastAug:
 gosub charge %camb
-gosub cast %AugSpell %ClericMana
+gosub cast %AugSpell %AugMana
 if $Augmentation.LearningRate > 30 then return
 if $charactername = Hintoc then put pray keren
-#if $charactername = Hixin then put predict weather
+if $charactername = Lewix then put predict weather
 goto CastAug
 
 FirstCastWard:
 gosub checkSpell %WardSpell
 CastWard:
 gosub charge %camb
-gosub cast %WardSpell %ClericMana
+gosub cast %WardSpell %WardMana
 if $Warding.LearningRate > 30 then return
 if $charactername = Hintoc then put pray keren
-#if $charactername = Hixin then put predict weather
+if $charactername = Lewix then put predict weather
 goto CastWard
 
 FirstCastUtil:
 gosub checkSpell %UtilSpell
 CastUtil:
 gosub charge %camb
-gosub cast %UtilSpell %ClericMana
+gosub cast %UtilSpell %UtilMana
 if $Utility.LearningRate > 30 then return
 if $charactername = Hintoc then put pray keren
-#if $charactername = Hixin then put predict weather
+if $charactername = Lewix then put predict weather
 goto CastUtil
 
 
