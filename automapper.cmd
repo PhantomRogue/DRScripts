@@ -211,6 +211,7 @@ wave_do:
 done:
      pause 0.1
      put #parse YOU HAVE ARRIVED!
+	 put #parse YOUHAVEARRIVED
      put #class arrive off
      exit
 move:

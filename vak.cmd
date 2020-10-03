@@ -21,8 +21,15 @@ var boltloot drake-fang bolt|flint-tipped bolt|crossbow bolt|basilisk bolt|soot-
 var coins gold coins|silver coins|bronze coins|platinum coins|gold coin|silver coin|bronze coin|platinum coin
 var boxloot trunk|box|casket|coffer|crate|chest|skippet|caddy|strongbox
 
-
+put dump junk
 put wie glad
+
+
+# Variable to stop hunting after you get the Box Liimt (Defined below, no variable for it)
+## Use .vak 1 from the Master Trainer if you want to stop hunting after getting boxes, no parameter if you just want to AFK hunt
+
+setvariable AFKVersion 0
+if_1 then setvariable AFKVersion 1
 
 setvariable TotalGems 0
 setvariable TotalBoxes 0
@@ -31,6 +38,8 @@ setvariable Golds 0
 setvariable Silvers 0
 
 start:
+if (%AFKVersion == 1 && %TotalBoxes > 11) then goto HunterDone
+
 put tb
 pause 10
 if $monstercount > 0 then gosub Kill_hide
@@ -174,7 +183,8 @@ matchwait
 
 Return:
 pause 3
-put loot
+if (%TotalBoxes < 12) then put loot 
+else put loot treasure
 pause 3
 gosub Loot
 return
@@ -186,7 +196,7 @@ if (matchre ("$roomobjs", "\b(%coins|%junkloot)\b(,|\.| and)")) then goto GET_CO
 if (matchre ("$roomobjs", "\b(%arrowloot)\b(,|\.| and)")) then goto GET_ARROWS
 if (matchre ("$roomobjs", "\b(%boltloot)\b(,|\.| and)")) then goto GET_BOLTS
 if (matchre ("$roomobjs", "\b(%metal1|%metal2)\b(,|\.| and)")) then goto GetAndPut
-if (matchre ("$roomobjs", "\b(%boxloot)\b(,|\.| and)") && (%TotalBoxes < 11)) then goto GetBoxes
+if (matchre ("$roomobjs", "\b(%boxloot)\b(,|\.| and)")) then goto GetBoxes
 ReturnFun:
 return
 
@@ -238,3 +248,7 @@ put get $1 coin
 pause
 return
 
+HunterDone:
+put #parse HUNTINGISDONE
+put ret;ret
+put #script abort vak

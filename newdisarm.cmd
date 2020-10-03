@@ -8,16 +8,22 @@ action goto Panic when (You're near death,|You're terribly wounded,|You're very 
 action math GemCount add $1 when quickly fill it with (\d+) gem
 action math Plats add $1 when You pick up (\d+) platinum
 action math Golds add $1 when You pick up (\d+) gold
-
+action setvariable pouchval $1 when You sort through the gems and finally decide that they're worth a total of about (\d+) 
 
 VAR trigger off
 VAR speed normal
-
+setvariable pouchval 0
+setvariable BeginningPouch 0
+setvariable EndingPouch 0
 setvariable Plats 0
 setvariable Golds 0
 setvariable GemCount 0
 send .ved remove
-pause 10
+pause 5
+
+put app pouch quick
+pause 7
+setvariable BeginningPouch %pouchval
 
 if_1 goto %1
 
@@ -82,6 +88,7 @@ MATCH setcasket casket
 MATCH setcaddy caddy
 MATCH settrunk trunk
 MATCH setbox box
+match done there is nothing in there
 PUT rumm my %container1
 MATCHWAIT
 goto done
@@ -211,9 +218,9 @@ match trapanalyze \.\.\.wait
 
 match trapanalyze FAIL
 match trapanalyze unable to determine
-match harvest Roundtime
-match harvest You've already analyzed this trap in preparation
-match harvest positive attitude
+match dismantle Roundtime
+match dismantle You've already analyzed this trap in preparation
+match dismantle positive attitude
 put disarm analyze
 matchwait
 
@@ -243,8 +250,13 @@ getpick:
 save getpick
 MATCH pickid from inside
 MATCH getpick \.\.\.wait
+match regetpick You need a free hand to pick that up
 PUT get lockpick from my %container2
 MATCHWAIT
+
+regetpick:
+put stow left
+goto getpick
 
 pickid:
 save pickid
@@ -382,7 +394,7 @@ MATCH loot ...wait
 MATCH loot Sorry,
 MATCH %afterloot nothing in there
 match loot ...wait
-matchre lootit (tablet|scroll|roll|bark|parchment|card|map|ostracon|gold nugget|Animite nugget|Audrualm nugget|Damite nugget|Darkstone nugget|Electrum nugget|Glaes nugget|Gold nugget|Haralun nugget|Icesteel nugget|Kertig nugget|Lumium nugget|Muracite nugget|Niello nugget|Niniam nugget|Orichalcum nugget|Platinum nugget|Silversteel nugget|Tyrium nugget|Vardite nugget|Animite bar|Audrualm bar|Damite bar|Darkstone bar|Electrum bar|Glaes bar|Gold bar|Haralun bar|Icesteel bar|Kertig bar|Lumium bar|Muracite bar|Niello bar|Niniam bar|Orichalcum bar|Platinum bar|Silversteel bar|Tyrium bar|Vardite bar|electrum nugget|silver nugget)
+matchre lootit (tablet|scroll|roll|bark|parchment|card|map|ostracon|platinum nugget|gold nugget|Animite nugget|Audrualm nugget|Damite nugget|Darkstone nugget|Electrum nugget|Glaes nugget|Gold nugget|Haralun nugget|Icesteel nugget|Kertig nugget|Lumium nugget|Muracite nugget|Niello nugget|Niniam nugget|Orichalcum nugget|Platinum nugget|Silversteel nugget|Tyrium nugget|Vardite nugget|Animite bar|Audrualm bar|Damite bar|Darkstone bar|Electrum bar|Glaes bar|Gold bar|Haralun bar|Icesteel bar|Kertig bar|Lumium bar|Muracite bar|Niello bar|Niniam bar|Orichalcum bar|Platinum bar|Silversteel bar|Tyrium bar|Vardite bar|electrum nugget|silver nugget)
 match gems Encumbrance
 PUT look in my %boxtype
 put encum
@@ -441,6 +453,8 @@ blewit:
 ECHO ********************
 ECHO ** YOU BLEW IT! **
 ECHO ********************
+
+put #PARSE YOUBLEWIT
 EXIT
 
 tohard:
@@ -457,7 +471,16 @@ EXIT
 # GOTO disarm
 
 done:
-#echo >Log MIND LOCKED or outa boxes\nBoxes opened %boxcount, Traps worked %trapcount, Locks worked %lockcount
+# Get Final Pouch
+put app pouch quick
+pause 7
+var EndingPouch %pouchval
+math EndingPouch sub %BeginningPouch
+echo Total From Gems: {%EndingPouch} 
+pause 1
+math EndingPouch divide %GemCount
+echo Avg Gem: {%EndingPouch} 
+put #parse BOXESAREPOPPED
 EXIT
 
 armor:
