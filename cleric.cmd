@@ -1,5 +1,6 @@
 #All Magiks
-action var ClericMana $1 when for a total of (\d+) streams
+action var ClericMana $1 when  reinforce it with (\d+) more
+action var MinPrep $1 when  at minimum (\d+) mana streams 
 
 echo To Skip to Specific Training, .cleric CastAug/CastWard/CastUtil
 
@@ -42,7 +43,7 @@ var UtilMana 6
 var WardSpell MAF
 var WardMana 6
 var camb armb
-var cambCharge 7
+var cambCharge 8
 put remove %camb
 if_1 gosub %1
 goto Looper
@@ -77,11 +78,11 @@ Doz:
 var AugSpell suf
 var AugMana 12
 var UtilSpell zeph
-var UtilMana 5
+var UtilMana 9
 var WardSpell es
-var WardMana 13
-var camb cambrinth.ring
-var cambCharge 2
+var WardMana 10
+var camb kiwi
+var cambCharge 8
 put remove %camb
 if_1 gosub %1
 goto Looper
@@ -101,14 +102,24 @@ if_1 gosub %1
 goto Looper
 
 checkSpell:
-#put discern $1
-#pause 10
-#put #var globalvar #evalmath $globalvar - 1
-#math ClericMana subtract 4
-#pause 1
+ ## Cheeky Math to start to pump alot of mana into spells, will use 75% of the Discern Max, 
+ ## since we charging twice, getting half that value to charge the Cambrinth
+ ## If we run out of mana too fast, we can use 1/3 of the Charge, just change ClericMana divide 2
+	put discern $1
+	pause 10
+	math ClericMana multiply .9
+	evalmath ClericMana round(%ClericMana)
+	math ClericMana subtract %MinPrep
+	math ClericMana divide 2
+	evalmath ClericMana round(%ClericMana)
+	var cambCharge %ClericMana
+	pause 10
 return
 
 exit:
+put wear %camb;stow %camb
+
+pause 1
 put #parse MagicTrainComplete
 exit
 
@@ -116,14 +127,14 @@ Looper:
 if $Utility.LearningRate < 25 then gosub FirstCastUtil
 if $Augmentation.LearningRate < 25 then gosub FirstCastAug
 if $Warding.LearningRate < 25 then gosub FirstCastWard
-if $Augmentation.LearningRate > 25 && $Warding.LearningRate > 25 && $Utility.LearningRate > 25 then gosub exit
+if $Augmentation.LearningRate > 25 && $Warding.LearningRate > 25 && $Utility.LearningRate > 25 then goto exit
 goto Looper
 
 FirstCastAug:
 gosub checkSpell %AugSpell
 CastAug:
 gosub charge %camb
-gosub cast %AugSpell %AugMana
+gosub cast %AugSpell
 if $Augmentation.LearningRate > 30 then return
 if $charactername = Hintoc then put pray keren
 if $charactername = Lewix then put predict weather
@@ -133,7 +144,7 @@ FirstCastWard:
 gosub checkSpell %WardSpell
 CastWard:
 gosub charge %camb
-gosub cast %WardSpell %WardMana
+gosub cast %WardSpell
 if $Warding.LearningRate > 30 then return
 if $charactername = Hintoc then put pray keren
 if $charactername = Lewix then put predict weather
@@ -143,7 +154,7 @@ FirstCastUtil:
 gosub checkSpell %UtilSpell
 CastUtil:
 gosub charge %camb
-gosub cast %UtilSpell %UtilMana
+gosub cast %UtilSpell
 if $Utility.LearningRate > 30 then return
 if $charactername = Hintoc then put pray keren
 if $charactername = Lewix then put predict weather

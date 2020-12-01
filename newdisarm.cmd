@@ -21,6 +21,7 @@ setvariable GemCount 0
 send .ved remove
 pause 5
 
+put tie pou
 put app pouch quick
 pause 7
 setvariable BeginningPouch %pouchval
@@ -171,6 +172,7 @@ MATCH tohard Prayer would be a good start for any
 match tohard You could just jump off a cliff and save
 MATCH tohard You probably have the same shot as a snowball
 MATCH tohard A pitiful snowball encased in the Flames
+match trapquick Somebody has already located and identified the current trap
 #Already disarmed
 match getpick Roundtime
 PUT disarm id
@@ -219,6 +221,7 @@ match trapanalyze \.\.\.wait
 match trapanalyze FAIL
 match trapanalyze unable to determine
 match dismantle Roundtime
+match dismantle Unable to locate the object you specified
 match dismantle You've already analyzed this trap in preparation
 match dismantle positive attitude
 put disarm analyze
@@ -406,7 +409,7 @@ goto exp
 
 lootit:
 put get $1 from my %boxtype
-put put $1 in my backp
+put put $1 in my wa sa
 pause 2
 goto loot
 
@@ -439,8 +442,14 @@ match unrecognizedloot You can not dismantle
 MATCH exp Rolling your shoulders to loosen them
 MATCH exp You move your hands
 MATCH exp You place some meat
+match exp You must be holding the object you wish to dismantle.
+match ecp Unable to locate the object you specified.
 PUT dismantle my %boxtype
 MATCHWAIT
+
+dispause:
+pause 1
+goto dismantle
 
 exp:
 echo Total Gems so Far:  %GemCount
@@ -472,6 +481,7 @@ EXIT
 
 done:
 # Get Final Pouch
+put khri stop
 put app pouch quick
 pause 7
 var EndingPouch %pouchval
@@ -479,6 +489,7 @@ math EndingPouch sub %BeginningPouch
 echo Total From Gems: {%EndingPouch} 
 pause 1
 math EndingPouch divide %GemCount
+math $$charactername.Gems add %GemCount
 echo Avg Gem: {%EndingPouch} 
 put #parse BOXESAREPOPPED
 EXIT

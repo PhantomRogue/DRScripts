@@ -15,9 +15,10 @@ start:
 	put #goto TGNE
 	waitfor YOU HAVE ARRIVED
 	put get vial
+	pause 5
 	put fill vial with water
 	put cast water in vial
-	pause
+	pause 2
 	put stow vial
 	goto bath
 

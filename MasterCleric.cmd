@@ -20,8 +20,8 @@ start:
 send #goto cleric
 waitfor YOU HAVE ARRIVED
 echo Time to Work your Magics!  Using Research
-send .cleric
-waitfor MagicTrainComplete
+	send .research
+	waitfor DONERESEARCH
 echo 
 echo Going to work on an Work Order, Engineering
 echo 
