@@ -10,3 +10,5 @@ put dep all
 put bal
 pause 1
 put #goto portal
+waitfor ARRIVE
+put #parse BANKINGDONG

@@ -16,7 +16,7 @@ put uncoil rope
 pause 3
 
 prep:
-if $Guild = Thief then goto StartKhri
+##if $Guild = Thief then goto StartKhri
 
 
 burgle:

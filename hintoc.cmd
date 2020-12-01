@@ -119,119 +119,6 @@ var BowHide No
 
 #gosub starBuffCheckt
 
-if_2 then var SkipHide %2
-else var SkipHide No
-
-if_3 then var ScriptType %3
-else var ScriptType Melee
-
-if_5 then var DoNecroHealing Yes
-else var DoNecroHealing No
-
-
-goto %ScriptType
-
-Lew:
-Lewix:
-var SkipHide No
-var BowHide Yes
-setvariable weapons shortbow|bastard sword|cusk|bastard sword
-setvariable WSkill Bow|Large_Edged|Light_Thrown|Twohanded_Edged
-var DEBIL HB.1
-var SPELL ec.2
-goto goon
-
-
-
-Doz:
-var SkipHide Yes
-setvariable weapons axe|spike|spike
-setvariable WSkill Heavy_Thrown|Light_Thrown|Small_Edged
-var SPELL fire.shard.12
-var DEBIL AL.2
-goto goon
-
-
-
-Korlash:
-var SkipHide No
-var BowHide Yes
-setvariable weapons bastard sword|PM|katar
-setvariable WSkill Twohanded_Edged|Targeted_Magic|Small_Edged
-var SPELL acs.7
-var DEBIL vs.10
-goto goon
-
-KKill:
-var SkipHide No
-var BowHide Yes
-setvariable WSkill Twohanded_Edged|Targeted_Magic
-setvariable weapons bastard sword|PM
-var SPELL acs.7
-var DEBIL vs.10
-goto goon
-
-Hixin:
-Hix:
-var SkipHide Yes
-var BowHide No
-setvariable weapons shortbow|cusk|cusk
-setvariable WSkill Bow|Light_Thrown|Small_Blunt
-goto goon
-
-HTrain:
-var SkipHide No
-var BowHide Yes
-setvariable weapons shortbow
-setvariable WSkill Bow
-goto goon
-
-
-Boklin:
-var SkipHide Yes
-var BowHide No
-setvariable weapons club|crossbow|club|brawling
-setvariable WSkill Light_Thrown|Crossbow|Small_Blunt|Brawling
-var SPELL STRA.2
-goto goon
-
-YTrain:
-var SkipHide Yes
-var BowHide Yes
-setvariable weapons latchbow|cusk|axe
-setvariable WSkill Crossbow|Light_Thrown|Large_Edged
-var DEBIL pv.2
-var SPELL stra.4
-goto goon
-
-YKill:
-var SkipHide Yes
-var BowHide Yes
-setvariable weapons sabre|PM|latchbow
-setvariable WSkill Small_Edged|Targeted_Magic|Crossbow
-var DEBIL pv.2
-var SPELL acs.4
-goto goon
-
-
-Yosto:
-Yo:
-var SkipHide No
-var BowHide Yes
-setvariable weapons sabre|PM|latchbow
-setvariable WSkill Small_Edged|Targeted_Magic|Crossbow
-var DEBIL pv.6
-var SPELL sv.7
-goto goon
-
-Smawk:
-Smawkins:
-var SkipHide Yes
-setvariable weapons PM|SABRE|axe|axe
-setvariable WSkill Targeted_Magic|Small_Edged|Large_Edged|Heavy_Thrown
-var SPELL fs.3
-goto goon
-
 Koil:
 Hint:
 Hintoc:
@@ -251,88 +138,6 @@ var SPELL HE.8
 var DEBIL sick.5
 goto goon
 
-Spac:
-var SkipHide Yes
-setvariable weapons Longsword
-setvariable WSkill Large_Edged
-goto goon
-
-Cern:
-Cernrec:
-var SkipHide Yes
-var BowHide No
-setvariable weapons Broadsword|Brawling|katar
-setvariable WSkill Large_Edged|Brawling|Small_Edged
-goto goon
-
-
-Wecht:
-var SkipHide No
-setvariable weapons scimitar|PM
-setvariable WSkill Small_Edged|Targeted_Magic
-goto goon
-
-
-VTrain:
-var SkipHide No
-var BackstabFull No
-setvariable weapons broad|club|crossbow|broad
-setvariable WSkill Heavy_Thrown|Light_Thrown|Crossbow|Large_Edged
-goto goon
-
-VStab:
-var SkipHide No
-var BackstabFull Yes
-setvariable weapons scimitar
-setvariable WSkill Small_Edged
-goto goon
-
-VKill:
-var SkipHide No
-var BackstabFull Yes
-setvariable weapons  gladius
-setvariable WSkill Small_Edged
-var FLIGHT OFF
-var ELUS OFF
-var PROW OFF
-var HASTEN OFF
-goto goon
-
-
-Vakroth:
-Vak:
-var SkipHide No
-var BackstabFull No
-setvariable weapons Scimitar|claymore
-setvariable WSkill Small_Edged|Twohanded_Edged
-goto goon
-
-Gil:
-Gilthwerp:
-var SkipHide No
-setvariable weapons longbow|bastard sword|brawling|bastard sword|bastard sword
-setvariable WSkill Bow|Twohanded_Edged|Brawling|Heavy_Thrown|Large_Edged
-goto goon
-
-
-
-Melee:
-var SkipHide No
-setvariable weapons rapier
-setvariable WSkill Small_Edged
-goto goon
-
-Ranged:
-if $charactername = Koiln then setvariable weapons bow
-else setvariable weapons bow
-if $charactername = Koiln then setvariable WSkill Bow
-else setvariable WSkill Bow
-goto goon
-
-BackTrain:
-setvariable weapons truncheon|chain|club|sap
-setvariable WSkill Short_Staff|Heavy_Blunt|Medium_Blunt|Light_Blunt
-goto goon
 
 goon:
 if_4 then var ArrayIndex %4
@@ -723,8 +528,8 @@ if $charactername = Vedalken then
 
 if $charactername = Doz then 
 {
-	if $SUF = "OFF" then gosub ReBuff SUF 10
-	if $ES = "OFF" then gosub ReBuff ES 10
+	if $SUF = "OFF" then gosub ReBuff SUF 5
+	if $ES = "OFF" then gosub ReBuff ES 5
 	
 }
 if $charactername = Ciravassus || $charactername = Iakku then
@@ -1188,7 +993,7 @@ throwit:
  match throwit ...wait
  match getweapon Roundtime
  match getweapon What are you
- put lob
+ put throw
  matchwait
 
  ReturnThrow:

@@ -125,7 +125,7 @@ HIB:
   goto map_check
   
 ARRIVED:
-  put #parse Done Portalhax
+  put #parse DonePortalhax
   echo Arrived.
   pause
   exit

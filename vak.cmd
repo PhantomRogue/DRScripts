@@ -1,12 +1,13 @@
 action send 1 $lastcommand when ^\.\.\.wait|^Sorry, you may only type
 action send $lastcommand when ^You are still stunned
 action goto DONE when eval $health < 55
-action math TotalGems add 1 when You open your pouch and put the 
+action math TotalGems add 1 when You open your pouch and put the
+action math TotalGems add 1 when You put your (.*) in your (.*) gem pouch
 action math TotalBoxes add 1 when in your spidersilk bag
 action math Plats add $1 when You pick up (\d+) platinum
 action math Golds add $1 when You pick up (\d+) gold
 action math Silvers add $1 when You pick up (\d+) silver
-
+action math LeatherProcs add 1 when Your leathers flare
 
 
 var gems1 agate|alexandrite|amber|amethyst|andalusite|aquamarine|bead|beryl|bloodgem|bloodstone|carnelian|chrysoberyl|carnelian|chalcedony|platinum bar|copper bar|silver bar|gold bar
@@ -31,6 +32,7 @@ put wie glad
 setvariable AFKVersion 0
 if_1 then setvariable AFKVersion 1
 
+setvariable LeatherProcs 0
 setvariable TotalGems 0
 setvariable TotalBoxes 0
 setvariable Plats 0
@@ -42,6 +44,8 @@ if (%AFKVersion == 1 && %TotalBoxes > 11) then goto HunterDone
 
 put tb
 pause 10
+if $Shield_Usage.LearningRate < 30 then put stance shie
+else put stance parr
 if $monstercount > 0 then gosub Kill_hide
 pause 5
 goto start
@@ -56,6 +60,8 @@ Kill_hide:
 put #statusbar 2 Money: %Plats p %Golds g %Silvers s
 put #statusbar 3 Gems: %TotalGems
 put #statusbar 4 Boxes: %TotalBoxes
+put #statusbar 5 Leather Procs: %LeatherProcs
+
 pause 1
 
 put face next
@@ -102,6 +108,7 @@ match Return balanced]
 match Return You turn to face
 match Return referring
 match Return Backstab what?
+match Return Blindside what
 match Advance if you were closer
 match Advance You aren't close enough to attack
 match Hide must be hidden
@@ -249,6 +256,7 @@ pause
 return
 
 HunterDone:
+math $$charactername.Gems add %TotalGems
 put #parse HUNTINGISDONE
 put ret;ret
 put #script abort vak

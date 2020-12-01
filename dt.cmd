@@ -2,6 +2,13 @@
 ###                                              ###
 ###              TRIGGERS                        ###
 ###                                              ###
+###                                              ###
+###     Yosto Hunter, Does not loot Boxes        ###
+###      Does One loop, then will exit           ###
+###        Used specifically for YostoTrain      ###
+###                                              ###
+###   If you want an AFK hunter, use .1hunter    ###
+###                                              ###
 ####################################################
 action put quit when $health < 40
 action put #beep when says
@@ -116,31 +123,7 @@ var BowHide No
 #####################################################
 
 
-
-#gosub starBuffCheckt
-
-if_2 then var SkipHide %2
-else var SkipHide No
-
-if_3 then var ScriptType %3
-else var ScriptType Melee
-
-if_5 then var DoNecroHealing Yes
-else var DoNecroHealing No
-
-
-goto %ScriptType
-
-Lew:
-Lewix:
-var SkipHide No
-var BowHide Yes
-setvariable weapons shortbow|bastard sword|cusk|bastard sword
-setvariable WSkill Bow|Large_Edged|Light_Thrown|Twohanded_Edged
-var DEBIL HB.1
-var SPELL ec.2
-goto goon
-
+var DoNecroHealing No
 
 
 Doz:
@@ -148,170 +131,7 @@ var SkipHide Yes
 setvariable weapons axe|spike|spike
 setvariable WSkill Heavy_Thrown|Light_Thrown|Small_Edged
 var SPELL fire.shard.12
-var DEBIL AL.2
-goto goon
-
-
-
-Korlash:
-var SkipHide No
-var BowHide Yes
-setvariable weapons bastard sword|PM|katar
-setvariable WSkill Twohanded_Edged|Targeted_Magic|Small_Edged
-var SPELL acs.7
-var DEBIL vs.10
-goto goon
-
-KKill:
-var SkipHide No
-var BowHide Yes
-setvariable WSkill Twohanded_Edged|Targeted_Magic
-setvariable weapons bastard sword|PM
-var SPELL acs.7
-var DEBIL vs.10
-goto goon
-
-Hixin:
-Hix:
-var SkipHide Yes
-var BowHide No
-setvariable weapons shortbow|cusk|cusk
-setvariable WSkill Bow|Light_Thrown|Small_Blunt
-goto goon
-
-HTrain:
-var SkipHide No
-var BowHide Yes
-setvariable weapons shortbow
-setvariable WSkill Bow
-goto goon
-
-
-Boklin:
-var SkipHide Yes
-var BowHide No
-setvariable weapons club|crossbow|club|brawling
-setvariable WSkill Light_Thrown|Crossbow|Small_Blunt|Brawling
-var SPELL STRA.2
-goto goon
-
-YTrain:
-var SkipHide Yes
-var BowHide Yes
-setvariable weapons latchbow|cusk|axe
-setvariable WSkill Crossbow|Light_Thrown|Large_Edged
-var DEBIL pv.2
-var SPELL stra.4
-goto goon
-
-YKill:
-var SkipHide Yes
-var BowHide Yes
-setvariable weapons sabre|PM|latchbow
-setvariable WSkill Small_Edged|Targeted_Magic|Crossbow
-var DEBIL pv.2
-var SPELL acs.4
-goto goon
-
-
-Yosto:
-Yo:
-var SkipHide No
-var BowHide Yes
-setvariable weapons sabre|PM|latchbow
-setvariable WSkill Small_Edged|Targeted_Magic|Crossbow
-var DEBIL pv.6
-var SPELL sv.7
-goto goon
-
-Smawk:
-Smawkins:
-var SkipHide Yes
-setvariable weapons PM|SABRE|axe|axe
-setvariable WSkill Targeted_Magic|Small_Edged|Large_Edged|Heavy_Thrown
-var SPELL fs.3
-goto goon
-
-Koil:
-Hint:
-Hintoc:
-var SkipHide Yes
-setvariable weapons foil|PM
-setvariable WSkill Small_Edged|Targeted_Magic
-var SPELL ff.10
-var DEBIL sick.3
-goto goon
-
-
-HintUndead:
-var SkipHide Yes
-setvariable weapons PM
-setvariable WSkill Targeted_Magic
-var SPELL HE.8
-var DEBIL sick.5
-goto goon
-
-Spac:
-var SkipHide Yes
-setvariable weapons Longsword
-setvariable WSkill Large_Edged
-goto goon
-
-Cern:
-Cernrec:
-var SkipHide Yes
-var BowHide No
-setvariable weapons Broadsword|Brawling|katar
-setvariable WSkill Large_Edged|Brawling|Small_Edged
-goto goon
-
-
-Wecht:
-var SkipHide No
-setvariable weapons scimitar|PM
-setvariable WSkill Small_Edged|Targeted_Magic
-goto goon
-
-
-VTrain:
-var SkipHide No
-var BackstabFull No
-setvariable weapons broad|club|crossbow|broad
-setvariable WSkill Heavy_Thrown|Light_Thrown|Crossbow|Large_Edged
-goto goon
-
-VStab:
-var SkipHide No
-var BackstabFull Yes
-setvariable weapons scimitar
-setvariable WSkill Small_Edged
-goto goon
-
-VKill:
-var SkipHide No
-var BackstabFull Yes
-setvariable weapons  gladius
-setvariable WSkill Small_Edged
-var FLIGHT OFF
-var ELUS OFF
-var PROW OFF
-var HASTEN OFF
-goto goon
-
-
-Vakroth:
-Vak:
-var SkipHide No
-var BackstabFull No
-setvariable weapons Scimitar|claymore
-setvariable WSkill Small_Edged|Twohanded_Edged
-goto goon
-
-Gil:
-Gilthwerp:
-var SkipHide No
-setvariable weapons longbow|bastard sword|brawling|bastard sword|bastard sword
-setvariable WSkill Bow|Twohanded_Edged|Brawling|Heavy_Thrown|Large_Edged
+var DEBIL EE.2
 goto goon
 
 
@@ -357,11 +177,6 @@ if %total > 0 then gosub loopArray
 gosub CritterCheck
 gosub StanceCheck
 if $Appraisal.LearningRate < 31 then gosub Appraise
-if $Guild = "Bard" then gosub ScreamOnce
-if $Guild = "Cleric" then gosub Pray
-if %BackstabFull != "Yes" && $Tactics.LearningRate < 25 then gosub TacticsTrain
-if $Guild = "Barbarian" then gosub RoarIt
-#if $Guild = "WarriorMage" then gosub DebilCast
 if $Guild = "Cleric" or $Guild = "Warrior Mage" or $Guild = "Necromancer" or $Guild = "Paladin" or $charactername = Lewix then gosub DebilCast
 if %WeaponType = "Magic" then gosub Magic_Kill
 else if %WeaponType = "Thrown" then gosub Throw_Kill
@@ -377,21 +192,6 @@ goto Loop
 dodge:
 put dod
 pause 1
-return
-
-Pray:
-send  pray keren
-pause 5
-return
-
-RoarIt:
-put roar everild
-pause 2
-return
-
-ScreamOnce:
-put scream conc
-pause 2
 return
 
 ###################################################################
@@ -411,6 +211,7 @@ castdebil:
 put cast
 match fnCast You can't cast that at yourself!
 match returnc Roundtime
+match returnc Maintaining two cyclic spells at once is beyond your mental comprehension, and the pattern dissipates
 matchwait
 returnc:
 pause 2
@@ -531,9 +332,17 @@ loopArray:
 	return	
 
 HOLD:
-#math ArrayIndex subtract %total
-setvariable ArrayIndex 0
-gosub SetupWeapons
+## Script completed a loop, lets exit
+if_2 then
+{
+	var ArrayIndex 0
+	gosub SetupWeapons
+}
+else
+{
+	put #parse HUNTINGISDONE
+	put #script abort dt
+}
 return
 
 CritterCheck:
@@ -557,8 +366,7 @@ if matchre ("$roomobjs", "(%skinnablecritters) ((which|that) appears dead|\(dead
 arrstuffdone:
 if %Necrofied = 0 && $Guild = Necromancer then goto NecroStuff
 pause .5
-if $Guild == Ranger then put loot treasure 
-else put loot
+put loot treasure
 var Necrofied 0
 pause
 gosub Loot 	 
@@ -679,7 +487,7 @@ if $charactername = Yosto then
 {
 	if $OBFUSCATION = "OFF" then gosub ReBuff OBFUSCATION 5 5
 	if $MAF = "OFF" then gosub ReBuff MAF 5 5
-	if $CH = "OFF" then gosub ReBuff CH 10 2 2
+#	if $CH = "OFF" then gosub ReBuff CH 10 2 2
 	
 }
 
@@ -723,8 +531,8 @@ if $charactername = Vedalken then
 
 if $charactername = Doz then 
 {
-	if $SUF = "OFF" then gosub ReBuff SUF 10
-	if $ES = "OFF" then gosub ReBuff ES 10
+	if $SUF = "OFF" then gosub ReBuff SUF 5
+	if $ES = "OFF" then gosub ReBuff ES 5
 	
 }
 if $charactername = Ciravassus || $charactername = Iakku then

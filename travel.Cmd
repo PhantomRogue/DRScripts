@@ -5,8 +5,9 @@ put #class rp on
 #put #class combat off
 #put #class joust off
 # Script to Travel for Genie3 #
-# Written by Chris/Achilles with help from Shroom
-# version 2.4
+# Written by Chris/Achilles
+# Revitalized and Robustified by Shroom
+# version 2.7
 # Requires EXP Plugin by VTCifer #
 # USAGE - .travel <city> <room>  (room is optional!)
 # If you are calling this script via another, use ^YOU ARRIVED! to match the end of travelling!
@@ -43,11 +44,11 @@ put #class rp on
     var segoltha 550
 ##########################################
 ##    RANKS TO USE UNDER-GONDOLA        ##
-    var undergondola 550
+    var undergondola 540
 ##########################################
 ##########################################
 ##    RANKS TO USE UNDER-SEGOLTHA(THIEF)##
-    var undersegoltha 60
+    var undersegoltha 50
 ##########################################
 ## MULTIPLE CHARACTER SUPPORT FOR SHARD CITIZEN VARIABLE
 ## YOU MUST CREATE GENIE GLOBAL VARIABLES CHAR1, CHAR2 etc IN GENIE FOR THIS TO WORK
@@ -59,7 +60,21 @@ if ("$charactername") = ("$char3") then var shardcitizen no
 if ("$charactername") = ("$char4") then var shardcitizen no
 #### DONT TOUCH ANYTHING BELOW THIS LINE
 ###########################################
-# CHANGELOG - Latest Update: 9/12/2019
+# CHANGELOG - Latest Update: 8/19/2020
+# - MAJOR UPDATE - ADDED SUPPORT FOR STARTING SCRIPT PRETTY MUCH ~ANYWHERE~
+# - SHOULD NOW AUTOMATICALLY ESCAPE FROM MAZE AREAS / PUZZLE AREA AND OTHER HARD TO ESCAPE FROM PLACES!!
+# - PROBABLY DEFINITELY SOME BUGS IN SOME AREAS
+#
+# - ADDED PORTAL TRAVEL FOR PLAT - AUTO CHECKS if you have enough time for portals and if so should take portals to travel between major cities
+# - Heavy robustification to Segoltha and Faldesu River travel - both North and South
+# - MAJOR update to Random Movement Logic - And complete overhaul of Movement routines 
+# - Added support to check for Passport and go get a passport if you don't have one, when travelling to Muspar'i
+# - Added Support for Starting inside the Gondola
+# - Robustified all matches for towns and cleaned up a bunch of code
+# - Added checking current coin you have on you and only going to bank if needed for ferries
+# - Should now check for/withdraw double the amount needed for ferries (to account for return trips/thieves) 
+# - Added remove invisible checks when visiting the teller
+# - Added support for Necros to check and keep up EOTB/ROC when using ferries
 # - Fixed travel from Shard to Alfren 
 # - Merged all changes from recent updates
 # - Added Khri Harrier for Thieves when climbing
@@ -89,6 +104,9 @@ goto INIT
 NODESTINATION:
   Echo ---------------------------------------------------------------------------------------------------------
   Echo ## Either you did not enter a destination, or your destination is not recognized.  Please try again! ##
+  Echo ##
+  Echo ## SYNTAX IS: .travel CITY or .travel CITY roomnumber/label
+  Echo ## e.g - .travel CROSS 144  - travel to crossing and move to room 144
   Echo ##
   Echo ## Valid Destinations are: ##
   Echo -------------------------------------------
@@ -127,13 +145,31 @@ INIT:
 # action goto START when ^Just when it seems you will never reach the end of the road
 action goto NOPASSPORT when No one proceeds through this checkpoint without a passport
 action goto NOCOIN when You haven't got enough (.+) to pay for your trip\. Come back|You reach your funds\, but realize you\'re short\.|^\"Hey\,\" he says\, \"You haven\'t got enough lirums to pay for your trip\.
+## action goto START when \"What in tarnation
+action (moving) var Moving 1 when Obvious (path|exits)|Roundtime
 action var offtransport platform when a barge platform
 action var offtransport pier when the Riverhaven pier
+action var offtransport beach when You also see the beach|mammoth and the beach
+action var offtransport ladder when You also see a ladder|mammoth and a ladder
 action var offtransport wharf when the Langenfirth wharf
-action var offtransport dock when \[\"Her Opulence\"\]|\[\"Hodierna\'s Grace\"\]|\[\"Kertigen\'s Honor\"\]|\[\"His Daring Exploit\"\]|\[The Evening Star\]|\[The Damaris\' Kiss\]|\[A Birch Skiff\]|\[A Highly Polished Skiff\]|\[\"Imperial Glory\"\]|\[\"The Riverhawk\"\]|Baso Docks|a dry dock|the salt yard dock|covered stone dock|\[The Galley Sanegazat\]|\[The Galley Cercorim\]
+action var offtransport dock when \[\"Her Opulence\"\]|\[\"Hodierna\'s Grace\"\]|\[\"Kertigen\'s Honor\"\]|\[\"His Daring Exploit\"\]|\[The Evening Star\]|\[The Damaris\' Kiss\]|\[A Birch Skiff\]|\[A Highly Polished Skiff\]|\[\"Imperial Glory\"\]|\[\"The Riverhawk\"\]|Baso Docks|a dry dock|the salt yard dock|covered stone dock|\[The Galley Sanegazat\]|\[The Galley Cercorim\]|\[Aboard the Warship\, Gondola\]
 action put fatigue when ^You can see a ferry approaching on the left side.|^The ferry|^A kingfisher|^A burst of|^The Elven|^The skiff|^The polemen|^Small waves|^The sturdy stone|^You are about a fourth of the way across\.|^The ferry moves away\, nearly out of view\.|ferry passing you on the left\.|^You are nearing the docks\.|^A swarm of eels passes beneath the keel\, probably on their way to the river\'s fresh water to spawn\.|followed by the clatter of wood on wood\.|^A family of dolphins leaps from the water beside the galley\.|^Some geese in a perfect V fly north high overhead\.|^Some small blue sharks slide past through the water\.|^A sailor walks by with a coil of rope\.|^A green turtle as large as a tower shield swims past\,|^You are nearing the docks\.|A drumbeat sounds through the ship\.|^You are about a fourth of the way across\.|^A galley comes into sight\, its oars beating rhythmically\.|^The galley moves away\, the beat of its drum slowly fading\.|^For a few minutes\, the drumbeat from below is echoed across the water by the beat from the galley passing on the left\.|The door swings shut of its own accord, and the gondola pushes off\.|The platform vanishes against the ridgeline\.|The gondola arrives at the center of the chasm\, and keeps heading (north|south)\.|The cab trundles on along as the ropes overhead creak and moan\.|The ropes creak as the gondola continues (north|south)\.|^The gondola creaks as a wind pushes it back and forth\.|^You hear a bell ring out three times|^The barge|^Several oars pull|^All that is visible|^The opposite bank|^A few of the other passengers|^The shore disappears
-action put fatigue when ^A desert oasis|^The oasis|The endless expanse of the desert|The dock disappears from view quickly|sand-bearing winds buffet|Several skilled yeehar-handlers|^The Sand Elf|^The harsh winds|^The Gemfire Mountains|^The extreme heat causes|^The sand barge|^The large yeehars|^The murderous shriek|dark-skinned elf|Dark-skinned Elves|^As the barge is pulled|^As the dirigible continues|^The thick canopy of|^The dirigible|^The sinuous Southern Trade Route|^The Reshal Sea|^The peculiar sight|^A long moment of breathless suspense|^A Gnomish mechanic|^As the dirigible|^A breathtaking panorama|^The Gnomish operators|^The river quickly gives|^A massive peak|^A large flock|^Far below\, you see|^The Greater Fist|^A clangorous commotion|^Passing over land|^A human who had been|^A cowled passenger peers|^The balloon|^A few scattered islands|^The mammoth\'s fur|^The sea mammoth|^The air cools|^Scarcely visible in|^Another sea mammoth|^Steadily climbing\,|^As the airship leaves the mountain range|^With a swift turn of the|^With another yank on the|^The pilot adjusts his controls|^Turning his wheel\, the pilot points the airship|^With a confident spin of the|^Coming down from the mountain|^A whoosh of steam escapes
+action put fatigue when ^A desert oasis|^The oasis|The endless expanse of the desert|The dock disappears from view quickly|sand-bearing winds buffet|Several skilled yeehar-handlers|^The Sand Elf|^The harsh winds|^The Gemfire Mountains|^The extreme heat causes|^The sand barge|^The large yeehars|^The murderous shriek|dark-skinned elf|Dark-skinned Elves|^As the barge is pulled|^As the dirigible continues|^The thick canopy of|^The dirigible|^The sinuous Southern Trade Route|^The Reshal Sea|^The peculiar sight|^A long moment of breathless suspense|^A Gnomish mechanic|^As the dirigible|^A breathtaking panorama|^The Gnomish operators|^The river quickly gives|^A massive peak|^A large flock|^Far below\, you see|^The Greater Fist|^A clangorous commotion|^Passing over land|^A human who had been|^A cowled passenger peers|^The balloon|^A few scattered islands|^The mammoth\'s fur|^The sea mammoth|^The air cools|^Scarcely visible in|^Another sea mammoth|^Steadily climbing\,|^As the airship leaves the mountain range|^With a swift turn of the|^With another yank on the|^The pilot adjusts his controls|^Turning his wheel\, the pilot points the airship|^With a confident spin of the|^Coming down from the mountain|^A whoosh of steam escapes|^The warship (rumbles|continues)|The tropical island|(crewmen|crewman) (works|rush|swabs)|Sputtering loudly\, the cast-iron stove|Gnomish (crew|pilot|crewman)|warship (proceeds|continues)
 action put look when ^Your destination
+action put #tvar spellEOTB 0 when ^Your corruptive mutation fades\, revealing you to the world once more\.
+action put #tvar spellEOTB 1 when ^You feel a rippling sensation throughout your body as your corruptive mutation alters you and your equipment into blind spots invisible to the world\.
+action put #tvar spellEOTB 1 when ^Your spell subtly alters the corruptive mutation upon you\, creating a blind spot once more\.
+action put #tvar spellEOTB 1 when ^You sense the Eyes of the Blind spell upon you\, which will last .*\.
+action put #tvar spellROC 0 when ^The Rite of Contrition matrix loses cohesion\, leaving your aura naked\.
+action put #tvar spellROC 0 when eval ($SpellTimer.RiteofContrition.active = 0)
+action put #tvar spellROC 1 when ^You weave a field of sublime corruption\, concealing the scars in your aura under a layer of magical pretense\.
+action put #tvar spellROC 1 when ^You sense the Rite of Contrition spell upon you\, which will last .*\.
+action put #tvar spellROG 1 when ^You project your self-image outward on a gust of psychic miasma
+action put #tvar spellROG 1 when eval ($SpellTimer.RiteofGrace.active = 1)
+action put #tvar spellROG 0 when eval ($SpellTimer.RiteofGrace.active = 0)
+put #tvar spellROG 0
+put #tvar spellROC 0
+put #tvar spellEOTB 0
 if !def(guild) then action put #var guild $1 when Guild\: (\S+)
 action put #var circle $1 when Circle\: (\d+)
 action var kronars 0 when No Kronars\.
@@ -142,37 +178,53 @@ action var lirums 0 when No Lirums\.
 action var lirums $1 when \((\d*) copper Lirums\)\.
 action var dokoras 0 when No Dokoras\.
 action var dokoras $1 when \((\d*) copper Dokoras\)\.
+var passport 0
+var premium 0
 var kronars 0
 var dokoras 0
 var lirums 0
+var portal 0
+var moved 0
+var randomloop 0
+var ported 0
+var lastmoved null
+var detour null
+var therencoin 300
+var boarneeded 300
 var destination %1
 eval destination tolower("%destination")
-var detour nil
 TOP:
 pause 0.001
 send info;encumbrance
 waitforre ^\s*Encumbrance\s*\:
 action remove Guild\: (\S+)
 action remove Circle\: (\d+)
-pause 0.001
-pause 0.001
-send exp 0
-wait
 pause 0.1
-pause 0.001
+pause 0.1
+send exp 0
+waitforre EXP HELP
+pause 0.2
+gosub PREMIUM_CHECK
+pause 0.2
 action remove Circle\: (\d+)
 action remove Guild\: (\S+)
 put #var save
 put #mapper reset
-if matchre("$guild", "Ranger|Thief") then var undergondola 520
-put #echo >Log Travel script departure from: $zonename (map $zoneid: room $roomid)
+# if matchre("$guild", "(Ranger|Thief)") then var undergondola 520
+if matchre("$guild", "Necromancer") then 
+     {
+          put perceive
+          pause
+          pause 0.2
+     }
+put #echo >Log * Travel script start: $zonename (map $zoneid: room $roomid)
 if $hidden then send unhide
 pause 0.001
 pause 0.001
 timer clear
 timer start
 eval destination tolower("%destination")
-if $joined = 1 then
+if ($joined = 1) then
      {
           var rossmannorth 2000
           var rossmansouth 2000
@@ -183,28 +235,10 @@ if $joined = 1 then
           var shardcitizen no
           echo ### You are in a group!  You will NOT be taking the gravy short cuts today! ###
      }
-# SAVED FOR POSTERITY, NOW HANDLED BY AUTOMAPPER
-# if ("shardcitizen" = "yes") then
-     # {
-          # put #trigger {^The gate is closed\.  Try KNOCKing instead\.} {knock gate}
-          # put #trigger {^The gate is wide open\.  You can just go through\!} {go gate}
-          # put #trigger save
-     # }
 START:
-if "%destination" = "" then goto NODESTINATION
-if ("$zoneid" = "0") || ("$roomid" = "0") then
-     {
-          echo ### Unknown map or room id - Attempting to move in random direction to recover
-          gosub MOVE_RANDOM
-     }
-pause 0.001
-if ("$zoneid" = "0") || ("$roomid" = "0") then gosub MOVE_RANDOM
-pause 0.001
-if "$zoneid" = "0" then
-     {
-          ECHO ### You are in a spot not recognized by Genie, please start somewhere else! ###
-          exit
-     }
+action (moving) on
+if ("%destination" = "") then goto NODESTINATION
+#DESTINATION
 echo ** TRAVEL DRAGON
 echo
 echo                 \||/
@@ -219,608 +253,745 @@ echo  ||      /    \)___)\
 echo  | \____(      )___) )___
 echo   \______(_______;;; __;;;
 echo 
-echo LET'S GO!
-pause 0.3
-#DESTINATION
+echo *** LET'S GO!!
+echo *** DESTINATION: %destination
+#### SPECIAL ESCAPE SECTION FOR MAZES/HARD TO ESCAPE AREAS BY SHROOM
+if matchre("$roomname", "Ehhrsk Highway") then gosub EHHRSK_ESCAPE
+if (matchre("$roomname", "Zaulfung, Swamp") && matchre("$roomdesc", "Rancid mire")) then gosub ZAULFUNG_ESCAPE
+if matchre("$roomname", "Zaulfung, Trackless Swamp") then gosub ZAULFUNG_ESCAPE_2
+if matchre("$roomname", "Velaka Desert") then gosub VELAKA_ESCAPE
+if matchre("$roomname", "Undershard") then gosub WARRENS_ESCAPE
+if matchre("$roomname", "The Marsh, In The Water") then gosub CROC_ESCAPE
+if matchre("$roomname", "Maelshyve's Ascent") then gosub MAELSHYVE_ASCENT_ESCAPE
+if matchre("$roomname", "(Abyssal Descent|Abyssal Seed)") then gosub ABYSSAL_ESCAPE
+if matchre("$roomname", "Deadman's Confide, Beach") then gosub DEADMAN_ESCAPE
+if matchre("$roomname", "Adder's Nest") then gosub ADDERNEST_ESCAPE
+if matchre("$roomname", "Temple of the North Wind\, Catacombs") then gosub NORTHWIND_ESCAPE
+if matchre("$roomname", "Temple of the North Wind\, High Priestess\' Sanctum") then gosub ASKETI_ESCAPE
+if matchre("$roomname", "Temple of the North Wind\, Dark Sanctuary") then gosub ASKETI_ESCAPE
+if matchre("$roomname", "Temple of the North Wind\, Last Sacrifice") then gosub ASKETI_ESCAPE
+if matchre("$roomname", "Asketi's Mount") then gosub ASKETI_ESCAPE
+if matchre("$roomname", "The Fangs of Ushnish") then gosub USHNISH_ESCAPE
+if matchre("$roomname", "Temple of Ushnish") then gosub USHNISH_ESCAPE_2
+if matchre("$roomname", "Beyond the Gate of Souls") then gosub USHNISH_ESCAPE_3
+if matchre("$roomname", "Clover Fields" then gosub BROCKET_ESCAPE
+if matchre("$roomname", "Maelshyve's Fortress, Inner Sanctum" then gosub MAELSHYVE_FORTRESS_ESCAPE
+if matchre("$roomname", "(Maelshyve's Fortress, Hall of Malice|Glutton's Rest|Fallen Altar|Great Dais|Inner Sanctum)") then gosub MAELSHYVE_FORTRESS_ESCAPE
+if matchre("$roomname", "(Charred Caverns|Beneath the Zaulfung|Maelshyve's Threshold)") then gosub BENEATH_ZAULFUNG_ESCAPE
+if matchre("$roomname", "(Zaulfung, Dense Swamp|Kweld Gelvdael|Zaulfung, Urrem'tier's Spire)") then gosub ZAULFUNG_ESCAPE_0
+if matchre("$roomname", "Zaulfung, Swamp") && matchre("$roomdesc", "Rancid mire") then gosub ZAULFUNG_ESCAPE
+if matchre("$roomname", "Zaulfung, Trackless Swamp") then gosub ZAULFUNG_ESCAPE_2
+###################################################################################
+if matchre ("$roomname","Aboard the Mammoth") then gosub FERRYLOGIC
+if matchre("$roomname", "Gondola") then gosub FERRYLOGIC
+if (("$zoneid" = "0") || ("$roomid" = "0")) then
+     {
+          echo ### Unknown map or room id - Attempting to move in random direction to recover
+          gosub MOVERANDOM
+     }
+pause 0.001
+if (("$zoneid" = "0") || ("$roomid" = "0")) then gosub MOVERANDOM
+pause 0.001
+if ("$zoneid" = "0") then
+     {
+          ECHO ### You are in a spot not recognized by Genie, please start somewhere else! ###
+          exit
+     }
+pause 0.1
+if ("$zoneid" = "2d") then gosub AUTOMOVE temple
+pause 0.1
+if ("$zoneid" = "1j") then gosub AUTOMOVE cross
+if ("$zoneid" = "2a") then gosub AUTOMOVE cross
+pause 0.1
 if matchre("Aesry","$zonename") then gosub AESRYBACK
-if "$zoneid" = "90" then
+if (matchre("%destination", "\b(ratha|hara?j?a?a?l?)") && matchre("$zoneid", "\b(1|30|42|47|61|66|67|90|99|107|108|116)\b")) then
+     {
+          if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+          {
+               if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+          }
+     if (matchre("$game", "(?i)DRF") && matchre("%destination", "\brath?a?") || (%premium = 1) && matchre("%destination", "\brath?a?")) then
+               {
+                    echo *** GOING TO FC
+                    gosub TO_SEACAVE
+                    gosub AUTOMOVE 2
+                    var toratha 1
+                    gosub JOINLOGIC
+                    gosub AUTOMOVE 252
+                    goto ARRIVED
+               }
+      if (matchre("$game", "(?i)DRF") && matchre("%destination", "\b(haraj?a?a?l?)")) then
+          {
+               echo ** TO FANG COVE
+               gosub TO_SEACAVE
+               gosub AUTOMOVE 3
+               gosub JOINLOGIC
+               goto ARRIVED
+          }
+    }
+if (("$zoneid" = "90") && !matchre("%destination", "\b(rath?a?|aesr?y?|hara)")) then
     {
+          if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+               {
+                    if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+               }
         var toratha 0
-        gosub MOVE 834
+        gosub AUTOMOVE 24
+        pause 0.5
+        put go rocks
+        pause
         gosub JOINLOGIC
         pause
         gosub JOINLOGIC
-        gosub MOVE 2
+        gosub AUTOMOVE 2
     }
-# if (("$zoneid" = "150") && ("$game" = "DRF")) then
-     # {
-         # gosub move portal
-         # pause 0.3
-         # send go exit portal
-         # pause 0.5
-         # pause 0.2
-     # }
+if (("$zoneid" = "150") && !matchre("%destination", "\b(rath?a?|acen?e?m?a?c?r?a?)")) then
+     {
+         gosub AUTOMOVE 85
+         pause 0.3
+         send go exit portal
+         pause 0.5
+         pause 0.2
+     }
 cheatstart:
-if matchre("(cro|cros|cross|crossi|crossin|crossing|crossings|xing)","%destination") then goto CROSSING
-if matchre("(wol|wolf|wolfc|wolfcl|wolfcla|wolfclan)","%destination") then
+if matchre("%destination", "\b(cros?s?i?n?g?s?|xing?)") then goto CROSSING
+if matchre("%destination", "\b(wolfc?l?a?n?)") then
      {
           var detour wolf
           goto CROSSING
      }
-if matchre("(kni|knif|knife|knifec|knifecl|knifecla|knifeclan)","%destination") then
+if matchre("%destination", "\b(knif?e?c?l?a?n?)") then
      {
           var detour knife
           goto CROSSING
      }
-if matchre("(tig|tige|tiger|tigerc|tigercl|tigercla|tigerclan)","%destination") then
+if matchre("%destination", "\b(tige?r?c?l?a?n?)") then
      {
           var detour tiger
           goto CROSSING
      }
-if matchre("(dir|dirg|dirge)","%destination") then
+if matchre("%destination", "\b(dirg?e?)") then
      {
           var detour dirge
           goto CROSSING
      }
-if matchre("(art|arth|arthe|arthed|artheda|arthedal|arthedale)","%destination") then
+if matchre("%destination", "\b(arth?e?d?a?l?e?)") then
      {
           var detour arthe
           goto CROSSING
      }
-if matchre("(kae|kaer|kaern|kaerna)","%destination") then
+if matchre("%destination", "\b(kaer?n?a?)") then
      {
           var detour kaerna
           goto CROSSING
      }
-if matchre("(ila|ilay|ilaya|ilayat|ilayata|ilayatai|ilayataip|ilayataipa|tai|taip|taipa)","%destination") then
+if matchre("%destination", "\b(ilay?a?t?a?i?p?|illa?y?a?t?a?i?p?a?|taipa)") then
      {
           var detour taipa
           goto CROSSING
      }
-if matchre("(let|leth|lethd|lethde|lethder|lethderi|lethderie|lethderiel)","%destination") then
+if matchre("%destination", "\b(leth?d?e?r?i?e?l?)") then
      {
           var detour leth
           goto CROSSING
      }
-if matchre("(ace|acen|acena|acenam|acenama|acenamac|acenamacr|acenamacra)","%destination") then
+if matchre("%destination", "\b(acen?a?m?a?c?r?a?)") then
      {
           var detour acen
           goto CROSSING
      }
-if matchre("(vip|vipe|viper|vipers|gua|guard|guardi|guardia|guardian|guardians|leu|leuc|leucr|leucro|leucros)","%destination") then
+if matchre("%destination", "\b(vipe?r?s?|guar?d?i?a?n?s?|leuc?r?o?s?)") then
      {
           var detour viper
           goto CROSSING
      }
-if matchre("(malodorous|malo|malod|malodo|malodor|malodoro|malodorou|buc|bucc|bucca)","%destination") then
+if matchre("%destination", "\b(malod?o?r?o?u?s?|bucc?a?)") then
      {
           var detour bucca
           goto CROSSING
      }
-if matchre("(dok|dokt)","%destination") then
+if matchre("%destination", "\b(dokt?)") then
      {
           var detour dokt
           goto CROSSING
      }
-if matchre("(sor|sorr|sorro|sorrow|sorrows)","%destination") then
+if matchre("%destination", "\bsorr?o?w?s?") then
      {
           var detour sorrow
           goto CROSSING
      }
-if matchre("(mis|mise|misen|misens|misense|misenseo|misenseor)","%destination") then
+if matchre("%destination", "\bmisens?e?o?r?") then
      {
           var detour misen
           goto CROSSING
      }
-if matchre("(bei|beis|beiss|beissw|beisswu|beisswur|beisswurm|beisswurms)","%destination") then
+if matchre("%destination", "\bbeis?s?w?u?r?m?s?") then
      {
           var detour beisswurms
           goto CROSSING
      }
-if matchre("(sto|ston|stone)","%destination") then
+if matchre("%destination", "\bston?e?c?l?a?n?") then
      {
           var detour stone
           goto CROSSING
      }
-if matchre("(sha|shar|shard)","%destination") then goto ILITHI
-if matchre("(bone|bone wolves|bone wolf|bon|bone wolvez|germ|germish|germishden|germishdin|germish'din)","%destination") then
+if matchre("%destination", "\bshar?d?") then goto ILITHI
+if matchre("%destination", "\b(bone?w?o?l?f?|germ?i?s?h?d?i?n?)") then
      {
           var detour bone
           goto ILITHI
      }
-if matchre("(alf|alfr|alfre|alfren|alfrens|alfren's)","%destination") then
+if matchre("%destination", "\balfr?e?n?s?") then
      {
           var detour alfren
           goto ILITHI
      }
-if matchre("(gon|gond|gondo|gondol|gondola)","%destination") then
+if matchre("%destination", "\b(gond?o?l?a?)") then
      {
           var detour gondola
           goto ILITHI
      }
-if matchre("(gar|garg|gargo|gargoy|gargoyl|gargoyle|gran|granite)","%destination") then
+if matchre("%destination", "\b(grani?t?e?|garg?o?y?l?e?)") then
      {
           var detour garg
           goto ILITHI
      }
-if matchre("(spi|spir|spire)","%destination") then
+if matchre("%destination", "\b(spir?e?)") then
      {
           var detour spire
           goto ILITHI
      }
-if matchre("(hor|hors|horse|horsec|horsecl|horsecla|horseclan)","%destination") then
+if matchre("%destination", "\b(horse?c?l?a?n?)") then
      {
           var detour horse
           goto ILITHI
      }
-if matchre("(fay|fayr|fayri|fayrin|fayrin'|fayrin's|fayrins)","%destination") then
+if matchre("%destination", "\b(fayr?i?n?s?)") then
      {
           var detour fayrin
           goto ILITHI
      }
-if matchre("(ste|stee|steel|steelc|steelcl|steelcla|steelclaw)","%destination") then
+if matchre("%destination", "\b(steel?c?l?a?w?)") then
      {
           var detour steel
           goto ILITHI
      }
-if matchre("(cor|cori|corik|corik'|corik's)","%destination") then
+if matchre("%destination", "\b(cori?k?s?)") then
      {
           var detour corik
           goto ILITHI
      }
-if matchre("(ada|adan|adan'|adan'f)","%destination") then
+if matchre("%destination", "\b(ada?n?f?)") then
      {
           var detour adan'f
           goto ILITHI
      }
-if matchre("(ylo|ylon|ylono)","%destination") then
+if matchre("%destination", "\b(ylo?n?o?)") then
      {
           var detour ylono
           goto ILITHI
      }
-if matchre("(wyv|wyve|wyver|wyvern)","%destination") then
+if matchre("%destination", "\b(wyve?r?n?)") then
      {
           var detour wyvern
           goto ILITHI
      }
 
-if matchre("(car|cara|carav|caravan|caravans|caravansary)","%destination") then
+if matchre("%destination", "\b(cara?v?a?n?s?a?r?y?)") then
      {
           var detour caravansary
           goto THERENGIA
      }
-if matchre("(riv|rive|river|riverh|riverha|riverhav|riverhave|riverhaven|hav|have|haven)","%destination") then
+if matchre("%destination", "\b(rive?r?h?a?v?e?n?|have?n?)") then
      {
           var detour haven
           goto THERENGIA
      }
-if matchre("(ros|ross|rossm|rossma|rossman|rossmans)","%destination") then
+if matchre("%destination", "\b(ross?m?a?n?s?)") then
      {
           var detour rossman
           goto THERENGIA
      }
-if matchre("(the|ther|there|theren|therenb|therenbo|therenbor|therenborou|therenboroug|therenborough)","%destination") then
+if matchre("%destination", "\b(ther?e?n?b?o?r?o?u?g?h?)") then
      {
           var detour theren
           goto THERENGIA
      }
-if matchre("(lan|lang|lange|langen|langenf|langenfi|langenfir|langenfirt|langenfirth)","%destination") then
+if matchre("%destination", "\b(lang?e?n?f?i?r?t?h?)") then
      {
           var detour lang
           goto THERENGIA
      }
-if matchre("(el'|el'b|el'ba|el'bai|el'bain|el'bains)","%destination") then
+if matchre("%destination", "\b(el'?b?a?i?n?s?|elb?a?i?n?s?)") then
      {
 	      var detour el'bain
 		  goto THERENGIA
 	 }
-if matchre("(rak|raka|rakas|rakash)","%destination") then
+if matchre("%destination", "\b(raka?s?h?)") then
      {
           var detour rakash
           goto THERENGIA
      }
-if matchre("(thr|thro|thron|throne)","%destination") then
+if matchre("%destination", "\bthro?n?e?") then
      {
           var detour throne
           goto THERENGIA
      }
-if matchre("(mus|musp|muspa|muspar|muspari|muspar'|muspar'i)","%destination") then
+if matchre("%destination", "\b(musp?a?r?i?)") then
      {
           var detour muspari
           goto THERENGIA
      }
-if matchre("(forn|forns|fornst|fornste|fornsted)","%destination") then
+if matchre("%destination", "\b(forn?s?t?e?d?)") then
      {
           var detour fornsted
           goto THERENGIA
      }
-if matchre("(hva|hvar|hvara|hvaral)","%destination") then
+if matchre("%destination", "\b(hvar?a?l?)") then
      {
           var detour hvaral
-          goto ILITHI
+          goto THERENGIA
      }
-if matchre("(zau|zaul|zaulf|zaulfu|zaulfun|zaulfung)","%destination") then
+if matchre("%destination", "\b(zaul?f?u?n?g?)") then
      {
           var detour zaulfung
           goto THERENGIA
      }
-if matchre("(ain|aing|aingh|aingha|ainghaz|ainghaza|ainghazal)","%destination") then
+if matchre("%destination", "\b(aing?h?a?z?a?l?)") then
      {
           var detour ain
           goto FORD
      }
-if matchre("(rav|rave|raven'|raven's)","%destination") then
+if matchre("%destination", "\b(rave?n?s?)") then
      {
           var detour raven
           goto FORD
      }
-if matchre("(out|oute|outer|hib|hiba|hibar|hibarn|hibarnh|hibarnhv|hibarnhvi|hibarnhvid|hibarnhvida|hibarnhvidar|hibble|hibbles|hibheigh|hibdjfekbhr|hibarvhigdladrwfws)","%destination") then
+if matchre("%destination", "\b(hib?a?r?n?h?v?i?d?a?r?|out?e?r?)") then
      {
           var detour outer
           goto FORD
      }
-if matchre("(inn|inne|inner|INNER|INN|Inner)","%destination") then
+if matchre("%destination", "\b(inne?r?)") then
      {
           var detour inner
           goto FORD
      }
-if matchre("(boa|boar|boarc|boarcl|boarcla|boarclan)","%destination") then goto FORD
-if matchre("(aes|aesr|aesry|sur|surl|surla|surlae|surlaen|surlaeni|surlaenis|surlaenis'|surlaenis'a)","%destination") then
+if matchre("%destination", "\b(boar?c?l?a?n?)") then goto FORD
+if matchre("%destination", "\b(aes?r?y?|sur?l?a?e?n?i?s?)") then
     {
             var detour aesry
             goto ILITHI
     }
-if matchre("(m'r|m'ri|m'ris|m'riss|mri|mris|mriss)","%destination") then
+if matchre("%destination", "\b(mri?s?s?)") then
     {
             var detour mriss
             goto THERENGIA
     }
-if matchre("(mer|mer'|mer'k|mer'kr|mer'kre|mer'kres|mer'kresh|merk|merkr|merkre|merkres|merkresh|kre|kres|kresh)","%destination") then
+if matchre("%destination", "\b(merk?r?e?s?h?|kre?s?h?)") then
     {
             var detour merk
             goto THERENGIA
     }
-if matchre("(har|hara|hara'|hara'j|hara'ja|hara'jaa|hara'jaal|haraj|haraja|harajaa|harajaal|jaa|jaal)","%destination") then
+if matchre("%destination", "\b(har?a?j?a?a?l?)") then
     {
             var detour hara
             goto THERENGIA
     }
-if matchre("(rat|rath|ratha)","%destination") then
+if matchre("%destination", "\b(rath?a?)") then
     {
             var detour ratha
-            if "$zoneid" = "150" then
+            if ("$zoneid" = "150") then
                 {
-                    gosub MOVE 2
+                    gosub AUTOMOVE 2
                     var toratha 1
                     gosub JOINLOGIC
-                    gosub MOVE 252
+                    gosub AUTOMOVE 252
                     goto ARRIVED
                 }
             goto CROSSING
     }
-if "$zoneid" = "150" && "$game" != "DRF" && "%detour" != "ratha" then
+if (("$zoneid" = "150") && ("$game" != "DRF") && ("%detour" != "ratha")) then
     {
-            gosub MOVE 2
+            gosub AUTOMOVE 2
             var toratha 0
             gosub JOINLOGIC
-            gosub MOVE 2
+            gosub AUTOMOVE 2
             goto cheatstart
     }
-if matchre("(fan|fang|cov|cove)","%destination") then
+if matchre("%destination", "\b(fan?g?|cov?e?)") then
     {
             var detour fang
-            if "$game" = "DRF" then
-                {
-                    pause
-                    echo
-                    echo
-                    echo YOU ARE IN THE FALLEN, GO FIND A FUCKING MEETING PORTAL YOU LAZY FUCK
-                    exit
-                }
             goto CROSSING
     }
 goto NODESTINATION
 
+AESRY_LONG:
+echo 
+echo ** NO SHORTCUT TO AESRY IN TF - TAKING LONG ROUTE
+echo
+if ("$zoneid" = "90") then goto AESRY_LONG_2
+var detour aesry
+if %lirums < 300 then goto NOCOIN
+if ("$zoneid" = "67") then gosub AUTOMOVE east
+gosub AUTOMOVE portal
+pause 0.2
+put go meeting portal
+pause 0.5
+pause 0.3
+gosub AUTOMOVE 2
+var toratha 1
+gosub JOINLOGIC
+AESRY_LONG_2:
+pause 0.2
+gosub AUTOMOVE 234
+gosub JOINLOGIC
+goto ARRIVED
+
 # TRAVEL
 CROSSING:
 var label CROSSING
-if matchre ("Hara'jaal|Mer'Kresh|M'Riss","$zonename") then
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if matchre("$zonename", "(Hara'jaal|Mer'Kresh|M'Riss)") then
+     {
+          var backuplabel CROSSING
+          var backupdetour %detour
+          var detour mriss
+          var tomainland 1
+          goto QITRAVEL
+     }
+if (("$zoneid" = "150") && !matchre("%destination", "\b(rath?a?|acen?e?m?a?c?r?a?|haraj?a?a?l?)")) then
+     {
+         gosub AUTOMOVE 85
+         pause 0.3
+         send go exit portal
+         pause 0.5
+         pause 0.2
+     }
+if ("$zoneid" = "35") then 
+     {
+          if (%lirums < 240) then goto NOCOIN
+          gosub AUTOMOVE 166
+          gosub FERRYLOGIC
+          pause
+     }
+if ("$zoneid" = "1a") then gosub AUTOMOVE cross
+if ("$zoneid" = "2a") then gosub AUTOMOVE cross
+if ("$zoneid" = "47") then 
+     {
+          if (matchre("$game", "(?i)DRX") && (%portal = 1) && (%ported = 0)) then gosub PORTAL_TIME
+          gosub AUTOMOVE 117
+          gosub FERRYLOGIC
+          pause
+     }
+if ("$zoneid" = "41") then 
+     {
+          gosub AUTOMOVE 53
+          pause 0.5
+          put east
+          waitforre ^Just when it seems
+          pause
+          # put #mapper reset
+     }
+if ("$zoneid" = "42") then gosub AUTOMOVE 2
+if ("$zoneid" = "59") then gosub AUTOMOVE 12
+if ("$zoneid" = "114") then
+     {
+          put wealth
+          pause 0.7
+          if (%dokoras < 120) then goto NOCOIN
+          gosub AUTOMOVE 1
+          gosub FERRYLOGIC
+          send go oak doors
+          pause
+     }
+if (("$zoneid" = "113") && ("$roomid" = "1")) then gosub AUTOMOVE 5
+if ("$zoneid" = "40a") then gosub AUTOMOVE 125
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "40") && ($Athletics.Ranks >= %rossmansouth)) then gosub AUTOMOVE 213
+if (("$zoneid" = "40") && ($Athletics.Ranks < %rossmansouth)) then
+     {
+          if (%lirums < 140) then goto NOCOIN
+          gosub AUTOMOVE 36
+          gosub FERRYLOGIC
+     }
+if ("$zoneid" = "34a") then gosub AUTOMOVE 134
+if ("$zoneid" = "34") then gosub AUTOMOVE 15
+if ("$zoneid" = "33a") then gosub AUTOMOVE 46
+if ("$zoneid" = "33") then gosub AUTOMOVE 1
+if ("$zoneid" = "32") then gosub AUTOMOVE 1
+if ("$zoneid" = "31") then gosub AUTOMOVE 1
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "30") && ($Athletics.Ranks < %faldesu)) then
+     {
+          put wealth
+          pause 0.7
+          if (%lirums < 140) then goto NOCOIN
+          gosub AUTOMOVE 103
+          pause
+          gosub FERRYLOGIC
+     }
+if (("$zoneid" = "30") && ($Athletics.Ranks >= %faldesu)) then
+     {
+          gosub AUTOMOVE 203
+          gosub AUTOMOVE 79
+     }
+if ("$zoneid" = "14c") then gosub FALDESU_SOUTH
+if ("$zoneid" = "14c") then gosub FALDESU_SOUTH
+if ("$zoneid" = "14c") then gosub FALDESU_SOUTH
+if ("$zoneid" = "127") then gosub AUTOMOVE 510
+if ("$zoneid" = "126") then gosub AUTOMOVE 49
+if ("$zoneid" = "116") then gosub AUTOMOVE 3
+if ("$zoneid" = "123") then gosub AUTOMOVE 175
+if ("$zoneid" = "67a") then gosub AUTOMOVE shard
+if ("$zoneid" = "69") then gosub AUTOMOVE 1
+if ("$zoneid" = "68a") then gosub AUTOMOVE 29
+if ("$zoneid" = "68b") then gosub AUTOMOVE 44
+if (("$zoneid" = "68") && ("$guild" = "Thief")) then gosub AUTOMOVE 15
+if (("$zoneid" = "68") && matchre("%shardcitizen", "(?i)yes")) then
+     {
+          gosub AUTOMOVE 1
+          gosub AUTOMOVE 135
+     }
+if (("$zoneid" = "68") && matchre("%shardcitizen", "(?i)no")) then gosub AUTOMOVE 15
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "67") && ("$guild" = "Thief")) then
+     {
+          gosub AUTOMOVE 566
+          gosub AUTOMOVE 23
+     }
+if ("$zoneid" = "67") then gosub AUTOMOVE 132
+if (("$zoneid" = "66") && ("$guild" = "Thief") && ($Athletics.Ranks >= %undergondola)) then 
+     {
+          put khri flight harrier
+          pause
+     }
+if (("$zoneid" = "66") && ("$guild" = "Ranger") && ($Athletics.Ranks >= %undergondola)) then 
+     {
+          put prep athletic 12
+          pause 8
+          put cast
+          pause 0.2
+     }
+if (("$zoneid" = "66") && ($Athletics.Ranks >= %undergondola)) then gosub AUTOMOVE 317
+if (("$zoneid" = "66") && ($Athletics.Ranks < %undergondola)) then
+     {
+          gosub AUTOMOVE 156
+          pause
+          gosub FERRYLOGIC
+     }
+if ("$zoneid" = "1a") then gosub AUTOMOVE cross
+if ("$zoneid" = "63") then gosub AUTOMOVE 112
+if ("$zoneid" = "65") then gosub AUTOMOVE 44
+if ("$zoneid" = "62") then gosub AUTOMOVE 100
+if ("$zoneid" = "112") then gosub AUTOMOVE 112
+if ("$zoneid" = "58") then gosub AUTOMOVE leth
+if (("$zoneid" = "60") && matchre("%detour", "(leth|acen|taipa|LETH|ACEN|ratha|fang)")) then gosub AUTOMOVE 57
+if (("$zoneid" = "61") && matchre("%detour", "(leth|acen|taipa|LETH|ACEN|ratha|fang)")) then
+     {
+          if ("%detour" = "acen") then
+               {
+                    gosub AUTOMOVE 178
+                    gosub AUTOMOVE 47
+               }
+          if ("%detour" = "taipa") then
+               {
+                    gosub AUTOMOVE 126
+                    gosub AUTOMOVE 27
+               }
+          if ("%detour" = "ratha") then
+               {
+                    gosub AUTOMOVE 178
+                    gosub AUTOMOVE 47
+                    var toratha 1
+                    gosub JOINLOGIC
+                    pause
+                    gosub JOINLOGIC
+                    gosub AUTOMOVE 252
+                    goto ARRIVED
+               }
+          if ("%detour" = "leth") then gosub AUTOMOVE 18
+          goto ARRIVED
+     }
+if ("$zoneid" = "61") then gosub AUTOMOVE 115
+if ("$zoneid" = "50") && matchre("%destination", "\b(knife?|wolf?|tige?r?|dirg?e?|arth?e?|kaer?n?a?|rive?r?|have?n?|ther?e?n?|lang?|raka?s?h?|musp?a?r?i?|zaul?f?u?n?g?|cross?i?n?g?)") && ($Athletics.Ranks > %segoltha) then gosub SEGOLTHA_NORTH
+if ("$zoneid" = "50") then gosub SEGOLTHA_SOUTH
+if (("$zoneid" = "60") && ("%detour" = "alfren")) then 
           {
-              var backuplabel CROSSING
-              var backupdetour %detour
-              var detour mriss
-              var tomainland 1
-              goto QITRAVEL
-          }
-if "$zoneid" = "35" then 
-          {
-              gosub MOVE 166
-              gosub FERRYLOGIC
-              pause
-          }
-if "$zoneid" = "1a" then gosub MOVE cross
-if "$zoneid" = "2a" then gosub MOVE cross
-if "$zoneid" = "47" then 
-          {
-              gosub MOVE 117
-              gosub FERRYLOGIC
-              pause
-          }
-if "$zoneid" = "41" then 
-          {
-              gosub MOVE 53
-              waitforre ^Just when it seems
-              pause
-              # put #mapper reset
-          }
-if "$zoneid" = "42" then gosub MOVE 2
-if "$zoneid" = "59" then gosub MOVE 12
-if "$zoneid" = "114" then
-          {
-              if %dokoras < 60 then goto NOCOIN
-              gosub MOVE 1
-              gosub FERRYLOGIC
-              send go oak doors
-              pause
-          }
-if "$zoneid" = "113" && "$roomid" = "1" then gosub MOVE 5
-if "$zoneid" = "40a" then gosub MOVE 125
-if "$zoneid" = "40" && $Athletics.Ranks >= %rossmansouth then gosub MOVE 213
-if "$zoneid" = "40" && $Athletics.Ranks < %rossmansouth then
-          {
-              if %lirums < 70 then goto NOCOIN
-              gosub MOVE 36
-              gosub FERRYLOGIC
-          }
-if "$zoneid" = "34a" then gosub MOVE 134
-if "$zoneid" = "34" then gosub MOVE 15
-if "$zoneid" = "33a" then gosub MOVE 46
-if "$zoneid" = "33" then gosub MOVE 1
-if "$zoneid" = "32" then gosub MOVE 1
-if "$zoneid" = "31" then gosub MOVE 1
-if "$zoneid" = "30" && $Athletics.Ranks < %faldesu then
-          {
-              if %lirums < 70 then goto NOCOIN
-              gosub MOVE 103
-              pause
-              gosub FERRYLOGIC
-          }
-if "$zoneid" = "30" && $Athletics.Ranks >= %faldesu then
-          {
-              gosub MOVE 203
-              gosub MOVE 79
-          }
-if "$zoneid" = "14c" then gosub MOVE 21
-if "$zoneid" = "127" then gosub MOVE 510
-if "$zoneid" = "126" then gosub MOVE 49
-if "$zoneid" = "116" then gosub MOVE 3
-if "$zoneid" = "123" then gosub MOVE 175
-if "$zoneid" = "67a" then gosub MOVE shard
-if "$zoneid" = "69" then gosub MOVE 1
-if "$zoneid" = "68a" then gosub MOVE 29
-if "$zoneid" = "68b" then gosub MOVE 44
-if "$zoneid" = "68" && "$guild" = "Thief" then gosub MOVE 15
-if "$zoneid" = "68" && %shardcitizen = "yes" then
-          {
-              gosub MOVE 1
-              gosub MOVE 135
-          }
-if "$zoneid" = "68" && %shardcitizen = "no" then gosub MOVE 15
-if "$zoneid" = "67" && "$guild" = "Thief" then
-          {
-              gosub MOVE 566
-              gosub MOVE 23
-          }
-if "$zoneid" = "67" then gosub MOVE 132
-if "$zoneid" = "66" && "$guild" = "Thief" && $Athletics.Ranks >= %undergondola then 
-          {
-               put khri flight harrier
-               pause
-          }
-if "$zoneid" = "66" && "$guild" = "Ranger" && $Athletics.Ranks >= %undergondola then 
-          {
-               put prep athletic 12
-               pause 8
-               put cast
-               pause 0.2
-          }
-if "$zoneid" = "66" && $Athletics.Ranks >= %undergondola then gosub MOVE 317
-if "$zoneid" = "66" && $Athletics.Ranks < %undergondola then
-          {
-              gosub MOVE 156
-              pause
-              gosub FERRYLOGIC
-          }
-if "$zoneid" = "1a" then gosub MOVE cross
-if "$zoneid" = "63" then gosub MOVE 112
-if "$zoneid" = "65" then gosub MOVE 44
-if "$zoneid" = "62" then gosub MOVE 100
-if "$zoneid" = "112" then gosub MOVE 112
-if "$zoneid" = "58" then gosub MOVE leth
-if "$zoneid" = "60" && matchre("(leth|acen|taipa|LETH|ACEN|ratha|fang)","%detour") then gosub MOVE 57
-if "$zoneid" = "61" && matchre("(leth|acen|taipa|LETH|ACEN|ratha|fang)","%detour") then
-          {
-              if "%detour" = "acen" then
-                  {
-                      gosub MOVE 178
-                      gosub MOVE 47
-                  }
-              if "%detour" = "taipa" then
-                  {
-                      gosub MOVE 126
-                      gosub MOVE 27
-                  }
-              if "%detour" = "ratha" then
-                  {
-                      gosub MOVE 178
-                      gosub MOVE 47
-                      var toratha 1
-                      gosub JOINLOGIC
-                      pause
-                      gosub JOINLOGIC
-                      gosub MOVE 252
-                      goto ARRIVED
-                  }
-              if "%detour" = "leth" then gosub MOVE 18
-              goto ARRIVED
-          }
-if "$zoneid" = "61" then gosub MOVE 115
-if ("$zoneid" = "50") && matchre("(knife|wolf|tiger|dirge|arthe|kaerna|haven|theren|lang|rakash|muspari|zaulfung|cross|crossing)","%destination") && ($Athletics.Ranks > %segoltha) then gosub MOVE 8
-if "$zoneid" = "50" then gosub MOVE 30
-if "$zoneid" = "60" && "%detour" = "alfren" then 
-          {
-          gosub MOVE 42
+          gosub AUTOMOVE 42
           goto ARRIVED
           }
-if "$zoneid" = "60" && matchre("(leth|acen|taipa|LETH|ACEN|ratha|fang|ain|raven|outer|inner|adan'f|corik|steel|ylono|fayrin|horse|spire)","%detour") then gosub MOVE leth
-if "$zoneid" = "60" && "$guild" = "Thief" then
+if (("$zoneid" = "60") && matchre("%detour", "(leth|acen|taipa|LETH|ACEN|ratha|fang|ain|raven|outer|inner|adan'f|corik|steel|ylono|fayrin|horse|spire)")) then gosub AUTOMOVE leth
+if (("$zoneid" = "60") && ("$guild" = "Thief")) then
           {
-              if $Athletics.Ranks >= %undersegoltha then
+              if ($Athletics.Ranks >= %undersegoltha) then
                   {
-                      gosub MOVE 107
-                      if ("$zoneid" = "60") then gosub MOVE 107
-                      gosub MOVE cross
+                      gosub AUTOMOVE 107
+                      if ("$zoneid" = "120") then gosub AUTOMOVE 107
+                      gosub AUTOMOVE cross
                       pause 0.1
-                      if ("$zoneid" = "1a") then gosub MOVE cross
+                      if ("$zoneid" = "1a") then gosub AUTOMOVE cross
                   }
           }
-if (("$zoneid" = "60") && ($Athletics.Ranks >= %segoltha)) then gosub MOVE 108
+if (("$zoneid" = "60") && ($Athletics.Ranks >= %segoltha)) then gosub AUTOMOVE 108
 pause 0.01
-if ("$zoneid" = "50") && matchre("(knife|wolf|tiger|dirge|arthe|kaerna|haven|theren|lang|rakash|muspari|zaulfung|cross|crossing)","%destination") && ($Athletics.Ranks > %segoltha) then gosub MOVE 8
-if "$zoneid" = "50" then gosub MOVE 30
-if "$zoneid" = "60" && $Athletics.Ranks < %segoltha then
+if ("$zoneid" = "50") && matchre("%destination", "\b(knife|wolf|tiger|dirge|arthe|kaerna|haven|theren|lang|rakash|muspari|zaulfung|cross|crossing)") && ($Athletics.Ranks > %segoltha) then gosub SEGOLTHA_NORTH
+if ("$zoneid" = "50") then gosub SEGOLTHA_SOUTH
+if (("$zoneid" = "60") && ($Athletics.Ranks < %segoltha)) then
           {
-              if %kronars < 40 then goto NOCOIN
-              gosub MOVE 42
-              if ("$roomid" != "42") then gosub MOVE 42
-              if ("$roomid" != "42") then gosub MOVE 42
+              put wealth
+              pause 0.7
+              if (%kronars < 40) then goto NOCOIN
+              gosub AUTOMOVE 42
+              if ("$roomid" != "42") then gosub AUTOMOVE 42
+              if ("$roomid" != "42") then gosub AUTOMOVE 42
               pause
               gosub FERRYLOGIC
           }
-if "$zoneid" = "6"  then gosub MOVE cross
-if "$zoneid" = "4a" then gosub MOVE 15
-if "$zoneid" = "4b" then gosub MOVE 1
-if "$zoneid" = "4" && ("%detour" = "dokt") then 
+if "$zoneid" = "6"  then gosub AUTOMOVE cross
+if ("$zoneid" = "4a") then gosub AUTOMOVE 15
+if ("$zoneid" = "4b") then gosub AUTOMOVE 1
+if (("$zoneid" = "4") && (("%detour" = "dokt"))) then 
           {
-              gosub MOVE dok
+              gosub AUTOMOVE dok
               goto ARRIVED
           }
-if "$zoneid" = "4"  then gosub MOVE 14
-if "$zoneid" = "13" then gosub MOVE 71
-if "$zoneid" = "12a" then gosub MOVE 60
-if "$zoneid" = "10" then gosub MOVE 116
-if "$zoneid" = "9b" then gosub MOVE 9
-if "$zoneid" = "14b" then gosub MOVE 217
-if "$zoneid" = "11" then gosub MOVE 2
-if "$zoneid" = "1" && matchre("(arthe|dirge|kaerna|stone|misen|sorrow|fist|beisswurms|bucca|viper)","%detour") then gosub MOVE 171
-if "$zoneid" = "7" && matchre("(arthe|dirge|kaerna|stone|misen|sorrow|fist|beisswurms|bucca|viper)","%detour") then
+if "$zoneid" = "4"  then gosub AUTOMOVE 14
+if ("$zoneid" = "13") then gosub AUTOMOVE 71
+if ("$zoneid" = "12a") then gosub AUTOMOVE 60
+if ("$zoneid" = "10") then gosub AUTOMOVE 116
+if ("$zoneid" = "9b") then gosub AUTOMOVE 9
+if ("$zoneid" = "14b") then gosub AUTOMOVE 217
+if ("$zoneid" = "11") then gosub AUTOMOVE 2
+if (("$zoneid" = "1") && matchre("%detour", "(arthe|dirge|kaerna|stone|misen|sorrow|fist|beisswurms|bucca|viper)")) then gosub AUTOMOVE 171
+if (("$zoneid" = "7") && matchre("%detour", "(arthe|dirge|kaerna|stone|misen|sorrow|fist|beisswurms|bucca|viper)")) then
      {
-         if "%detour" = "dirge" then
+         if ("%detour" = "dirge") then
              {
-                 gosub MOVE 147
-                 gosub MOVE 38
+                 gosub AUTOMOVE 147
+                 gosub AUTOMOVE 38
              }
-         if "%detour" = "arthe" then gosub MOVE 535
-         if "%detour" = "kaerna" then gosub MOVE 352
-         if "%detour" = "stone" then gosub MOVE 396
-         if "%detour" = "stone" && "$zoneid" = "7" then gosub MOVE 396
-         if "%detour" = "stone" && "$zoneid" = "7" then gosub MOVE 396
-         if "%detour" = "beisswurms" then gosub MOVE 396
-         if "%detour" = "beisswurms" && "$zoneid" = "7" then gosub MOVE 396
-         if "%detour" = "fist" then gosub MOVE 253
-         if "%detour" = "misen" then gosub MOVE 437
-         if "%detour" = "viper" then
+         if ("%detour" = "arthe") then gosub AUTOMOVE 535
+         if ("%detour" = "kaerna") then gosub AUTOMOVE 352
+         if ("%detour" = "stone") then gosub AUTOMOVE 396
+         if (("%detour" = "stone") && ("$zoneid" = "7")) then gosub AUTOMOVE 396
+         if (("%detour" = "stone") && ("$zoneid" = "7")) then gosub AUTOMOVE 396
+         if ("%detour" = "beisswurms") then gosub AUTOMOVE 396
+         if (("%detour" = "beisswurms") && ("$zoneid" = "7")) then gosub AUTOMOVE 396
+         if ("%detour" = "fist") then gosub AUTOMOVE 253
+         if ("%detour" = "misen") then gosub AUTOMOVE 437
+         if ("%detour" = "viper") then
              {
-                 gosub MOVE 394
-                 if $Perception.Ranks > 150 then gosub MOVE 5
+                 gosub AUTOMOVE 394
+                 if ($Perception.Ranks > 150) then gosub AUTOMOVE 5
              }
          if matchre("(sorrow|bucca)","%detour") then
              {
-                 gosub MOVE 397
-                 if "%detour" = "sorrow" then 
+                 gosub AUTOMOVE 397
+                 if ("%detour" = "sorrow") then 
                        {
-                            gosub MOVE 77
+                            gosub AUTOMOVE 77
                             goto ARRIVED
                        }
-                 if "%detour" = "bucca" then 
+                 if ("%detour" = "bucca") then 
                        {
-                            gosub MOVE 124
+                            gosub AUTOMOVE 124
                             goto ARRIVED
                        }
              }
-        if "%detour" = "beisswurms" then gosub MOVE 31
+        if ("%detour" = "beisswurms") then gosub AUTOMOVE 31
          goto ARRIVED
      }
-if "$zoneid" = "7" then gosub MOVE 349
-if "$zoneid" = "8" then gosub MOVE 43
-if "$zoneid" = "1" && matchre("(wolf|knife|tiger)","%detour") then
+if ("$zoneid" = "7") then gosub AUTOMOVE 349
+if ("$zoneid" = "7") then gosub AUTOMOVE 349
+if ("$zoneid" = "8") then gosub AUTOMOVE 43
+if (("$zoneid" = "1") && matchre("%detour", "(wolf|knife|tiger)")) then
      {
-         gosub MOVE 172
-         if "%detour" = "wolf" then gosub MOVE 126
-         if "%detour" = "knife" then gosub MOVE 459
-         if "%detour" = "tiger" then gosub MOVE 87
+         gosub AUTOMOVE 172
+         if ("%detour" = "wolf") then gosub AUTOMOVE 126
+         if ("%detour" = "knife") then gosub AUTOMOVE 459
+         if ("%detour" = "tiger") then gosub AUTOMOVE 87
          goto ARRIVED
      }
-if "$zoneid" = "1" && matchre("(leth|acen|taipa|ratha)","%detour") then
+if (("$zoneid" = "1") && matchre("%detour", "(leth|acen|taipa|ratha)")) then
      {
-         if "$guild" = "Thief" then
+         if ("$guild" = "Thief") then
              {
-                 if $Athletics.Ranks >= %undersegoltha then
+                 if ($Athletics.Ranks >= %undersegoltha) then
                      {
-                         gosub MOVE 650
-                         gosub MOVE 23
+                         gosub AUTOMOVE 650
+                         gosub AUTOMOVE 23
                      }
              }
-         if $Athletics.Ranks >= %segoltha && "$zoneid" = "1" then
+         if (($Athletics.Ranks >= %segoltha) && ("$zoneid" = "1")) then
              {
-                 gosub MOVE 476
-                 gosub MOVE 30
+                 gosub AUTOMOVE 476
+                 gosub SEGOLTHA_SOUTH
              }
-         if "$zoneid" = "1" then
+         if ("$zoneid" = "1") then
              {
-                 if %kronars < 50 then goto NOCOIN
-                 gosub MOVE 236
+                 if %kronars < 100 then goto NOCOIN
+                 gosub AUTOMOVE 236
                  gosub FERRYLOGIC
              }
          pause
          put south
          wait
          put #mapper reset
-         gosub MOVE 57
-         if "%detour" = "acen" then
+         gosub AUTOMOVE 57
+         if ("%detour" = "acen") then
              {
-                 gosub MOVE 178
-                 gosub MOVE 47
+                 gosub AUTOMOVE 178
+                 gosub AUTOMOVE 47
              }
-         if "%detour" = "taipa" then
+         if ("%detour" = "taipa") then
              {
-                 gosub MOVE 126
-                 gosub MOVE 27
+                 gosub AUTOMOVE 126
+                 gosub AUTOMOVE 27
              }
-         if "%detour" = "ratha" then
+         if ("%detour" = "ratha") then
              {
-                 gosub MOVE 178
-                 gosub MOVE 47
+                 gosub AUTOMOVE 178
+                 gosub AUTOMOVE 47
                  var toratha 1
                  gosub JOINLOGIC
                  pause
                  gosub JOINLOGIC
                  send go beach
                  pause 0.5
-                 gosub MOVE 252
+                 gosub AUTOMOVE 252
                  goto ARRIVED
              }
-         if "%detour" = "leth" then gosub MOVE 18
+         if ("%detour" = "leth") then gosub AUTOMOVE 18
      }
-if "$zoneid" = "1" then gosub MOVE 42
+if ("$zoneid" = "1") then gosub AUTOMOVE 42
 goto ARRIVED
 
 ILITHI:
 var label ILITHI
-if "$zoneid" = "6"  then gosub MOVE cross  
-if "$zoneid" = "2a" then gosub MOVE cross
-if "$zoneid" = "67a" then gosub MOVE shard
-if matchre ("Hara'jaal|Mer'Kresh|M'Riss","$zonename") then
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (("$zoneid" = "1") && matchre("%detour", "(alfren|leth|bone)")) then goto ILLITHI_2
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+ILITHI_1:
+if ("$zoneid" = "127") then gosub AUTOMOVE south
+if "$zoneid" = "6"  then gosub AUTOMOVE cross  
+if ("$zoneid" = "2a") then gosub AUTOMOVE cross
+if ("$zoneid" = "67a") then gosub AUTOMOVE shard
+if matchre("$zonename", "(Hara'jaal|Mer'Kresh|M'Riss)") then
      {
          var backuplabel ILITHI
          var backupdetour %detour
@@ -828,122 +999,158 @@ if matchre ("Hara'jaal|Mer'Kresh|M'Riss","$zonename") then
          var tomainland 1
          goto QITRAVEL
      }
-if "$zoneid" = "35" then 
+if ("$zoneid" = "35") then 
      {
-         gosub MOVE 166
+         if %lirums < 120 then goto NOCOIN
+         gosub AUTOMOVE 166
          gosub FERRYLOGIC
      }
- if "$zoneid" = "47" then 
+ if ("$zoneid" = "47") then 
      {
-         gosub MOVE 117
+         if (matchre("$game", "(?i)DRX") && (%portal = 1) && (%ported = 0)) then gosub PORTAL_TIME
+         gosub AUTOMOVE 117
          gosub FERRYLOGIC
          pause 0.5
      }
-if "$zoneid" = "41" then 
+if ("$zoneid" = "41") then 
      {
-         gosub MOVE 53
+         gosub AUTOMOVE 53
+         pause 0.5
+         put east
          waitforre ^Just when it seems
          pause
          put #mapper reset
      }
-if "$zoneid" = "40a" then gosub MOVE 125
-if "$zoneid" = "40" && $Athletics.Ranks >= %rossmansouth then gosub MOVE 213
-if "$zoneid" = "40" && $Athletics.Ranks < %rossmansouth then
+if ("$zoneid" = "127") then gosub AUTOMOVE south
+if ("$zoneid" = "40a") then gosub AUTOMOVE 125
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
      {
-        evalmath boarneeded $circle * 20
-        if %lirums < %boarneeded then goto NOCOIN
-        gosub MOVE 263
+          if (("$zoneid" = "1") && matchre("%detour", "(alfren|leth|bone)")) then goto ILLITHI_2
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
      }
-if "$zoneid" = "40a" then 
+if (("$zoneid" = "40") && ($Athletics.Ranks >= %rossmansouth)) then gosub AUTOMOVE 213
+if (("$zoneid" = "40") && ($Athletics.Ranks < %rossmansouth)) then
+     {
+        evalmath boarneeded ($circle * 20)
+        if (%lirums < %boarneeded) then goto NOCOIN
+        gosub AUTOMOVE 263
+     }
+if ("$zoneid" = "40a") then 
 	{
-	evalmath boarneeded $circle * 20
-	if %lirums < %boarneeded then 
+	evalmath boarneeded ($circle * 20)
+	if (%lirums < %boarneeded) then 
 		{
-		gosub move 125
+		gosub AUTOMOVE 125
 		goto NOCOIN
 		}
-	gosub MOVE 68
+	gosub AUTOMOVE 68
 	gosub JOINLOGIC
 	}
-if "$zoneid" = "127" then gosub MOVE south
-if "$zoneid" = "126" then gosub MOVE 49
-if "$zoneid" = "116" then gosub MOVE 3
-if "$zoneid" = "114" then
+if ("$zoneid" = "126") then gosub AUTOMOVE 49
+if ("$zoneid" = "127") then gosub AUTOMOVE south
+if ("$zoneid" = "126") then gosub AUTOMOVE 49
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (("$zoneid" = "1") && matchre("%detour", "(alfren|leth|bone)")) then goto ILLITHI_2
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if ("$zoneid" = "116") then gosub AUTOMOVE 3
+if ("$zoneid" = "114") then
           {
-              if %dokoras < 60 then goto NOCOIN
-              gosub MOVE 4
+              if (%dokoras < 120) then goto NOCOIN
+              gosub AUTOMOVE 4
               gosub FERRYLOGIC
               send west
               wait
           }
-if "$zoneid" = "112" then gosub MOVE 112
-if "$zoneid" = "123" then gosub MOVE 175
-if "$zoneid" = "42" then gosub MOVE 2
-if "$zoneid" = "59" then gosub MOVE 12
-if "$zoneid" = "114" then
+if ("$zoneid" = "112") then gosub AUTOMOVE 112
+if ("$zoneid" = "123") then gosub AUTOMOVE 175
+if ("$zoneid" = "42") then gosub AUTOMOVE 2
+if ("$zoneid" = "59") then gosub AUTOMOVE 12
+if ("$zoneid" = "114") then
           {
-              if %dokoras < 60 then goto NOCOIN
-              gosub MOVE 1
+              if (%dokoras < 120) then goto NOCOIN
+              gosub AUTOMOVE 1
               gosub FERRYLOGIC
               send go oak doors
           }
-if "$zoneid" = "40a" then gosub MOVE 125
-if "$zoneid" = "40" && $Athletics.Ranks >= %rossmansouth then gosub MOVE 213
-if "$zoneid" = "40" && $Athletics.Ranks < %rossmansouth then
+if ("$zoneid" = "40a") then gosub AUTOMOVE 125
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (("$zoneid" = "1") && matchre("%detour", "(alfren|leth|bone)")) then goto ILLITHI_2
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "40") && ($Athletics.Ranks >= %rossmansouth)) then gosub AUTOMOVE 213
+if (("$zoneid" = "40") && ($Athletics.Ranks < %rossmansouth)) then
           {
-              if %lirums < 70 then goto NOCOIN
-              gosub MOVE 36
+              if (%lirums < 140) then goto NOCOIN
+              gosub AUTOMOVE 36
               gosub FERRYLOGIC
           }
-if "$zoneid" = "34a" then gosub MOVE 134
-if "$zoneid" = "34" then gosub MOVE 15
-if "$zoneid" = "33a" then gosub MOVE 46
-if "$zoneid" = "33" then gosub MOVE 1
-if "$zoneid" = "32" then gosub MOVE 1
-if "$zoneid" = "31" then gosub MOVE 1
-if "$zoneid" = "30" && $Athletics.Ranks < %faldesu then
+if ("$zoneid" = "34a") then gosub AUTOMOVE 134
+if ("$zoneid" = "34") then gosub AUTOMOVE 15
+if ("$zoneid" = "33a") then gosub AUTOMOVE 46
+if ("$zoneid" = "33") then gosub AUTOMOVE 1
+if ("$zoneid" = "32") then gosub AUTOMOVE 1
+if ("$zoneid" = "31") then gosub AUTOMOVE 1
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (("$zoneid" = "1") && matchre("%detour", "(alfren|leth|bone)")) then goto ILLITHI_2
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "30") && ($Athletics.Ranks < %faldesu)) then
           {
-              if %lirums < 70 then goto NOCOIN
-              gosub MOVE 103
+              if (%lirums < 140) then goto NOCOIN
+              gosub AUTOMOVE 103
               pause
               gosub FERRYLOGIC
           }
-if "$zoneid" = "30" && $Athletics.Ranks >= %faldesu then
+if (("$zoneid" = "30") && ($Athletics.Ranks >= %faldesu)) then
           {
-              gosub MOVE 203
-              gosub MOVE 79
+              gosub AUTOMOVE 203
+              gosub AUTOMOVE 79
           }
-if "$zoneid" = "14c" then gosub MOVE 21
-if "$zoneid" = "13" then gosub MOVE 71
-if "$zoneid" = "12a" then gosub MOVE 60
-if "$zoneid" = "4a" then gosub MOVE 15
-if "$zoneid" = "4" then gosub MOVE 14
-if "$zoneid" = "8" then gosub MOVE 43
-if "$zoneid" = "10" then gosub MOVE 116
-if "$zoneid" = "9b" then gosub MOVE 9
-if "$zoneid" = "14b" then gosub MOVE 217
-if "$zoneid" = "11" then gosub MOVE 2
-if "$zoneid" = "7" then gosub MOVE 349
-if "$zoneid" = "112" then gosub MOVE 112
-if "$zoneid" = "1" then
+if ("$zoneid" = "14c") then gosub FALDESU_SOUTH
+if ("$zoneid" = "14c") then gosub FALDESU_SOUTH
+if ("$zoneid" = "14c") then gosub FALDESU_SOUTH
+if ("$zoneid" = "13") then gosub AUTOMOVE 71
+if ("$zoneid" = "12a") then gosub AUTOMOVE 60
+if ("$zoneid" = "4a") then gosub AUTOMOVE 15
+if ("$zoneid" = "4") then gosub AUTOMOVE 14
+if ("$zoneid" = "8") then gosub AUTOMOVE 43
+if ("$zoneid" = "10") then gosub AUTOMOVE 116
+if ("$zoneid" = "9b") then gosub AUTOMOVE 9
+if ("$zoneid" = "14b") then gosub AUTOMOVE 217
+if ("$zoneid" = "11") then gosub AUTOMOVE 2
+if ("$zoneid" = "7") then gosub AUTOMOVE 349
+if ("$zoneid" = "7") then gosub AUTOMOVE 349
+if ("$zoneid" = "7") then gosub AUTOMOVE 349
+if ("$zoneid" = "112") then gosub AUTOMOVE 112
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (("$zoneid" = "1") && matchre("%detour", "(alfren|leth|bone)")) then goto ILLITHI_2
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+ILLITHI_2:
+if ("$zoneid" = "1") then
           {
-              if "$guild" = "Thief" then
+              if ("$guild" = "Thief") then
                   {
-                      if $Athletics.Ranks >= %undersegoltha then
+                      if ($Athletics.Ranks >= %undersegoltha) then
                           {
-                              gosub MOVE 650
-                              gosub MOVE 23
+                              gosub AUTOMOVE 650
+                              gosub AUTOMOVE 23
                           }
                   }
-              if $Athletics.Ranks >= %segoltha && "$zoneid" = "1" then
+              if (($Athletics.Ranks >= %segoltha) && ("$zoneid" = "1")) then
                   {
-                      gosub MOVE 476
-                      gosub MOVE 30
+                      gosub AUTOMOVE 476
+                      gosub SEGOLTHA_SOUTH
                   }
-              if "$zoneid" = "1" then
+              if ("$zoneid" = "1") then
                   {
-                      if %kronars < 50 then goto NOCOIN
-                      gosub MOVE 236
+                      if %kronars < 100 then goto NOCOIN
+                      gosub AUTOMOVE 236
                       gosub FERRYLOGIC
                   }
               pause
@@ -951,214 +1158,253 @@ if "$zoneid" = "1" then
               wait
               put #mapper reset
           }
-if ("$zoneid" = "50") && matchre("(knife|wolf|tiger|dirge|arthe|kaerna|haven|theren|lang|rakash|muspari|zaulfung|cross|crossing)","%destination") && ($Athletics.Ranks > %segoltha) then gosub MOVE 8
-if "$zoneid" = "50" then gosub MOVE 30
-if "$zoneid" = "1a" then gosub MOVE 23
-if "$zoneid" = "67" && matchre("alfren","%detour") then 
+if ("$zoneid" = "50") && matchre("(knife|wolf|tiger|dirge|arthe|kaerna|haven|theren|lang|rakash|muspari|zaulfung|cross|crossing)","%destination") && ($Athletics.Ranks > %segoltha) then gosub SEGOLTHA_NORTH
+if ("$zoneid" = "50") then gosub SEGOLTHA_SOUTH
+if ("$zoneid" = "1a") then gosub AUTOMOVE 23
+if (("$zoneid" = "67") && matchre("alfren","%detour")) then 
           {
               goto CROSSING
           }
-if "$zoneid" = "62" && matchre("alfren","%detour") then 
+if (("$zoneid" = "62") && matchre("alfren","%detour")) then 
           {
-              gosub MOVE leth
+              gosub AUTOMOVE leth
           }
-if "$zoneid" = "61" && matchre("alfren","%detour") then 
+if (("$zoneid" = "61") && matchre("alfren","%detour")) then 
           {
-              gosub MOVE cross
+              gosub AUTOMOVE cross
               pause 0.2
           }
-if "$zoneid" = "60" && matchre("alfren","%detour") then 
+if (("$zoneid" = "60") && matchre("alfren","%detour")) then 
           {
-              gosub MOVE 42
+              gosub AUTOMOVE 42
               goto ARRIVED
           }
-if "$zoneid" = "60" then gosub MOVE 57
-if "$zoneid" = "112" then gosub MOVE 112
-if "$zoneid" = "59" then gosub MOVE 12
-if "$zoneid" = "58" then gosub MOVE 2
-if "$zoneid" = "61" then gosub MOVE 130
-if "$zoneid" = "63" then gosub MOVE 112
-if "$zoneid" = "62" && matchre("gondola","%detour") then
+if ("$zoneid" = "60") then gosub AUTOMOVE 57
+if ("$zoneid" = "112") then gosub AUTOMOVE 112
+if ("$zoneid" = "59") then gosub AUTOMOVE 12
+if ("$zoneid" = "58") then gosub AUTOMOVE 2
+if ("$zoneid" = "61") then gosub AUTOMOVE 130
+if ("$zoneid" = "63") then gosub AUTOMOVE 112
+if (("$zoneid" = "62") && matchre("gondola","%detour")) then
           {
-              gosub MOVE 2
+              gosub AUTOMOVE 2
               goto ARRIVED
           }
-if "$zoneid" = "62" && matchre("(bone|germ)","%detour") then
+if (("$zoneid" = "62") && matchre("(bone|germ)","%detour")) then
           {
-              gosub MOVE 101
+              gosub AUTOMOVE 101
               goto ARRIVED
           }
-if "$zoneid" = "62" && "$guild" = "Thief" && $Athletics.Ranks >= %undergondola then 
+if (("$zoneid" = "62") && ("$guild" = "Thief") && ($Athletics.Ranks >= %undergondola)) then 
           {
                put khri flight harrier
                pause
           }
-if "$zoneid" = "62" && "$guild" = "Ranger" && $Athletics.Ranks >= %undergondola then 
+if (("$zoneid" = "62") && ("$guild" = "Ranger") && ($Athletics.Ranks >= %undergondola)) then 
           {
                put prep athlet 10
                pause 8
                put cast
           }
-if "$zoneid" = "62" && $Athletics.Ranks >= %undergondola then 
+if (("$zoneid" = "62") && ($Athletics.Ranks >= %undergondola)) then 
           {
-             gosub MOVE 41
+             gosub AUTOMOVE 41
              pause
-             if (toupper("$game") = "DRF") then
+             if matchre("$game", "(?i)DRF") then
                    {
-                        put sw
-                        pause 0.5
-                        put sw
-                        pause 0.7
-                        put s
-                        pause 0.5
-                        gosub MOVE 153
-                        goto ILITHI_2
+                        gosub MOVE sw
+                        gosub MOVE sw
+                        gosub MOVE s
+                        gosub AUTOMOVE 153
+                        goto ILITHI_3
                    }
-             if (toupper("$game") = "DR") then
+             if matchre("$game", "(?i)DR") then
                    {
-                        put sw
-                        pause 0.5
-                        put sw
-                        pause 0.7
+                        gosub MOVE sw
+                        gosub MOVE sw
+                        pause 0.2
                         put go blockade
                         pause 0.8
                         pause 0.1
-                        gosub MOVE 153
+                        gosub AUTOMOVE 153
                    }
           }
-if ("$zoneid" = "62") && (toupper("$game") = "DRF") then
+if (("$zoneid" = "62") && ("$game"= "DRF")) then
           {
-              gosub MOVE 41
-              put sw
+              gosub AUTOMOVE 41
+              gosub MOVE sw
+              gosub MOVE sw
+              gosub MOVE s
               pause 0.5
-              pause
-              put sw
-              pause 0.5
-              put s
-              pause 0.5
-              gosub MOVE 2
+              gosub AUTOMOVE 2
               gosub FERRYLOGIC
           }
-if ("$zoneid" = "62") && (toupper("$game") = "DR") then
+if (("$zoneid" = "62") && matchre("$game", "(?i)DR")) then
           {
-              gosub MOVE 41
-              put sw
-              pause 0.5
-              put sw
-              pause 0.5
+              gosub AUTOMOVE 41
+              gosub MOVE sw
+              gosub MOVE sw
+              pause 0.1
               put go blockade
               pause 0.8
               pause 0.1
-              gosub MOVE 2
+              gosub AUTOMOVE 2
               gosub FERRYLOGIC
           }
-ILITHI_2:
-if "$zoneid" = "69" && matchre("(horse|spire|wyvern)","%detour") then
+ILITHI_3:
+if (("$zoneid" = "69") && matchre("(horse|spire|wyvern)","%detour")) then
           {
-              if "%detour" = "horse" then gosub MOVE 199
-              if "%detour" = "spire" then gosub MOVE 334
-              if "%detour" = "wyvern" then gosub MOVE 15
+              if ("%detour" = "horse") then gosub AUTOMOVE 199
+              if ("%detour" = "spire") then gosub AUTOMOVE 334
+              if ("%detour" = "wyvern") then gosub AUTOMOVE 15
               goto ARRIVED
           }
-if "$zoneid" = "65" then gosub MOVE 1
-if "$zoneid" = "66" && "%detour" = "garg" then
+if ("$zoneid" = "65") then gosub AUTOMOVE 1
+if (("$zoneid" = "66") && ("%detour" = "garg")) then
           {
-              gosub MOVE 167
+              gosub AUTOMOVE 167
               goto ARRIVED
           }
-#if "$zoneid" = "69" && "%shardcitizen" = "yes" then gosub MOVE 31
-if "$zoneid" = "69" then gosub MOVE 1
-if "$zoneid" = "68a" then gosub MOVE 29
-if "$zoneid" = "68" && matchre("(adan'f|corik)","%detour") then
+#if (("$zoneid" = "69") && ("%shardcitizen" = "yes")) then gosub AUTOMOVE 31
+if ("$zoneid" = "69") then gosub AUTOMOVE 1
+if ("$zoneid" = "68a") then gosub AUTOMOVE 29
+if (("$zoneid" = "68") && matchre("(adan'f|corik)","%detour")) then
           {
-              if "%detour" = "corik" then gosub MOVE 114
-              if "%detour" = "adan'f" then gosub MOVE 29
+              if ("%detour" = "corik") then gosub AUTOMOVE 114
+              if ("%detour" = "adan'f") then gosub AUTOMOVE 29
               goto ARRIVED
           }
-if "$zoneid" = "68" && "$guild" = "Thief" then gosub MOVE 225
-if "$zoneid" = "67a" then gosub MOVE shard
-if "$zoneid" = "68" && %shardcitizen = "yes" then gosub MOVE 1
-if "$zoneid" = "68" && %shardcitizen = "no" then gosub MOVE 15
-if "$zoneid" = "67" && matchre("alfren","%detour") then 
+if (("$zoneid" = "68") && ("$guild" = "Thief")) then gosub AUTOMOVE 225
+if ("$zoneid" = "67a") then gosub AUTOMOVE shard
+if (("$zoneid" = "68") && matchre("%shardcitizen", "(?i)yes")) then gosub AUTOMOVE 1
+if (("$zoneid" = "68") && matchre("%shardcitizen", "(?i)no")) then gosub AUTOMOVE 15
+if (("$zoneid" = "67") && matchre("alfren","%detour")) then 
           {
               goto CROSSING
           }
-if "$zoneid" = "67" && "$guild" = "Thief" && matchre("(steel|ylono|fayrin|horse|spire|wyvern)","%detour") then
+if (("$zoneid" = "67") && ("$guild" = "Thief") && matchre("(steel|ylono|fayrin|horse|spire|wyvern)","%detour")) then
           {
-              gosub MOVE 566
-              gosub MOVE 23
+              gosub AUTOMOVE 566
+              gosub AUTOMOVE 23
           }
-if "$zoneid" = "67" && "$guild" = "Thief" && matchre("(adan'f|corik)","%detour") then
+if (("$zoneid" = "67") && ("$guild" = "Thief") && matchre("(adan'f|corik)","%detour")) then
           {
-              gosub MOVE 228
+              gosub AUTOMOVE 228
               pause
               send climb embrasure
               wait
-              if "%detour" = "adan'f" then gosub MOVE 29
-              if "%detour" = "corik" then gosub MOVE 114
+              if ("%detour" = "adan'f") then gosub AUTOMOVE 29
+              if ("%detour" = "corik") then gosub AUTOMOVE 114
           }
-if "$zoneid" = "67" && matchre("(steel|ylono|fayrin|horse|spire|wyvern|corik|adan'f)","%detour") then gosub MOVE 132
-if "$zoneid" = "66" && matchre("(steel|fayrin|ylono|corik|adan'f)","%detour") then
+if (("$zoneid" = "67") && matchre("(steel|ylono|fayrin|horse|spire|wyvern|corik|adan'f)","%detour")) then gosub AUTOMOVE 132
+if (("$zoneid" = "66") && matchre("(steel|fayrin|ylono|corik|adan'f)","%detour")) then
           {
-              if "%detour" = "steel" then gosub MOVE 99
-              if "%detour" = "fayrin" then gosub MOVE 127
-              if "%detour" = "ylono" then gosub MOVE 495
+              if ("%detour" = "steel") then gosub AUTOMOVE 99
+              if ("%detour" = "fayrin") then gosub AUTOMOVE 127
+              if ("%detour" = "ylono") then gosub AUTOMOVE 495
               if matchre("(corik|adan'f)","%detour") then
                   {
-                      if "$guild" = "Thief" then
+                      if ("$guild" = "Thief") then
                           {
-                              gosub MOVE 617
-                              gosub MOVE 19
-                              gosub MOVE 228
+                              gosub AUTOMOVE 66
+                              put go trail
+                              pause 0.5
+                              gosub MOVE south
+                              gosub MOVE south
+                              pause 0.2
+                              gosub MOVE shard
+                              gosub AUTOMOVE 228
                               pause
                               send climb embrasure
                               wait
                           }
-                      if "%shardcitizen" = "yes" && "$zoneid" = 66 then
+                      if (!matchre("%shardcitizen", "(?i)yes") && ("$zoneid" = 66)) then
                           {
-                              gosub MOVE 216
-                              gosub MOVE 230
+                              gosub AUTOMOVE 216
+                              gosub AUTOMOVE 230
                           }
-                      if "$zoneid" = "66" then gosub MOVE 3
-                      if "%detour" = "adan'f" then gosub MOVE 29
-                      if "%detour" = "corik" then gosub MOVE 114
+                      if (matchre("%shardcitizen", "(?i)yes") && ("$zoneid" = 66) && ($roomid > 54)) then
+                          {
+                              gosub AUTOMOVE 215
+                              gosub AUTOMOVE 230
+                          }
+                      if ("$zoneid" = "66") then gosub AUTOMOVE 3
+                      if ("%detour" = "adan'f") then gosub AUTOMOVE 29
+                      if ("%detour" = "corik") then gosub AUTOMOVE 114
                   }
               goto ARRIVED
           }
-if "$zoneid" = "66" && matchre("(horse|spire|wyvern)","%detour") then
+if (("$zoneid" = "66") && matchre("(horse|spire|wyvern)","%detour")) then
           {
-              gosub MOVE 217
-              if "%detour" = "horse" then gosub MOVE 199
-              if "%detour" = "spire" then gosub MOVE 334
-              if "%detour" = "wyvern" then gosub MOVE 15
+              gosub AUTOMOVE 217
+              if ("%detour" = "horse") then gosub AUTOMOVE 199
+              if ("%detour" = "spire") then gosub AUTOMOVE 334
+              if ("%detour" = "wyvern") then gosub AUTOMOVE 15
           }
-if "$zoneid" = "66" && "$guild" = "Thief" then
+if (("$zoneid" = "66") && ("$guild" = "Thief")) then
           {
-              gosub MOVE 617
-              pause 0.5
-              gosub MOVE 19
+               gosub AUTOMOVE 66
+               gosub MOVE go trail
+               pause 0.2
+               gosub MOVE south
+               gosub MOVE south
+               pause 0.2
+               gosub AUTOMOVE shard
           }
-if "$zoneid" = "66" then gosub MOVE 216
-if "$zoneid" = "67" then gosub MOVE 81
-if "$zoneid" = "67" && matchre("gondola","%detour") then 
+if ("$zoneid" = "66a") then gosub AUTOMOVE shard
+if (matchre("%shardcitizen", "(?i)yes") && ("$zoneid" = 66) && ($roomid > 54)) then gosub AUTOMOVE 215
+if ("$zoneid" = "66") then gosub AUTOMOVE 216
+if ("$zoneid" = "67") then gosub AUTOMOVE 81
+if (("$zoneid" = "67") && matchre("gondola","%detour")) then 
           {
-              gosub MOVE north
-              gosub MOVE platform
+              gosub AUTOMOVE north
+              gosub AUTOMOVE platform
               goto ARRIVED
           }
 if matchre("aesry","%detour") then
           {
-              gosub MOVE 734
+              if matchre("$game", "DRF") then goto AESRY_LONG
+              gosub AUTOMOVE 734
               gosub JOINLOGIC
-              gosub MOVE 113
+              gosub AUTOMOVE 113
           }
 goto ARRIVED
 THERENGIA:
 var label THERENGIA
-if "$zoneid" = "2a" then gosub MOVE cross
-if "$zoneid" = "6"  then gosub MOVE cross
-if "$zoneid" = "67a" then gosub MOVE shard
-if matchre ("Hara'jaal|Mer'Kresh|M'Riss","$zonename") then
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "42") && ("%detour" = "rakash")) then gosub AUTOMOVE lang
+if ("$zoneid" = "2a") then gosub AUTOMOVE cross
+if ("$zoneid" = "6")  then gosub AUTOMOVE cross
+if ("$zoneid" = "67a") then gosub AUTOMOVE shard
+if (matchre("%destination", "(ratha|hara?j?a?a?l?)") && matchre("$zoneid", "\b(1|30|42|47|61|66|67|90|99|107|108|116)\b")) then
+     {
+          if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+          {
+               if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+          }
+     if (matchre("$game", "(?i)DRF") && matchre("%destination", "\brath?a?") || (%premium = 1) && matchre("%destination", "\brath?a?")) then
+               {
+                    echo *** GOING TO FC
+                    gosub TO_SEACAVE
+                    gosub AUTOMOVE 2
+                    var toratha 1
+                    gosub JOINLOGIC
+                    gosub AUTOMOVE 252
+                    goto ARRIVED
+               }
+      if (matchre("$game", "(?i)DRF") && matchre("%destination", "\b(haraj?a?a?l?)")) then
+          {
+               echo ** TO FANG COVE
+               gosub TO_SEACAVE
+               gosub AUTOMOVE 3
+               gosub JOINLOGIC
+               goto ARRIVED
+          }
+    }
+if matchre("$zonename", "(Hara'jaal|Mer'Kresh|M'Riss)") then
           {
               var backuplabel THERENGIA
               var backupdetour %detour
@@ -1168,345 +1414,414 @@ if matchre ("Hara'jaal|Mer'Kresh|M'Riss","$zonename") then
           }
 if matchre("$zoneid", "106|107|108") then goto QITRAVEL
 #debug 10
-if ("$zoneid" = "150") && ("$game" = "DRF") && ("%detour" = "hara") then
+if (("$zoneid" = "150") && matchre("$game", "(?i)DRF") && ("%detour" = "hara")) then
           {
-              gosub MOVE 3
+              gosub AUTOMOVE 3
               gosub FERRYLOGIC
               pause
           }
-if "$zoneid" = "35" && "%detour" != "throne" then 
+if (("$zoneid" = "35") && ("%detour" != "throne")) then 
           {
-              gosub MOVE 166
+              if (%lirums < 240) then goto NOCOIN
+              gosub AUTOMOVE 166
               gosub FERRYLOGIC
               pause
           }
-if "$zoneid" = "127" then gosub MOVE 510
-if "$zoneid" = "126" then gosub MOVE 49
-if "$zoneid" = "116" then gosub MOVE 3
-if "$zoneid" = "114" then
+if ("$zoneid" = "127") then gosub AUTOMOVE 510
+if ("$zoneid" = "126") then gosub AUTOMOVE 49
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if ("$zoneid" = "116") then gosub AUTOMOVE 3
+if ("$zoneid" = "114") then
           {
-              if %dokoras < 70 then goto NOCOIN
-              gosub MOVE 1
+              if (%dokoras < 140) then goto NOCOIN
+              gosub AUTOMOVE 1
               gosub FERRYLOGIC
               put go oak doors
               waitforre ^Obvious
           }
-if "$zoneid" = "113" && "$roomid" = "1" then gosub MOVE 5
-if "$zoneid" = "123" then gosub MOVE 175
-if "$zoneid" = "69" then gosub MOVE 1
-if "$zoneid" = "68a" then gosub MOVE 29
-if "$zoneid" = "68b" then gosub MOVE 44
-if "$zoneid" = "68" && "$guild" = "Thief" then gosub MOVE 15
-if "$zoneid" = "68" && %shardcitizen = "yes" then
+if (("$zoneid" = "113") && ("$roomid" = "1")) then gosub AUTOMOVE 5
+if ("$zoneid" = "123") then gosub AUTOMOVE 175
+if ("$zoneid" = "69") then gosub AUTOMOVE 1
+if ("$zoneid" = "68a") then gosub AUTOMOVE 29
+if ("$zoneid" = "68b") then gosub AUTOMOVE 44
+if (("$zoneid" = "68") && ("$guild" = "Thief")) then gosub AUTOMOVE 15
+if (("$zoneid" = "68") && matchre("%shardcitizen", "(?i)yes")) then
           {
-              gosub MOVE 1
-              gosub MOVE 135
+              gosub AUTOMOVE 1
+              gosub AUTOMOVE 135
           }
-if "$zoneid" = "68" && %shardcitizen = "no" then gosub MOVE 15
-if "$zoneid" = "67" && "$guild" = "Thief" then
+if (("$zoneid" = "68") && matchre("%shardcitizen", "(?i)no")) then gosub AUTOMOVE 15
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "67") && ("$guild" = "Thief")) then
           {
-              gosub MOVE 566
+              gosub AUTOMOVE 566
               pause 0.5
-              gosub MOVE 23
+              gosub AUTOMOVE 23
           }
-if "$zoneid" = "67a" then gosub MOVE STR
-if "$zoneid" = "67" then gosub MOVE 132
-if "$zoneid" = "66" && matchre("gondola","%detour") then 
+if ("$zoneid" = "67a") then gosub AUTOMOVE STR
+if ("$zoneid" = "67") then gosub AUTOMOVE 132
+if (matchre("%destination", "\b(ratha|hara?j?a?a?l?)") && matchre("$zoneid", "\b(1|30|42|47|61|66|67|90|99|107|108|116)\b")) then
+     {
+          if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
           {
-              gosub MOVE platform
+               if ("$zoneid" = "66") then gosub AUTOMOVE east
+               if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+          }
+     if (matchre("$game", "(?i)DRF") && matchre("%destination", "\brath?a?") || (%premium = 1) && matchre("%destination", "\brath?a?")) then
+               {
+                    echo *** GOING TO FC
+                    gosub TO_SEACAVE
+                    gosub AUTOMOVE 2
+                    var toratha 1
+                    gosub JOINLOGIC
+                    gosub AUTOMOVE 252
+                    goto ARRIVED
+               }
+      if (matchre("$game", "(?i)DRF") && matchre("%destination", "\b(haraj?a?a?l?)")) then
+          {
+               echo ** TO FANG COVE
+               gosub TO_SEACAVE
+               gosub AUTOMOVE 3
+               gosub JOINLOGIC
+               goto ARRIVED
+          }
+    }
+if (("$zoneid" = "66") && matchre("gondola","%detour")) then 
+          {
+              gosub AUTOMOVE platform
               goto ARRIVED
           }  
-if "$zoneid" = "66" && "$guild" = "Thief" && $Athletics.Ranks >= %undergondola then 
+if (("$zoneid" = "66") && ("$guild" = "Thief") && ($Athletics.Ranks >= %undergondola)) then 
           {
                put khri flight harrier
                pause
           }
-if "$zoneid" = "66" && "$guild" = "Ranger" && $Athletics.Ranks >= %undergondola then 
+if (("$zoneid" = "66") && ("$guild" = "Ranger") && ($Athletics.Ranks >= %undergondola)) then 
           {
                put prep athlet 10
                pause 8
                put cast
           }
-if "$zoneid" = "66" && $Athletics.Ranks >= %undergondola then gosub MOVE 317
-if "$zoneid" = "66" && $Athletics.Ranks < %undergondola then
+if (("$zoneid" = "66") && ($Athletics.Ranks >= %undergondola)) then gosub AUTOMOVE 317
+if (("$zoneid" = "66") && ($Athletics.Ranks < %undergondola)) then
           {
-              gosub MOVE 156
+              gosub AUTOMOVE 156
               pause
               gosub FERRYLOGIC
           }
-if "$zoneid" = "65" then gosub MOVE 44
+if ("$zoneid" = "65") then gosub AUTOMOVE 44
 pause 0.1
-if "$zoneid" = "63" then gosub MOVE 112
-if "$zoneid" = "62" then gosub MOVE 100
-if "$zoneid" = "112" then gosub MOVE 112
-if "$zoneid" = "59" then gosub MOVE 12
-if "$zoneid" = "58" then gosub MOVE 2
-if ("$zoneid" = "50") && ($Athletics.Ranks > %segoltha) then gosub MOVE 8
-if "$zoneid" = "50" then gosub MOVE 30
-if "$zoneid" = "61" then gosub MOVE 115
-if "$zoneid" = "50" && $Athletics.Ranks < %segoltha then gosub MOVE STR
-if "$zoneid" = "60" && "$guild" = "Thief" then
+if ("$zoneid" = "63") then gosub AUTOMOVE 112
+if ("$zoneid" = "62") then gosub AUTOMOVE 100
+if ("$zoneid" = "112") then gosub AUTOMOVE 112
+if ("$zoneid" = "59") then gosub AUTOMOVE 12
+if ("$zoneid" = "58") then gosub AUTOMOVE 2
+if (("$zoneid" = "50") && ($Athletics.Ranks > %segoltha)) then gosub SEGOLTHA_NORTH
+if ("$zoneid" = "50") then gosub SEGOLTHA_SOUTH
+if ("$zoneid" = "61") then gosub AUTOMOVE 115
+if (("$zoneid" = "50") && ($Athletics.Ranks < %segoltha)) then gosub AUTOMOVE STR
+if (("$zoneid" = "60") && ("$guild" = "Thief")) then
           {
-              if $Athletics.Ranks >= %undersegoltha then
+              if ($Athletics.Ranks >= %undersegoltha) then
                   {
-                      gosub MOVE 107
-                      gosub MOVE 6
+                      gosub AUTOMOVE 107
+                      gosub AUTOMOVE 6
                   }
           }
-if "$zoneid" = "60" && $Athletics.Ranks >= %segoltha then gosub MOVE 108
-if "$zoneid" = "60" && $Athletics.Ranks < %segoltha then
+if (("$zoneid" = "60") && ($Athletics.Ranks >= %segoltha)) then gosub AUTOMOVE 108
+if (("$zoneid" = "60") && ($Athletics.Ranks < %segoltha)) then
           {
-              if %kronars < 50 then goto NOCOIN
-              gosub MOVE 42
+              if %kronars < 100 then goto NOCOIN
+              gosub AUTOMOVE 42
               pause
               gosub FERRYLOGIC
           }
-if "$zoneid" = "13" then gosub MOVE 71
-if "$zoneid" = "4a" then gosub MOVE 15
-if "$zoneid" = "32" then gosub MOVE 1
-if "$zoneid" = "4" then gosub MOVE 14
-if "$zoneid" = "8" then gosub MOVE 43
-if "$zoneid" = "10" then gosub MOVE NTR
-if "$zoneid" = "9b" then gosub MOVE 9
-if "$zoneid" = "14b" then gosub MOVE 217
-if "$zoneid" = "11" then gosub MOVE 2
-if "$zoneid" = "1" then gosub MOVE 171
-if "$zoneid" = "7" && "%detour" = "muspari" then
+if (("$zoneid" = "50") && ($Athletics.Ranks > %segoltha)) then gosub SEGOLTHA_NORTH
+if ("$zoneid" = "13") then gosub AUTOMOVE 71
+if ("$zoneid" = "4a") then gosub AUTOMOVE 15
+if ("$zoneid" = "32") then gosub AUTOMOVE 1
+if ("$zoneid" = "4") then gosub AUTOMOVE 14
+if ("$zoneid" = "8") then gosub AUTOMOVE 43
+if ("$zoneid" = "10") then gosub AUTOMOVE NTR
+if ("$zoneid" = "9b") then gosub AUTOMOVE 9
+if ("$zoneid" = "14b") then gosub AUTOMOVE 217
+if ("$zoneid" = "11") then gosub AUTOMOVE 2
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if ("$zoneid" = "1") then gosub AUTOMOVE 171
+if (("$zoneid" = "7") && ("%detour" = "muspari") && ("$game" != "DRF")) then
           {
-              gosub move 271
+              gosub AUTOMOVE 271
               gosub JOINLOGIC
-              gosub move 
-          }
-if "$zoneid" = "7" && "%detour" = "caravansary" then
-          {
-              gosub MOVE caravan
               goto ARRIVED
           }
-if "$zoneid" = "7" && $Athletics.Ranks >= %faldesu then gosub MOVE 197
-if "$zoneid" = "7" && $Athletics.Ranks < %faldesu then
+if (("$zoneid" = "7") && ("%detour" = "caravansary")) then
           {
-              if %lirums < 70 then goto NOCOIN
-              gosub MOVE 81
+              gosub AUTOMOVE caravan
+              goto ARRIVED
+          }
+if (("$zoneid" = "7") && ($Athletics.Ranks >= %faldesu)) then gosub AUTOMOVE 197
+if (("$zoneid" = "7") && ($Athletics.Ranks >= %faldesu)) then gosub AUTOMOVE 197
+if (("$zoneid" = "7") && ($Athletics.Ranks < %faldesu)) then
+          {
+              if (%lirums < 140) then goto NOCOIN
+              gosub AUTOMOVE 81
               gosub FERRYLOGIC
           }
-if "$zoneid" = "14c" then gosub MOVE 22
-if "$zoneid" = "33a" then gosub MOVE 46
-if "$zoneid" = "33" then gosub MOVE 1
-if "$zoneid" = "31" && "%detour" = "zaulfung" then gosub MOVE 100
-if "$zoneid" = "31" then gosub MOVE 1
-if "$zoneid" = "34a" && "%detour" != "rossman" then gosub MOVE forest
-if "$zoneid" = "34" && "%detour" = "rossman" then
+if ("$zoneid" = "14c") then gosub FALDESU_NORTH
+if ("$zoneid" = "33a") then gosub AUTOMOVE 46
+if ("$zoneid" = "33") then gosub AUTOMOVE 1
+if (("$zoneid" = "31") && ("%detour" = "zaulfung")) then gosub AUTOMOVE 100
+if ("$zoneid" = "31") then gosub AUTOMOVE 1
+if (("$zoneid" = "34a") && ("%detour" != "rossman")) then gosub AUTOMOVE forest
+if (("$zoneid" = "34") && ("%detour" = "rossman")) then
           {
-              if %lirums < 70 then goto NOCOIN
-              gosub MOVE 22
+              if (%lirums < 70) then goto NOCOIN
+              gosub AUTOMOVE 22
               goto ARRIVED
           }
-if "$zoneid" = "34" && matchre("(lang|theren|rakash|muspari|fornsted|el'bain)","%detour") then gosub MOVE 137
-if "$zoneid" = "34" && matchre("(haven|zaulfung)","%detour") then
+if (("$zoneid" = "34") && matchre("%detour", "(lang|theren|rakash|muspari|fornsted|el'bain)")) then gosub AUTOMOVE 137
+if (("$zoneid" = "34") && matchre("%detour", "(haven|zaulfung)")) then
           {
-              if $Athletics.Ranks < %rossmansouth then gosub MOVE 137
+              if $Athletics.Ranks < %rossmansouth then gosub AUTOMOVE 137
               if $Athletics.Ranks >= %rossmansouth then
                   {
-                      gosub MOVE 15
-                      gosub MOVE 46
-                      gosub MOVE 1
+                      gosub AUTOMOVE 15
+                      gosub AUTOMOVE 46
+                      gosub AUTOMOVE 1
                   }
           }
-if "$zoneid" = "47" then 
+if ("$zoneid" = "47") then 
           {
-              gosub MOVE 117
+              gosub AUTOMOVE 117
               gosub FERRYLOGIC
           }
-if "$zoneid" = "41" then if matchre("(muspari|fornsted)","%detour") then
+if ("$zoneid" = "41") then if matchre("%detour", "(muspari|fornsted)") then
           {
               if matchre("fornsted","%detour") then
                   {
-                      gosub MOVE 91
+                      gosub AUTOMOVE 91
                       goto ARRIVED
                   }
               if matchre("muspari","%detour") then
                   {
-                      gosub MOVE 91
+                      gosub AUTOMOVE 91
                       gosub PASSPORT
-                      gosub MOVE 160
+                      gosub AUTOMOVE 160
                       gosub FERRYLOGIC
+                      gosub STOWING
                   }
           }
-if "$zoneid" = "41" && matchre("(rossman|lang|theren|rakash|el'bain|haven|zaulfung)","%detour") then 
+if (("$zoneid" = "41") && matchre("%detour", "(rossman|lang|theren|rakash|el'bain|haven|zaulfung)")) then 
           {
-              gosub MOVE 53
+              gosub AUTOMOVE 53
+              pause 0.5
+              put east
               waitforre ^Just when it seems
               pause 0.5
               put #mapper reset
           }
-if "$zoneid" = "47" && matchre("muspari","%detour") then
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "47") && matchre("muspari","%detour")) then
           {
-              gosub MOVE 235
+              gosub AUTOMOVE 235
               goto ARRIVED
           }
-if "$zoneid" = "47" then 
+if ("$zoneid" = "47") then 
           {
-              gosub MOVE 117
+              gosub AUTOMOVE 117
               gosub FERRYLOGIC
           }
-if "$zoneid" = "30" && matchre("(rossman|lang|theren|rakash|muspari|fornsted|el'bain|mriss|merk|hara)","%detour") then
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "30") && matchre("%detour", "(rossman|lang|theren|rakash|muspari|fornsted|el'bain|mriss|merk|hara)")) then
           {
               if $Athletics.Ranks < %rossmannorth then
                   {
-                      if %lirums < 70 then goto NOCOIN
-                      gosub MOVE 99
+                      if (%lirums < 140) then goto NOCOIN
+                      gosub AUTOMOVE 99
                       gosub FERRYLOGIC
                   }
               if $Athletics.Ranks >= %rossmannorth then
                   {
-                      gosub MOVE 174
-                      gosub MOVE 29
-                      gosub MOVE 48
-                      if "%detour" = "rossman" then
+                      gosub AUTOMOVE 174
+                      gosub AUTOMOVE 29
+                      gosub AUTOMOVE 48
+                      if ("%detour" = "rossman") then
                           {
-                              gosub MOVE 22
+                              gosub AUTOMOVE 22
                               goto ARRIVED
                           }
-                      gosub MOVE 137
+                      gosub AUTOMOVE 137
                   }
           }
-if "$zoneid" = "116" then 
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if ("$zoneid" = "116") then 
 			{
 			evalmath therencoin $circle*20
-			if %dokoras < %therencoin then goto NOCOIN
-			gosub MOVE 217
+			if (%dokoras < %therencoin) then goto NOCOIN
+			gosub AUTOMOVE 217
 			}
-if "$zoneid" = "126" then 
+if ("$zoneid" = "126") then 
 			{
 			evalmath therencoin $circle*20
-			if %dokoras < %therencoin then 
+			if (%dokoras < %therencoin) then 
 				{
-				gosub MOVE 49
+				gosub AUTOMOVE 49
 				goto NOCOIN
 				}
-			gosub MOVE 103
+			gosub AUTOMOVE 103
 			}
-if "$zoneid" = "127" then
+if ("$zoneid" = "127") then
 			{
 			evalmath therencoin $circle*20
-			if %dokoras < %therencoin then 
+			if (%dokoras < %therencoin) then 
 				{
-				gosub MOVE 510
-				gosub MOVE 49
+				gosub AUTOMOVE 510
+				gosub AUTOMOVE 49
 				goto NOCOIN
 				}
-			gosub MOVE 363
+			gosub AUTOMOVE 363
 			gosub JOINLOGIC
 			}
-if matchre("rakash", "(?i)%detour" then goto ARRIVED
-if "$zoneid" = "40a" then gosub MOVE 125
-if "$zoneid" = "42" && "%detour" != "theren" then gosub MOVE 2
-if "$zoneid" = "40" && "%detour" = "rossman" then
+# if matchre("rakash", "(?i)%detour" then goto ARRIVED
+if ("$zoneid" = "40a") then gosub AUTOMOVE 125
+if "$zoneid" = "42" && "%detour" != "theren" then gosub AUTOMOVE 2
+if (("$zoneid" = "40") && matchre("$game", "(?i)DRX") && (%portal = 1) && !matchre("%detour", "(?i)(el'bain|lang|rakash)") && (%ported = 0)) then gosub PORTAL_TIME
+if (("$zoneid" = "40") && ("%detour" = "muspari")) then
           {
-              gosub MOVE 213
-              gosub MOVE 22
+              gosub PASSPORT_CHECK
+              if (%passport = 0) then gosub GET_PASSPORT
+          }
+if (("$zoneid" = "40") && ("%detour" = "rossman")) then
+          {
+              gosub AUTOMOVE 213
+              gosub AUTOMOVE 22
               goto ARRIVED
           }
-if "$zoneid" = "40" && matchre("(lang|rakash|el'bain|mriss|merk|hara)","%detour") then
+if (("$zoneid" = "40") && matchre("%detour", "(?i)(lang|rakash|el'bain|mriss|merk|hara)")) then
           {
-              if "%detour" = "el'bain" then
+              if ("%detour" = "el'bain") then
                   {
-                      gosub MOVE 142
+                      gosub AUTOMOVE 142
                       goto ARRIVED
                   }
-              if "%detour" = "lang" then
+              if ("%detour" = "lang") then
                   {
-                      gosub MOVE 1
+                      gosub AUTOMOVE 1
                       goto ARRIVED
                   }
-              if "%detour" = "rakash" then
+              if ("%detour" = "rakash") then
                   {
-                      gosub MOVE 263
-                      gosub MOVE 96
+                      gosub AUTOMOVE 263
+                      gosub AUTOMOVE 96
                       goto ARRIVED
                   }
-              if matchre ("(mriss|merk|hara)","%detour") then
+              if matchre("%detour", "(mriss|merk|hara)") then
                   {
-                      gosub MOVE 305
+                      gosub AUTOMOVE 305
                       gosub JOINLOGIC
                       goto QITRAVEL
                   }
           }
-if "$zoneid" = "40" && matchre("(haven|zaulfung|throne)","%detour") then
+if (("$zoneid" = "40") && matchre("(haven|zaulfung|throne)","%detour")) then
           {
-              if $Athletics.Ranks >= %rossmansouth then
+              if ($Athletics.Ranks >= %rossmansouth) then
                   {
-                      gosub MOVE 213
-                      gosub MOVE 15
-                      gosub MOVE 46
-                      gosub MOVE 1
+                      gosub AUTOMOVE 213
+                      gosub AUTOMOVE 15
+                      gosub AUTOMOVE 46
+                      gosub AUTOMOVE 1
                   }
-              if $Athletics.Ranks < %rossmansouth then
+              if ($Athletics.Ranks < %rossmansouth) then
                   {
-                      if %lirums < 70 then goto NOCOIN
-                      gosub MOVE 36
+                      if (%lirums < 140) then goto NOCOIN
+                      gosub AUTOMOVE 36
                       gosub FERRYLOGIC
                   }
           }
-if "$zoneid" = "40" && "%detour" = "theren" then gosub MOVE 211
-if "$zoneid" = "42" && "%detour" = "theren" then
+if (("$zoneid" = "40") && ("%detour" = "theren")) then gosub AUTOMOVE 211
+if (("$zoneid" = "42") && ("%detour" = "theren")) then
           {
-              gosub MOVE 56
+              gosub AUTOMOVE 56
               goto ARRIVED
           }
-if "$zoneid" = "40" && matchre("(muspari|fornsted|hvaral)","%detour") then
+if (("$zoneid" = "40") && matchre("%detour", "(muspari|fornsted|hvaral)")) then
           {
-              gosub MOVE 376
+              gosub AUTOMOVE 376
+              pause 0.5
+              put west
               waitforre ^Just when it seems
               pause
               put #mapper reset
           }
-if ("$zoneid" = "41") && ("%detour" = "fornsted") then 
+if (("$zoneid" = "41") && ("%detour" = "fornsted")) then 
           {
-              gosub MOVE 91
+              gosub AUTOMOVE 91
               goto ARRIVED
           }
-if ("$zoneid" = "41") && ("%detour" = "hvaral") then 
+if (("$zoneid" = "41") && ("%detour" = "hvaral")) then 
           {
-              gosub MOVE 91
+              gosub AUTOMOVE 91
               gosub PASSPORT
-              gosub MOVE 145
+              gosub AUTOMOVE 145
               goto ARRIVED
           }
-if ("$zoneid" = "41") && ("%detour" = "muspari") then
+if (("$zoneid" = "41") && ("%detour" = "muspari")) then
           {
-              gosub MOVE 91
+              gosub AUTOMOVE 91
               gosub PASSPORT
-              gosub MOVE 160
+              gosub AUTOMOVE 160
               gosub FERRYLOGIC
           }
-if "$zoneid" = "41" && matchre("(rossman|lang|theren|rakash|el'bain|haven|zaulfung)","%detour") then 
+if (("$zoneid" = "41") && matchre("%detour", "(rossman|lang|theren|rakash|el'bain|haven|zaulfung)")) then 
           {
-              gosub MOVE 53
+              gosub AUTOMOVE 53
               waitforre ^Just when
               pause
               put #mapper reset
           }
-if "$zoneid" = "30" && "%detour" = "throne" then
+if (("$zoneid" = "30") && ("%detour" = "throne")) then
           {
-              gosub MOVE throne city barge
+              gosub AUTOMOVE throne city barge
               gosub FERRYLOGIC
               goto ARRIVED
           }
-if "$zoneid" = "30" && "%detour" = "zaulfung" then
+if (("$zoneid" = "30") && ("%detour" = "zaulfung")) then
           {
-              gosub MOVE 203
-              gosub MOVE 100
+              gosub AUTOMOVE 203
+              gosub AUTOMOVE 100
           }
-if "$zoneid" = "30" then
+if ("$zoneid" = "30") then
           {
-              gosub MOVE 8
+              gosub AUTOMOVE 8
               goto ARRIVED
           }
+gosub STOWING
 goto ARRIVED
 FORD:
 var label FORD
-if matchre ("Hara\'jaal|Mer\'Kresh|M\'Riss","$zoneid") then
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if matchre("$zoneid", "(Hara'jaal|Mer'Kresh|M'Riss)") then
           {
               var backuplabel FORD
               var backupdetour %detour
@@ -1514,92 +1829,107 @@ if matchre ("Hara\'jaal|Mer\'Kresh|M\'Riss","$zoneid") then
               var tomainland 1
               goto QITRAVEL
           }
-if "$zoneid" = "35" && "%detour" != "throne" then 
+if (("$zoneid" = "35") && ("%detour" != "throne")) then 
           {
-              gosub MOVE 166
+              if (%lirums < 240) then goto NOCOIN
+              gosub AUTOMOVE 166
               gosub FERRYLOGIC
               pause
           }  
-if "$zoneid" = "47" then 
+if ("$zoneid" = "47") then 
           {
-              gosub MOVE 117
+              if (matchre("$game", "(?i)DRX") && (%portal = 1) && (%ported = 0)) then gosub PORTAL_TIME
+              gosub AUTOMOVE 117
               gosub FERRYLOGIC
           }
-if "$zoneid" = "41" then 
+if ("$zoneid" = "41") then 
           {
-              gosub MOVE 53
+              gosub AUTOMOVE 53
+              pause 0.5
+              put east
               waitforre ^Just when it seems
               pause
               put #mapper reset
           }
-if "$zoneid" = "40a" then gosub MOVE 125
-if "$zoneid" = "42" then gosub MOVE 2
-if "$zoneid" = "40" && $Athletics.Ranks >= %rossmansouth then gosub MOVE 213
-if "$zoneid" = "40" && $Athletics.Ranks < %rossmansouth then
+if ("$zoneid" = "40a") then gosub AUTOMOVE 125
+if ("$zoneid" = "42") then gosub AUTOMOVE 2
+if (("$zoneid" = "40") && matchre("$game", "(?i)DRX") && (%portal = 1) && (%ported = 0)) then gosub PORTAL_TIME
+if (("$zoneid" = "40") && ($Athletics.Ranks >= %rossmansouth)) then gosub AUTOMOVE 213
+if (("$zoneid" = "40") && ($Athletics.Ranks < %rossmansouth)) then
           {
-				evalmath boarneeded $circle*20
-              if %lirums < %boarneeded then goto NOCOIN
-              gosub MOVE 263
+		    evalmath boarneeded $circle*20
+              if (%lirums < %boarneeded) then goto NOCOIN
+              gosub AUTOMOVE 263
           }
-if "$zoneid" = "40a" then 
+if ("$zoneid" = "40a") then 
 			{
 				evalmath boarneeded $circle*20
-				if %lirums < %boarneeded then 
+				if (%lirums < %boarneeded) then 
 					{
-					gosub move 125
+					gosub AUTOMOVE 125
 					goto NOCOIN
 					}
-				gosub MOVE 68
+				gosub AUTOMOVE 68
 				gosub JOINLOGIC
 				goto FORD_3
 			}
-if "$zoneid" = "34a" then gosub MOVE 134
-if "$zoneid" = "34" then gosub MOVE 15
-if "$zoneid" = "33a" then gosub MOVE 46
-if "$zoneid" = "33" then gosub MOVE 1
-if "$zoneid" = "32" then gosub MOVE 1
-if "$zoneid" = "31" then gosub MOVE 1
-if "$zoneid" = "30" && $Athletics.Ranks < %faldesu then
+if ("$zoneid" = "34a") then gosub AUTOMOVE 134
+if ("$zoneid" = "34") then gosub AUTOMOVE 15
+if ("$zoneid" = "33a") then gosub AUTOMOVE 46
+if ("$zoneid" = "33") then gosub AUTOMOVE 1
+if ("$zoneid" = "32") then gosub AUTOMOVE 1
+if ("$zoneid" = "31") then gosub AUTOMOVE river 
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "30") && ($Athletics.Ranks < %faldesu)) then
           {
-              if %lirums < 70 then goto NOCOIN
-              gosub MOVE 103
+              if (%lirums < 140) then goto NOCOIN
+              gosub AUTOMOVE 103
               pause
               gosub FERRYLOGIC
           }
-if "$zoneid" = "30" && $Athletics.Ranks >= %faldesu then
+if (("$zoneid" = "30") && ($Athletics.Ranks >= %faldesu)) then
           {
-              gosub MOVE 203
-              gosub MOVE 79
+              ## TO FALDESU
+              gosub AUTOMOVE 203
+              gosub AUTOMOVE 79
           }
-if "$zoneid" = "14c" then gosub MOVE 21
-if "$zoneid" = "13" then gosub MOVE 71
-if "$zoneid" = "4a" then gosub MOVE 15
-if "$zoneid" = "4" then gosub MOVE 14
-if "$zoneid" = "8" then gosub MOVE 43
-if "$zoneid" = "10" then gosub MOVE NTR
-if "$zoneid" = "9b" then gosub MOVE 9
-if "$zoneid" = "14b" then gosub MOVE 217
-if "$zoneid" = "11" then gosub MOVE 2
-if "$zoneid" = "7" then gosub MOVE 349
-if "$zoneid" = "1" then
+if ("$zoneid" = "14c") then gosub FALDESU_SOUTH
+if ("$zoneid" = "14c") then gosub FALDESU_SOUTH
+if ("$zoneid" = "13") then gosub AUTOMOVE 71
+if ("$zoneid" = "4a") then gosub AUTOMOVE 15
+if ("$zoneid" = "4") then gosub AUTOMOVE 14
+if ("$zoneid" = "8") then gosub AUTOMOVE 43
+if ("$zoneid" = "10") then gosub AUTOMOVE NTR
+if ("$zoneid" = "9b") then gosub AUTOMOVE 9
+if ("$zoneid" = "14b") then gosub AUTOMOVE 217
+if ("$zoneid" = "11") then gosub AUTOMOVE 2
+if ("$zoneid" = "7") then gosub AUTOMOVE 349
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if ("$zoneid" = "1") then
           {
-              if "$guild" = "Thief" then
+              if ("$guild" = "Thief") then
                   {
-                      if $Athletics.Ranks >= %undersegoltha then
+                      if ($Athletics.Ranks >= %undersegoltha) then
                           {
-                              gosub MOVE 650
-                              gosub MOVE 23
+                              gosub AUTOMOVE 650
+                              gosub AUTOMOVE 23
                           }
                   }
-              if $Athletics.Ranks >= %segoltha && "$zoneid" = "1" then
+              if (($Athletics.Ranks >= %segoltha) && ("$zoneid" = "1")) then
                   {
-                      gosub MOVE 476
-                      gosub MOVE 30
+                      gosub AUTOMOVE 476
+                      gosub SEGOLTHA_SOUTH
                   }
-              if "$zoneid" = "1" then
+              if ("$zoneid" = "1") then
                   {
-                      if %kronars < 50 then goto NOCOIN
-                      gosub MOVE 236
+                      if %kronars < 100 then goto NOCOIN
+                      gosub AUTOMOVE 236
                       gosub FERRYLOGIC
                   }
               pause
@@ -1607,57 +1937,57 @@ if "$zoneid" = "1" then
               wait
               put #mapper reset
           }
-if "$zoneid" = "50" then gosub MOVE 30
-if "$zoneid" = "60" then gosub MOVE 57
-if "$zoneid" = "58" then gosub MOVE 2
-if "$zoneid" = "61" && "%detour" = "ain" then gosub MOVE 126
-if "$zoneid" = "114" && "%detour" != "ain" then
+if ("$zoneid" = "50") then gosub SEGOLTHA_SOUTH
+if ("$zoneid" = "60") then gosub AUTOMOVE 57
+if ("$zoneid" = "58") then gosub AUTOMOVE 2
+if (("$zoneid" = "61") && ("%detour" = "ain")) then gosub AUTOMOVE 126
+if (("$zoneid" = "114") && ("%detour" != "ain")) then
           {
-              if %dokoras < 60 then goto NOCOIN
-              gosub MOVE 4
+              if (%dokoras < 120) then goto NOCOIN
+              gosub AUTOMOVE 4
               gosub FERRYLOGIC
-              gosub MOVEIT west
+              gosub MOVE west
           }
-if "$zoneid" = "63" && $Athletics.Ranks < %undergondola then
+if (("$zoneid" = "63") && ($Athletics.Ranks < %undergondola)) then
           {
-              gosub MOVE 112
-              gosub MOVE 100
-              gosub MOVE 126
+              gosub AUTOMOVE 112
+              gosub AUTOMOVE 100
+              gosub AUTOMOVE 126
           }
-if "$zoneid" = "112" && "$guild" = "Ranger" && $Athletics.Ranks >= %undergondola then 
+if (("$zoneid" = "112") && ("$guild" = "Ranger") && ($Athletics.Ranks >= %undergondola)) then 
           {
                put prep athlet 10
                pause 8
                put cast
           }
-if "$zoneid" = "112" && "$guild" = "Thief" && $Athletics.Ranks >= %undergondola then 
+if (("$zoneid" = "112") && ("$guild" = "Thief") && ($Athletics.Ranks >= %undergondola)) then 
           {
                put khri flight harrier
                pause
           }
-if "$zoneid" = "112" && "%detour" = "ain" then
+if (("$zoneid" = "112") && ("%detour" = "ain")) then
           {
-              if $Athletics.Ranks >= %undergondola then
+              if ($Athletics.Ranks >= %undergondola) then
                   {
-                      gosub MOVE 112
-                      gosub MOVE 130
+                      gosub AUTOMOVE 112
+                      gosub AUTOMOVE 130
                   }
-              if $Athletics.Ranks < %undergondola then
+              if ($Athletics.Ranks < %undergondola) then
                   {
-                      if %dokoras < 60 then goto NOCOIN
-                      gosub MOVE 98
+                      if (%dokoras < 120) then goto NOCOIN
+                      gosub AUTOMOVE 98
                       gosub FERRYLOGIC
                   }
           }
-if "$zoneid" = "112" then gosub MOVE 112
-if "$zoneid" = "58" then gosub MOVE 2
-if "$zoneid" = "61" then gosub MOVE 130
-if "$zoneid" = "63" then gosub MOVE 112
-if "$zoneid" = "62" && $Athletics.Ranks >= %undergondola then 
+if ("$zoneid" = "112") then gosub AUTOMOVE 112
+if ("$zoneid" = "58") then gosub AUTOMOVE 2
+if ("$zoneid" = "61") then gosub AUTOMOVE 130
+if ("$zoneid" = "63") then gosub AUTOMOVE 112
+if (("$zoneid" = "62") && ($Athletics.Ranks >= %undergondola)) then 
           {
-             gosub MOVE 41
+             gosub AUTOMOVE 41
              pause
-             if (toupper("$game") = "DRF") then
+             if matchre("$game", "(?i)DRF") then
                    {    
                         put sw
                         pause 0.5
@@ -1665,10 +1995,10 @@ if "$zoneid" = "62" && $Athletics.Ranks >= %undergondola then
                         pause 0.7
                         put s
                         pause 0.5
-                        gosub MOVE 153
+                        gosub AUTOMOVE 153
                         goto FORD_2
                    }
-             if (toupper("$game") = "DR") then
+             if matchre("$game", "(?i)DR") then
                    {
                         put sw
                         pause 0.5
@@ -1677,13 +2007,17 @@ if "$zoneid" = "62" && $Athletics.Ranks >= %undergondola then
                         put go blockade
                         pause 0.8
                         pause 0.1
-                        gosub MOVE 153
+                        gosub AUTOMOVE 153
                         goto FORD_2
                    }
           }
-if (toupper("$game") = "DR") && ("$zoneid" = "62") then
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (matchre("$game", "(?i)DR") && ("$zoneid" = "62")) then
           {
-              gosub MOVE 41
+              gosub AUTOMOVE 41
               put sw
               pause 0.5
               put sw
@@ -1691,12 +2025,12 @@ if (toupper("$game") = "DR") && ("$zoneid" = "62") then
               put go blockade
               pause 0.8
               pause 0.1
-              gosub MOVE 2
+              gosub AUTOMOVE 2
               gosub FERRYLOGIC
           }
-if (toupper("$game") = "DRF") && ("$zoneid" = "62") then
+if (matchre("$game", "(?i)DRF") && ("$zoneid" = "62")) then
           {
-              gosub MOVE 41
+              gosub AUTOMOVE 41
               put sw
               pause 0.5
               pause
@@ -1704,76 +2038,82 @@ if (toupper("$game") = "DRF") && ("$zoneid" = "62") then
               pause 0.5
               put s
               pause 0.5
-              gosub MOVE 2
+              gosub AUTOMOVE 2
               gosub FERRYLOGIC
           }
 FORD_2:
-if "$zoneid" = "65" then gosub MOVE 1
-if "$zoneid" = "68b" then gosub MOVE 44
-if "$zoneid" = "68a" then gosub MOVE 29
-if "$zoneid" = "68" && "$guild" = "Thief" then gosub MOVE 15
-if "$zoneid" = "68" && %shardcitizen = "yes" then
+if ("$zoneid" = "65") then gosub AUTOMOVE 1
+if ("$zoneid" = "68b") then gosub AUTOMOVE 44
+if ("$zoneid" = "68a") then gosub AUTOMOVE 29
+if (("$zoneid" = "68") && ("$guild" = "Thief")) then gosub AUTOMOVE 15
+if (("$zoneid" = "68") && matchre("%shardcitizen", "(?i)yes")) then
           {
-              gosub MOVE 1
-              gosub MOVE 129
+              gosub AUTOMOVE 1
+              gosub AUTOMOVE 129
           }
-if "$zoneid" = "68" && %shardcitizen = "no" then gosub MOVE 15
-if "$zoneid" = "67" && "$guild" = "Thief" then
+if (("$zoneid" = "68") && matchre("%shardcitizen", "(?i)no")) then gosub AUTOMOVE 15
+if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
+if (("$zoneid" = "67") && ("$guild" = "Thief")) then
           {
-              gosub MOVE 566
-              gosub MOVE 23
+              gosub AUTOMOVE 566
+              gosub AUTOMOVE 23
           }
-if "$zoneid" = "67a" then gosub MOVE STR
-if "$zoneid" = "67" then gosub MOVE 132
-if "$zoneid" = "66" then gosub MOVE 217
-if "$zoneid" = "69" then gosub MOVE 283
+if ("$zoneid" = "67a") then gosub AUTOMOVE STR
+if ("$zoneid" = "67") then gosub AUTOMOVE 132
+if ("$zoneid" = "66") then gosub AUTOMOVE 217
+if ("$zoneid" = "69") then gosub AUTOMOVE 283
 FORD_3:
-if "$zoneid" = "127" && matchre("(raven|outer|inner|ain)","%detour") then gosub MOVE 510
-if "$zoneid" = "126" && matchre("(raven|outer|inner|ain)","%detour") then gosub MOVE 49
-if "$zoneid" = "116" && matchre("(raven|ain)","%detour") then gosub MOVE 3
-if "$zoneid" = "123" && "%detour" = "ain" then
+if (("$zoneid" = "127") && matchre("%detour", "(raven|outer|inner|ain)")) then gosub AUTOMOVE 510
+if (("$zoneid" = "126") && matchre("%detour", "(raven|outer|inner|ain)")) then gosub AUTOMOVE 49
+if (("$zoneid" = "116") && matchre("%detour", "(raven|ain)")) then gosub AUTOMOVE 3
+if (("$zoneid" = "123") && ("%detour" = "ain")) then
           {
-              if %dokoras < 60 then goto NOCOIN
-              gosub MOVE 174
+              if (%dokoras < 120) then goto NOCOIN
+              gosub AUTOMOVE 174
               gosub FERRYLOGIC
           }
-if "$zoneid" = "123" && "%detour" = "raven" then
+if (("$zoneid" = "123") && ("%detour" = "raven")) then
           {
-              gosub MOVE 133
+              gosub AUTOMOVE 133
               goto ARRIVED
           }
-if "$zoneid" = "123" then gosub MOVE 169
-if "$zoneid" = "116" && "%detour" = "outer" then
+if ("$zoneid" = "123") then gosub AUTOMOVE 169
+if (("$zoneid" = "116") && ("%detour" = "outer")) then
           {
-              gosub MOVE 225
+              gosub AUTOMOVE 225
               goto ARRIVED
           }
-if "$zoneid" = "116" && "%detour" = "inner" then
+if (("$zoneid" = "116") && ("%detour" = "inner")) then
           {
-              gosub MOVE 96
+              gosub AUTOMOVE 96
               goto ARRIVED
           }
-if "$zoneid" = "113" && "$roomid" = "4" then
+if (("$zoneid" = "113") && ("$roomid" = "4")) then
           {
-              gosub MOVEIT west
+              gosub MOVE west
               waitforre ^Obvious
           }
-if "$zoneid" = "113" && "$roomid" = "8" then
+if (("$zoneid" = "113") && ("$roomid" = "8")) then
           {
-              gosub MOVEIT north
+              gosub MOVE north
           }
-if "$zoneid" = "114" && "%detour" = "ain" then gosub MOVE 34
-if "$zoneid" = "116" then gosub MOVE 217
-if "$zoneid" = "126" then gosub MOVE 103
-if "$zoneid" = "127" then gosub MOVE 24
+if (("$zoneid" = "114") && ("%detour" = "ain")) then gosub AUTOMOVE 34
+if ("$zoneid" = "116") then gosub AUTOMOVE 217
+if ("$zoneid" = "126") then gosub AUTOMOVE 103
+if ("$zoneid" = "127") then gosub AUTOMOVE 24
 goto ARRIVED
   
 AESRYBACK:
   pause 0.1
   pause 0.1
   var label AESRYBACK
-  if "$zoneid" = "98" then gosub MOVE 86
-  gosub MOVE 427
+  if ("$zoneid" = "98") then gosub AUTOMOVE 86
+  if (matchre("$game", "(?i)DRX") && (%portal = 1) && (%ported = 0)) then gosub PORTAL_TIME
+  if matchre("$game", "(?i)DRF") then goto AESRY_LONG
+  gosub AUTOMOVE 427
   gosub JOINLOGIC
   return
   
@@ -1781,36 +2121,49 @@ QITRAVEL:
   pause 0.1
   pause 0.1
   var label QITRAVEL
+  if (matchre("$game", "(?i)DRX") && (%portal = 1)) then
+     {
+          if (matchre("$zoneid", "\b(1|30|40|47|67|99|107|116)\b") && (%ported = 0)) then gosub PORTAL_TIME
+     }
   if !matchre("106|107|108","$zoneid") then goto therengia
-  if "$zoneid" = "108" && matchre("(merk|hara)","%detour") then 
+  if (("$zoneid" = "108") && matchre("%detour", "(merk|hara)")) then 
             {
-                gosub MOVE 151
+                gosub AUTOMOVE 151
+                if ("$roomid" != "151") then gosub AUTOMOVE 151
                 gosub FERRYLOGIC
             }
-  if "$zoneid" = "107" && "%detour" = "hara" then
+  if (("$zoneid" = "107") && ("%detour" = "hara")) then
             {
-                gosub MOVE 78
+                gosub AUTOMOVE 78
                 gosub FERRYLOGIC
-                gosub MOVE 173
+                gosub AUTOMOVE 173
             }
-  if "$zoneid" = "106" && matchre("(merk|mriss)","%detour") then
+  if (("$zoneid" = "106") && matchre("$game", "(?i)DRF")) then
             {
-                gosub MOVE 101
+                gosub AUTOMOVE 102
+                gosub JOINLOGIC
+                pause 
+                put #mapper reset
+                goto %label
+            }
+  if (("$zoneid" = "106") && matchre("%detour", "(merk|mriss)")) then
+            {
+                gosub AUTOMOVE 101
                 gosub FERRYLOGIC
             }
-  if "$zoneid" = "107" && "%detour" = "merk" then
+  if (("$zoneid" = "107") && ("%detour" = "merk")) then
             {
-                gosub MOVE 194
+                gosub AUTOMOVE 194
                 goto ARRIVED
             }
-  if "$zoneid" = "107" && "%detour" = "mriss" then
+  if (("$zoneid" = "107") && ("%detour" = "mriss")) then
             {
-                gosub MOVE 113
+                gosub AUTOMOVE 113
                 gosub FERRYLOGIC
             }
   if %tomainland then
             {
-                gosub move 222
+                gosub AUTOMOVE 222
                 var tomainland 0
                 var label %backuplabel
                 var detour %backupdetour
@@ -1819,16 +2172,16 @@ QITRAVEL:
                 put #mapper reset
                 goto %label
             }
-  if "$zoneid" = "108" && "%detour" = "mriss" then
+  if (("$zoneid" = "108") && ("%detour" = "mriss")) then
             {
-                gosub MOVE 150
+                gosub AUTOMOVE 150
                 goto ARRIVED
             }
 
 #####################################################################################
 ## ENGINE
 ARRIVED:
-     if_2 then gosub move %2 %3 %4
+     if_2 then gosub AUTOMOVE %2 %3 %4
      echo
      echo      |\          .(' *) ' .
      echo      | \        ' .*) .'*
@@ -1843,6 +2196,7 @@ ARRIVED:
      echo         (()
      echo          ))      
      echo
+     ## "
   put #parse YOU ARRIVED!
   put #parse REACHED YOUR DESTINATION
   # put #play Just Arrived.wav
@@ -1851,14 +2205,128 @@ ARRIVED:
   put #class arrive off
   exit
 ######################################################################################
+SEGOLTHA_NORTH:
+     pause 0.1
+     if matchre("$roomid", "\b(24|25|26|27|28|29|31|42|43|44|45|46)\b") then gosub AUTOMOVE 23
+     echo *** Swimming the Segoltha - Heading NORTH
+     if matchre("$roomid", "\b(7|6|5)\b") then 
+          {
+               gosub MOVE east
+               goto SEGOLTHA_NORTH
+          }
+    if matchre("$roomid", "\b(35|34|33|32)\b") then 
+          {
+               gosub AUTOMOVE 3
+               return
+          }
+    if matchre("$roomid", "\b(5|4|3|2|1)\b") then 
+          {
+               gosub AUTOMOVE crossing
+               return
+          }
+     if matchre("$roomid", "\b(7|6|5)\b") then 
+          {
+               gosub MOVE east
+               goto SEGOLTHA_NORTH
+          }
+    if ($north) then gosub MOVE north
+    goto SEGOLTHA_NORTH
+SEGOLTHA_SOUTH:
+     pause 0.1
+     if ("$zoneid" = "1") then gosub AUTOMOVE segoltha
+     echo *** Swimming the Segoltha - Heading SOUTH
+     if matchre("$roomid", "\b(1|2|3|4|5|6)\b") then 
+          {
+               gosub AUTOMOVE 7
+               goto SEGOLTHA_SOUTH
+          }
+    if (($roomid = 0) && ($south)) then
+          {
+               gosub MOVE south
+               goto SEGOLTHA_SOUTH
+          }
+    if ($south) then gosub MOVE south
+    if ((!$southwest) && (!$southeast) && (!$south)) then
+          {
+               gosub AUTOMOVE south
+               return
+          }
+    goto SEGOLTHA_SOUTH
+FALDESU_NORTH:
+    echo *** Swimming the Faldesu - Heading NORTH 
+    gosub MoveAllTheWay north
+    if ($northwest) then
+         {
+             gosub MOVE northwest
+             gosub MoveAllTheWay northeast
+         }
+    if ((!$northwest) && (!$northeast) && (!$north)) then
+         {
+              gosub Move climb stone bridge
+              return
+         }
+    goto FALDESU_NORTH
+FALDESU_SOUTH:
+    echo *** Swimming the Faldesu - Heading SOUTH
+    if ($south) then
+         {
+             gosub MOVE south
+             pause 0.1
+             goto FALDESU_SOUTH
+         }
+    if ($southwest) then
+         {
+             gosub Move southwest
+             gosub MoveAllTheWay southeast
+         }
+    if ((!$southwest) && (!$southeast) && (!$south)) then
+         {
+              gosub Move climb stone bridge
+              return
+         }
+    goto FALDESU_SOUTH
+MoveAllTheWay:
+    # Keeps moving in a direction until it is no longer a portal option
+    var direction $1
+MovingAllTheWay:
+    if $%direction then gosub Move %direction
+    pause .1
+    if $%direction then goto MovingAllTheWay
+    return
+PASSPORTCHECK:
+  pause 0.2
+  put get my passport
+  pause 2
+  if !matchre("$righthand $lefthand", "passport") then var passport 0
+  if matchre("$righthand $lefthand", "passport") then var passport 1
+  put stow passport
+  pause 0.4
+  return
 FERRYLOGIC:
   if contains("(1|7|30|35|60|40|41|47|113|106|107|108|150)","$zoneid" then goto FERRY
-  if "$zoneid" = "66" then
+  if matchre ("$roomname","Aboard the Mammoth") then goto FERRY
+  if matchre("$roomname", "Gondola") then
+     {
+         if matchre("%destination", "\b(acen?e?m?a?c?r?a?|cros?s?i?n?g?s?|xing?|knif?e?c?l?a?n?|tige?r?c?l?a?n?|dirg?e?|arth?e?d?a?l?e?|kaer?n?a?|ilay?a?t?a?i?p?|illa?y?a?t?a?i?p?a?|taipa|leth?d?e?r?i?e?l?|acen?a?m?a?c?r?a?|vipe?r?s?|guar?d?i?a?n?s?|leuc?r?o?s?|malod?o?r?o?u?s?|bucc?a?|dokt?|sorr?o?w?s?|misens?e?o?r?|beis?s?w?u?r?m?s?|ston?e?c?l?a?n?|bone?w?o?l?f?|germ?i?s?h?d?i?n?|alfr?e?n?s?|cara?v?a?n?s?a?r?y?|rive?r?h?a?v?e?n?|have?n?|ross?m?a?n?s?|ther?e?n?b?o?r?o?u?g?h?|lang?e?n?f?i?r?t?h?|el\'?b?a?i?n?s?|elb?a?i?n?s?|raka?s?h?|thro?n?e?|musp?a?r?i?|forn?s?t?e?d?|hvar?a?l?|zaul?f?u?n?g?|mri?s?s?|merk?r?e?s?h?|kre?s?h?|har?a?j?a?a?l?|rath?a?)\b") then
+          {
+               echo *** ON GONDOLA! - HEADING NORTH
+               var direction north
+               goto ONGONDOLA
+          }
+         if matchre("%destination", "\b(shar?d?|grani?t?e?|garg?o?y?l?e?|spir?e?|horse?c?l?a?n?|fayr?i?n?s?|steel?c?l?a?w?|cori?k?s?|ada?n?f?|ylo?n?o?|wyve?r?n?|aing?h?a?z?a?l?|rave?n?s?|hib?a?r?n?h?v?i?d?a?r?|out?e?r?|inne?r?|boar?c?l?a?n?|aes?r?y?|sur?l?a?e?n?i?s?|fan?g?|cov?e?)\b") then
+          {
+               echo *** ON GONDOLA! - HEADING SOUTH
+               var direction south
+               goto ONGONDOLA
+          }
+        if matchre("%destination", "\bgondola?\b") then goto ARRIVED
+     }
+  if ("$zoneid" = "66") then
         {
             var direction north
             goto GONDOLA
         }
-  if "$zoneid" = "62" then
+  if ("$zoneid" = "62") then
         {
             var direction south
             goto GONDOLA
@@ -1866,25 +2334,42 @@ FERRYLOGIC:
   else goto NODESTINATION
 GONDOLA:
   pause 0.1
+  if matchre("$roomname", "Gondola") then goto ONGONDOLA
   pause 0.1
   send look
   pause 2
   matchre ONGONDOLA \[Gondola\,
+  echo *** Waiting for Gondola to arrive
   if matchre ("$roomobjs","gondola") then send go gondola
-  matchwait 2
-  pause 7
+  matchwait 5
+  if matchre ("$roomobjs","gondola") then send go gondola
+  pause 2
+  if matchre ("$roomobjs","gondola") then send go gondola
+  pause 2
+  if matchre ("$roomobjs","gondola") then send go gondola
+  pause 2
   goto GONDOLA
 ONGONDOLA:
   pause
   pause
-  if "%direction" = "north" then gosub MOVEIT north
-  else gosub MOVEIT south
+  if ("%direction" = "north") && ($north = 1) then gosub MOVE north
+  if ("%direction" = "south") && ($south = 1) then gosub MOVE south
 GONDOLAWAIT:
   pause
+  if ($out) then goto GONDOLAOUT
   waitforre ^With a soft
-  gosub MOVEIT out
+  if ($standing = 0) then gosub STAND
+GONDOLAOUT:
+  if ("%direction" = "north") && ($north = 1) then gosub MOVE north
+  if ("%direction" = "south") && ($south = 1) then gosub MOVE south
+  put look
+  pause 0.8
+  if ($out = 0) then goto GONDOLAWAIT
+  gosub MOVE out
   pause
   put #mapper reset
+  pause 0.2
+  pause 0.2
   return
 STOP_INVIS:
      delay 0.001
@@ -1908,7 +2393,9 @@ FERRY:
   pause 0.1
   if ($invisible) then goto STOP_INVIS
   pause 0.1
-  matchre ONFERRY \[\"Her Opulence\"\]|\[\"Hodierna\'s Grace\"\]|\[\"Kertigen\'s Honor\"\]|\[\"His Daring Exploit\"\]|\[\"Northern Pride\"\, Main Deck\]|\[\"Theren\'s Star\"\, Deck\]|\[The Evening Star\]|\[The Damaris\' Kiss\]|\[A Birch Skiff\]|\[A Highly Polished Skiff\]|\[\"The Desert Wind\"\]|\[\"The Suncatcher\"\]|\[\"The Riverhawk\"\]|\[\"Imperial Glory\"\]\"Hodierna\'s Grace\"|\"Her Opulence\"\]|\[The Galley Cercorim\]|\[The Jolas\, Fore Deck\]|\[Aboard the Warship\, Gondola\]
+  matchre ONFERRY \[\"Her Opulence\"\]|\[\"Hodierna\'s Grace\"\]|\[\"Kertigen\'s Honor\"\]|\[\"His Daring Exploit\"\]|\[\"Northern Pride\"\, Main Deck\]|\[\"Theren\'s Star\"\, Deck\]|\[The Evening Star\]|\[The Damaris\' Kiss\]|\[A Birch Skiff\]|\[A Highly Polished Skiff\]|\[\"The Desert Wind\"\]|\[\"The Suncatcher\"\]|\[\"The Riverhawk\"\]|\[\"Imperial Glory\"\]\"Hodierna\'s Grace\"|\"Her Opulence\"\]|\[The Galley Cercorim\]|\[The Jolas\, Fore Deck\]|\[Aboard the Warship\, Gondola\]|\[The Halasa Selhin\, Main Deck\]|\[Aboard the Mammoth\, Platform\]
+  matchre ONFERRY Secured to the gigantic balloon overhead\, the armored ironwood gondola dangles on a convoluted network of hempen rope\.
+  matchre ONFERRY ^One of the barge\'s crew members stops you and requests a transportation fee|A row of benches occupies the deck
   matchre ONFERRY Long\, wide and low\, this vessel is built for utility\, but the hand of luxury can be discerned in the ornately carved walnut railings\, down-cushioned benches and the well polished deck
   matchre ONFERRY ^A few weary travelers lean against a railing at the bow of this ferry\, anxiously waiting to reach the opposite bank\.
   matchre ONFERRY ^The ferry rocks gently as you step aboard\. Surrounded by the cool\, briny air of the Segoltha\, you take your place on the deserted deck and gaze up into the night sky\.
@@ -1935,9 +2422,12 @@ FERRY:
   matchre ONFERRY ^The length of this ferry is filled to capacity with travelers making their way to the opposite bank of the Segoltha
   matchre ONFERRY ^A few weary travelers lean against a railing at the bow of this ferry
   matchre ONFERRY ^Passengers and cargo crowd the deck of the sleek\, black galley\.|^The galley\, like its twin\, carries passengers and cargo\,|^Grease spewed from the galley
+  matchre ONFERRY ^The Selhin ties off to the Uaro Dock\!
   matchre STOP_INVIS ^How do you expect the barge crew to let you onboard if they can't see you\?
   send look
   pause 0.5
+  pause 0.2
+  if matchre ("$roomobjs","Gnomish warship") then send join warship
   if matchre ("$roomobjs","Riverhawk") then send go riverhawk
   if matchre ("$roomobjs","Imperial") then send go imperial glory
   if matchre ("$roomobjs","Star") then send go ferry
@@ -1947,9 +2437,31 @@ FERRY:
   if matchre ("$roomobjs","barge") then send go barge
   if matchre ("$roomobjs","galley") then send go galley
   if matchre ("$roomobjs","Jolas") then send go jolas
+  if matchre ("$roomobjs","Selhin") then send go selhin
   if matchre ("$roomobjs","warship") then send join warship
   matchwait 5
-  pause 15
+  if matchre ("$roomname","Aboard the Mammoth") then goto ONFERRY
+  if matchre ("$roomname","Imperial") then goto ONFERRY
+  if matchre ("$roomname","Kertigen") then goto ONFERRY
+  if matchre ("$roomname","Hodierna") then goto ONFERRY
+  if matchre ("$roomname","Opulence") then goto ONFERRY
+  if matchre ("$roomname","Daring") then goto ONFERRY
+  if matchre ("$roomname","Northern Pride") then goto ONFERRY
+  if matchre ("$roomname","Theren\'s Star") then goto ONFERRY
+  if matchre ("$roomname","Damaris") then goto ONFERRY
+  if matchre ("$roomname","Evening Star") then goto ONFERRY
+  if matchre ("$roomname","Birch Skiff") then goto ONFERRY
+  if matchre ("$roomname","Polished Skiff") then goto ONFERRY
+  if matchre ("$roomname","Desert Wind") then goto ONFERRY
+  if matchre ("$roomname","Suncatcher") then goto ONFERRY
+  if matchre ("$roomname","Riverhawk") then goto ONFERRY
+  if matchre ("$roomname","Imperial Glory") then goto ONFERRY
+  if matchre ("$roomname","Galley Cercorim") then goto ONFERRY
+  if matchre ("$roomname","Jolas") then goto ONFERRY
+  if matchre ("$roomname","Aboard the Warship") then goto ONFERRY
+  if matchre ("$roomname","Halasa Selhin") then goto ONFERRY
+  if ($hidden = 0) then put hide
+  pause 10
   echo ### Waiting for a transport..
   goto FERRY
 ONFERRY:
@@ -1958,14 +2470,23 @@ ONFERRY:
   echo
   echo ### Riding on public transport. Final Destination: %destination
   echo
-  if matchre ("$roomname","Jolas" then goto shiploop
+  send hide
+  pause
+  if matchre("$roomobjs","the beach") && matchre("%destination", "\bratha?") then goto OFFTHERIDE
+  if matchre("$roomobjs","a ladder") && !matchre("%destination", "\bratha?") then goto OFFTHERIDE
+  if ("$guild" = "Necromancer") then
+     {
+          if (($spellROC = 0) || ($spellEOTB = 0)) then gosub NECRO_PREP
+     }
+  if matchre ("$roomname","(Jolas|Selhin)") then goto shiploop
   matchre OFFTHERIDE dock and its crew ties the (ferry|barge) off\.|^You come to a very soft stop|^The skiff lightly taps|^The sand barge pulls into dock|^The barge pulls into dock|The crew ties it off and runs out the gangplank\.
-  matchre OFFTHERIDE ^The warship lands with a creaky lurch
+  matchre OFFTHERIDE ^The warship lands with a creaky lurch|^The captain barks the order to tie off .+ to the docks\.|returning to Fang Cove|returning to Ratha
   matchwait
   
 SHIPLOOP:
   pause 0.1
   pause 0.1
+  matchre OFFTHERIDE ^The captain barks the order to tie off the Selhin to the docks\.
   matchre OFFTHERIDE ^The captain barks the order to tie off the Jolas to the docks\.
   matchwait 180
   put fatigue
@@ -1973,16 +2494,35 @@ SHIPLOOP:
   
 OFFTHERIDE:
   put look
-  pause
+  pause 0.5
+  if ($hidden = 1) then 
+     {
+          put unhide
+          pause 0.4
+     }
+  if ("$guild" = "Necromancer") then
+     {
+          if (($spellROC = 0) || ($spellEOTB = 0)) then gosub NECRO_PREP
+     }
   pause 0.1
-  if matchre ("$roomname","Jolas") then
+  pause 0.1
+  if matchre("$roomname", "Rocky Path") then
+     {
+          put go beach
+          pause 0.1
+          return
+     }
+  pause 0.2
+  if matchre("$roomname","Jolas") then
     {
-        if matchre ("$roomobjs","Sumilo") then put go dock
-        if matchre ("$roomobjs","Wharf") then put go end
+        pause 0.1
+        if matchre("$roomobjs","Sumilo") then put go dock
+        if matchre("$roomobjs","Wharf") then put go end
         pause
         put #mapper reset
         return
     }
+  if ($standing = 0) then gosub STAND
   put go %offtransport
   pause
   put #mapper reset
@@ -1991,40 +2531,76 @@ OFFTHERIDE:
 JOINLOGIC:
   pause 0.1
   pause 0.1
-  matchre ONJOINED ^\[Aboard the Dirigible\, Gondola\]|^\[Alongside a Wizened Ranger\]|^An intricate network of silken rope|^\[Aboard the Balloon\, Gondola\]|^A veritable spiderweb of ropes secures|^Thick\, barnacle\-encrusted ropes secure the platform to the|\[Aboard the Mammoth\, Platform\]|\[The Bardess\' Fete\, Deck\]|^Silken rigging suspends the sweeping teak|\[Aboard the Warship\, Gondola\]
   put look
-  wait
-  pause
+  matchre ONJOINED ^\[Aboard the Dirigible\, Gondola\]|^\[Alongside a Wizened Ranger\]|^An intricate network of silken rope|^\[Aboard the Balloon\, Gondola\]|^A veritable spiderweb of ropes secures|^Thick\, barnacle\-encrusted ropes secure the platform to the|\[Aboard the Mammoth\, Platform\]|\[The Bardess' Fete\, Deck\]|^Silken rigging suspends the sweeping teak|\[Aboard the Warship\, Gondola\]
+  pause 0.3
+  pause 0.2
+  if matchre("$roomobjs $roomname", "(^\[Aboard the Dirigible\, Gondola\]|^\[Alongside a Wizened Ranger\]|^An intricate network of silken rope|^\[Aboard the Balloon\, Gondola\]|^A veritable spiderweb of ropes secures|^Thick\, barnacle\-encrusted ropes secure the platform to the|\[Aboard the Mammoth\, Platform\]|\[The Bardess' Fete\, Deck\]|^Silken rigging suspends the sweeping teak|\[Aboard the Warship\, Gondola\])") then goto ONJOINED
+  if matchre("$roomobjs","warship") then send join warship
   if matchre("$roomobjs","airship") then put join airship
   if matchre("$roomobjs","dirigible") then put join dirigible;join dirigible
   if matchre("$roomobjs","balloon") then put join balloon;join balloon
   if matchre("$roomobjs","wizened ranger") then put join wizened ranger;join wizened ranger
-  if "$zoneid" = "58" && matchre ("$roomobjs","tall sea mammoth") then put join tall mammoth
-  if "$zoneid" = "90" && matchre ("$roomobjs","massive sea mammoth") then put join sea mammoth
-  if "$zoneid" = "150" then
+  if (("$zoneid" = "58") && matchre("$roomobjs","tall sea mammoth")) then put join tall mammoth
+  if (("$zoneid" = "90") && matchre("$roomobjs","massive sea mammoth")) then put join sea mammoth
+  if ("$zoneid" = "150") then
         {
-            if "%detour" = "fang" then goto ARRIVED
+            if ("%detour" = "fang") then goto ARRIVED
             if %toratha = 1 && matchre ("$roomobjs","massive sea mammoth") then put join sea mammoth
             if %toratha = 0 && matchre ("$roomobjs","tall sea mammoth") then put join tall mammoth
             if "%detour" = "hara" && matchre ("$roomobjs","warship") then put join warship
         }
-  matchwait 5
+  matchwait 3
   echo ### Waiting for a transport..
-  pause 20
+  pause 15
   goto joinlogic
   
 ONJOINED:
   pause 0.1
   pause 0.1
-  matchre OFFJOINED ^The grasses of this wide clearing|^From its northwest\-facing position|^A deep firepit has been hacked into the frozen earth|^The distance between the surrounding hills is narrower|^The ironwood platform has withstood|^A rickety platform in the top of this huge\,|^Beyond the harbor\, spray is thrown|^Giant boulders are scattered|^Crudely assembled yet sturdy just the|\[Fang Cove\, Dock\]|\[Smuggler\'s Wharf\]|\[Outside Muspar\'i\]|\[Northeast Wilds\, Grimsage Way\]|^The once pristine tower of the Warrior Mages
+  echo ### Riding on Transport!
+  pause 0.1
+  matchre OFFJOINED ^The grasses of this wide clearing|^From its northwest\-facing position|^A deep firepit has been hacked into the frozen earth|^The distance between the surrounding hills is narrower|^The ironwood platform has withstood|^A rickety platform in the top of this huge\,|^Beyond the harbor\, spray is thrown|^Giant boulders are scattered|^Crudely assembled yet sturdy just the|\[Fang Cove\, Dock\]|\[Smuggler\'s Wharf\]|\[Outside Muspar\'i\]|\[Northeast Wilds\, Grimsage Way\]|^The once pristine tower of the Warrior Mages|returning to Fang Cove|returning to Ratha
   matchwait
 OFFJOINED:
   put look
   wait
+  if matchre("$roomname", "Rocky Path") then put go beach
   pause
   put #mapper reset
   return
+ 
+PASSPORT_CHECK: 
+  pause 0.3
+  matchre YES_PASSPORT ^You tap
+  matchre NO_PASSPORT ^What were you|^I could not
+  send tap my passport
+  matchwait 5
+NO_PASSPORT:
+  var passport 0
+  return
+YES_PASSPORT:
+  var passport 1
+  return
   
+GET_PASSPORT:
+    echo ===============
+    echo ** NO PASSPORT FOUND
+    echo ** GOING TO GET ONE
+    echo ===============
+    if ("$zoneid" = "40") then gosub AUTOMOVE theren
+    pause 0.2
+    gosub AUTOMOVE passport
+    pause 0.5
+    pause 0.2
+    put ask lic for passport
+    pause 0.5
+    put ask lic for passport
+    pause 0.5
+    gosub STOWING
+    gosub AUTOMOVE gate
+    return
+    
 PASSPORT:
   gosub STOWING
   pause 0.3
@@ -2043,61 +2619,85 @@ NOCOIN:
   pause 0.5
   put wealth
   pause
-  if "$zoneid" = "1" then
+  if ($invisible = 1) then gosub stopinvis
+  if ("$zoneid" = "1") then
         {
             var currencyneeded kro
-            gosub MOVE exchange
-            gosub KRONARS
-            if %kronars >= 52 then goto COIN.CONTINUE
-            gosub MOVE teller
-            put withdraw 60 copper
+            if (%kronars < 120) then
+               {
+                    gosub AUTOMOVE exchange
+                    gosub KRONARS
+               }
+            if (%kronars >= 120) then goto COIN.CONTINUE
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
+            put withdraw 120 copper
             wait
         }
-  if "$zoneid" = "60" then gosub MOVE leth
-  if "$zoneid" = "61" then
+  if ("$zoneid" = "60") then gosub AUTOMOVE leth
+  if ("$zoneid" = "61") then
         {
             var currencyneeded kro
-            gosub MOVE 57
-            gosub MOVE exchange
-            gosub KRONARS
-            if %kronars >= 52 then goto COIN.CONTINUE
-            gosub MOVE teller
-            put withdraw 60 copper
+            gosub AUTOMOVE 57
+            if (%kronars < 120) then
+               {
+                    gosub AUTOMOVE exchange
+                    gosub KRONARS
+               }
+            if (%kronars >= 120) then goto COIN.CONTINUE
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
+            put withdraw 120 copper
             wait
         }
-   if "$zoneid" = "30" then
+   if ("$zoneid" = "30") then
         {
             var currencyneeded lir
-            gosub MOVE exchange
-            gosub LIRUMS
-            if %lirums >= 70 then goto COIN.CONTINUE
-            gosub MOVE teller
-            put withdraw 70 copper
+            if (%lirums < 140) then
+               {
+                    gosub AUTOMOVE exchange
+                    gosub LIRUMS
+               }
+            if (%lirums >= 140) then goto COIN.CONTINUE
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
+            put withdraw 140 copper
             wait
         }
-   if "$zoneid" = "7" then
+   if ("$zoneid" = "7") then
         {
             var currencyneeded lir
-            gosub MOVE 349
-            gosub MOVE exchange
-            gosub LIRUMS
-            if %lirums >= 70 then goto COIN.CONTINUE
-            gosub MOVE teller
-            put withdraw 100 copper
+            gosub AUTOMOVE 349
+            if (%lirums < 200) then
+               {
+                    gosub AUTOMOVE exchange
+                    gosub LIRUMS
+               }
+            if (%lirums >= 200) then goto COIN.CONTINUE
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
+            put withdraw 200 copper
             wait
-            gosub MOVE exchange
-            put exchange 100 copper kronars for lirums
+            pause 0.2
+            gosub AUTOMOVE exchange
+            pause 0.2
+            put exchange 200 copper kronar for lirum
             wait
+            pause 0.2
         }
-    if "$zoneid" = "40" then
+    if ("$zoneid" = "40") then
         {
             var currencyneeded lirtoboar
-            gosub MOVE 211
-            gosub MOVE exchange
-            gosub LIRUMS
-            if %lirums >= %boarneeded then goto COIN.CONTINUE
-            gosub MOVE teller
-            if matchre ("(mriss|merk|hara)","%detour") then 
+            gosub AUTOMOVE 211
+            if (%lirums < %boarneeded) then
+               {
+                    gosub AUTOMOVE exchange
+                    gosub LIRUMS
+               }
+            gosub AUTOMOVE teller
+            if (%lirums >= %boarneeded) then goto COIN.CONTINUE
+            if ($invisible = 1) then gosub stopinvis                                        
+            if matchre ("%detour", "(mriss|merk|hara)") then 
                 {
                     var currencyneeded qi
                     put withdraw 10 gold
@@ -2105,71 +2705,115 @@ NOCOIN:
             else put withdraw %boarneeded copper
             wait
         }
-    if "$zoneid" = "113" && "$roomid" = "4" then gosub MOVE 10
-    if "$zoneid" = "113" && "$roomid" = "9" then gosub MOVE 8
-    if "$zoneid" = "114" then
+    if (("$zoneid" = "113") && ("$roomid" = "4")) then gosub AUTOMOVE 10
+    if (("$zoneid" = "113") && ("$roomid" = "9")) then gosub AUTOMOVE 8
+    if ("$zoneid" = "114") then
         {
             var currencyneeded dok
-            gosub MOVE exchange
-            gosub DOKORAS
-            if %dokoras > 60 then goto COIN.CONTINUE
-            gosub MOVE teller
-            put withdraw 60 copper
+            if (%dokoras < 120) then
+               {
+                    gosub AUTOMOVE exchange
+                    gosub DOKORAS
+               }
+            if (%dokoras > 120) then goto COIN.CONTINUE
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
+            put withdraw 120 copper
             wait
         }
-    if "$zoneid" = "113" && "$roomid" = "6" then gosub MOVE 7
-    if "$zoneid" = "123" then gosub MOVE hibar
-    if (("$zoneid" = "116") && matchre("(rossman|lang|theren|rakash|muspari|fornsted|el'bain|mriss|merk|hara)","%detour")) then
+    if (("$zoneid" = "113") && ("$roomid" = "6")) then gosub AUTOMOVE 7
+    if ("$zoneid" = "123") then gosub AUTOMOVE hibar
+    if (("$zoneid" = "116") && matchre("%detour", "(rossman|lang|theren|rakash|muspari|fornsted|el'bain|mriss|merk|hara)")) then
         {
             var currencyneeded doktotheren
-            gosub MOVE exchange
-            gosub DOKORAS
-            if  %dokoras > %therencoin then goto COIN.CONTINUE
-            gosub MOVE teller
+            if (%dokoras < %therencoin) then
+               {
+                    gosub AUTOMOVE exchange
+                    gosub DOKORAS
+               }
+            if (%dokoras > %therencoin) then goto COIN.CONTINUE
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
 		  put withdraw %therencoin copper
             wait
         }
-	if (("$zoneid" = "116") && !matchre("(rossman|lang|theren|rakash|muspari|fornsted|el'bain|mriss|merk|hara)","%detour")) then
+	if (("$zoneid" = "116") && !matchre("%detour", "(rossman|lang|theren|rakash|muspari|fornsted|el'bain|mriss|merk|hara)")) then
         {
             var currencyneeded dok
-            gosub MOVE exchange
-            gosub DOKORAS
-            if %dokoras > 60 then goto COIN.CONTINUE
-            gosub MOVE teller
-            put withdraw 60 copper
+            if (%dokoras < 120) then
+               {
+                    gosub AUTOMOVE exchange
+                    gosub DOKORAS
+               }
+            if (%dokoras > 120) then goto COIN.CONTINUE
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
+            put withdraw 120 copper
             wait
         }
-     if "$zoneid" = "113" && "$roomid" = "1" then gosub MOVE 5
-     if "$zoneid" = "112" then
+     if (("$zoneid" = "113") && ("$roomid" = "1")) then gosub AUTOMOVE 5
+     if ("$zoneid" = "112") then
         {
             var currencyneeded dok
-            gosub MOVE exchange
-            gosub DOKORAS
-            if %dokoras > 60 then goto COIN.CONTINUE
-            gosub MOVE teller
-            put withdraw 60 copper
+            if (%dokoras < 120) then
+               {
+                    gosub AUTOMOVE exchange
+                    gosub DOKORAS
+               }
+            if (%dokoras > 120) then goto COIN.CONTINUE
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
+            put withdraw 120 copper
             wait
         }
-    if "$zoneid" = "67" && "%detour" = "aesry" then
+    if (("$zoneid" = "67") && ("%detour" = "aesry")) then
         {
             var currencyneeded aesry
-            gosub MOVE teller
-            put withdraw 10 gold
-            wait
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
+            if matchre("$game", "(?i)DR") then put withdraw 10 gold
+            if matchre("$game", "(?i)DRF") then 
+               {
+                    var currencyneeded lir
+                    put withdraw 5 silver
+                    wait
+                    gosub AUTOMOVE exchange
+                    put exchange all dok to lirum
+               }
+            pause
         }
-    if "$zoneid" = "99" then
+	if (("$zoneid" = "67") && !matchre("(rossman|lang|theren|rakash|muspari|fornsted|el'bain|mriss|merk|hara|cross|river|haven|arthe|kaerna|stone|sorrow|throne|hvaral)","%detour")) then
+        {
+            var currencyneeded kro
+            gosub AUTOMOVE exchange
+            gosub DOKORAS
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
+            put withdraw 300 copper
+            wait
+            gosub AUTOMOVE exchange
+            pause 0.3
+            put exchang 50 copper dok to kro
+            wait
+            pause 0.5
+            if matchre("(rossman|lang|theren|rakash|muspari|fornsted|el'bain|mriss|merk|hara|river|haven|arthe|kaerna|stone|sorrow|throne|hvaral)","%detour") then put exchang 250 copper dok to lir
+            pause 0.5
+        }
+    if ("$zoneid" = "99") then
         {
             var currencyneeded aesryback
-            gosub MOVE teller
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
             put withdraw 10 gold
         }
-    if "$zoneid" = "107" then
+    if ("$zoneid" = "107") then
         {
             var currencyneeded lir
-            gosub MOVE teller
-            put withdraw 70 copper
+            gosub AUTOMOVE teller
+            if ($invisible = 1) then gosub stopinvis                                        
+            put withdraw 140 copper
         }
-    if "$zoneid" = "108" then
+    if ("$zoneid" = "108") then
         {
             ECHO ## YOU ARE ON MRISS WITH NO COINS!  YOU NEED TO FIND A FRIEND, OR KILL STUFF TO SELL HIDES OR GEMS!
             exit
@@ -2177,14 +2821,14 @@ NOCOIN:
     put wealth
     waitforre Dokoras
     pause 0.5
-    if "%currencyneeded" = "kro" && %kronars < 50 then goto COINQUIT
-    if "%currencyneeded" = "lirtoboar" && %lirums < %boarneeded then goto COINQUIT
-    if "%currencyneeded" = "lir" && %lirums < 70 then goto COINQUIT
-    if "%currencyneeded" = "dok" && %dokoras < 60 then goto COINQUIT
-	if "%currencyneeded" = "doktotheren" && %dokoras < %therencoin then goto COINQUIT
-    if "%currencyneeded" = "aesry" && %dokoras < 10000 then goto COINQUIT
-    if "%currencyneeded" = "aesryback" && %lirums < 10000 then goto COINQUIT
-    if "%currencyneeded" = "qi" && %lirums < 10000 then goto COINQUIT
+    if (("%currencyneeded" = "kro") && (%kronars < 50)) then goto COINQUIT
+    if (("%currencyneeded" = "lirtoboar") && (%lirums < %boarneeded)) then goto COINQUIT
+    if (("%currencyneeded" = "lir") && (%lirums < 70)) then goto COINQUIT
+    if (("%currencyneeded" = "dok") && (%dokoras < 60)) then goto COINQUIT
+    if (("%currencyneeded" = "doktotheren") && (%dokoras < %therencoin)) then goto COINQUIT
+    if (("%currencyneeded" = "aesry") && (%dokoras < 10000)) then goto COINQUIT
+    if (("%currencyneeded" = "aesryback") && (%lirums < 10000)) then goto COINQUIT
+    if (("%currencyneeded" = "qi") && (%lirums < 10000)) then goto COINQUIT
     put #echo >Log Green You withdrew some money to ride the ferry from Zone $zonename!
     ECHO YOU HAD MONEY IN THE BANK, LET'S TRY THIS AGAIN!
     pause
@@ -2252,19 +2896,441 @@ EXCHANGE.FINISH:
      pause 0.5
      RETURN
 EXCH.INVIS:
-     pause 0.1
-     send hum scale
-     pause 0.5
-     send stop hum
-     pause 0.1
+     delay 0.001
+     echo *** Removing Invis..
+     if ("$guild" = "Necromancer") then
+          {
+               gosub PUT release eotb
+               pause 0.3
+          }
+     if ("$guild" = "Thief") then
+          {
+               gosub PUT khri stop silence vanish
+               pause 0.3
+          }
+     if ("$guild" = "Moon Mage") then
+          {
+               gosub PUT release rf
+               pause 0.3
+          }
+     pause 0.3
      goto EXCHANGE.CONTINUE
+     
+TO_SEACAVE:
+TO_SEACAVES:
+     if ("$zoneid" = "67") then gosub AUTOMOVE east
+     if ("$zoneid" = "127") then gosub AUTOMOVE south
+     if ("$zoneid" = "124") then gosub AUTOMOVE hib
+     if ("$zoneid" = "112") then gosub AUTOMOVE leth
+     if ("$zoneid" = "4") then gosub AUTOMOVE cross
+     if ("$zoneid" = "7") then gosub AUTOMOVE cross
+     if ("$zoneid" = "67") then gosub AUTOMOVE east
+     if ("$zoneid" = "42") then gosub AUTOMOVE gate
+     pause 0.1
+     gosub AUTOMOVE portal
+     pause 0.5
+     if ($invisible = 1) then gosub STOP.INVIS
+     if ($invisible = 1) then gosub STOP.INVIS
+     pause 0.2
+     send go meeting portal
+     pause 0.5
+     pause 0.2
+     return
+     
+STOP.INVIS:
+     delay 0.001
+     echo *** Removing Invis..
+     if ("$guild" = "Necromancer") then
+          {
+               gosub PUT release eotb
+               pause 0.3
+          }
+     if ("$guild" = "Thief") then
+          {
+               gosub PUT khri stop silence vanish
+               pause 0.3
+          }
+     if ("$guild" = "Moon Mage") then
+          {
+               gosub PUT release rf
+               pause 0.3
+          }
+     pause 0.3
+     return
     
+PREMIUM_CHECK:
+     matchre PREMIUM_NO ^You are not currently a Premium
+     matchre PREMIUM_YES ^Your premium service has been continuous
+     matchre PRETRAININGLOOP ^You need to concentrate
+     put ltb info
+     matchwait 5
+     goto PREMIUM_NO
+PREMIUM_NO:
+     var premium 0
+     return
+PREMIUM_YES:
+     var premium 1
+     echo *** PREMIUM ACCOUNT ENABLED
+     pause 0.2
+     if !matchre("$game", "DRX") then return
+PREMIUM_TIME:
+     var premtime 0
+     matchre PREMIUM_SET ^You have a cumulative Premium time of (\d+) months\.
+     matchre PREMIUM_SET ^You have a cumulative Platinum time of (\d+) months\.
+     put prem 10
+     matchwait 5
+     return
+PREMIUM_SET:
+     var premtime $1
+     pause 0.1
+     if (%premtime >= 6) then
+          {
+               var portal 1
+               if matchre("$game", "DRX") then echo *** Using Plat Portals!
+          }
+     return
+
+###########################################################################################################
+## Plat Portals
+#########################################################
+PORTAL_TIME:
+     echo ========================
+     echo ** USING PLAT PORTALS TO TRAVEL!
+     echo ** Starting ZoneID:$zoneid RoomID:$roomid
+     echo ========================
+     pause 0.5
+## CROSS PORTAL ENTRANCE Zone 1 Room 484
+CROSS_PORTAL:
+     if ("$zoneid" = "1") then
+          {
+               if matchre("%destination", "cross?i?n?g?s?") then return
+               if matchre("%destination", "\b(knif?e?c?l?a?n?|tige?r?c?l?a?n?|dirg?e?|arth?e?d?a?l?e?|kaer?n?a?|ilay?a?t?a?i?p?|illa?y?a?t?a?i?p?a?|taipa|leth?d?e?r?i?e?l?|acen?a?m?a?c?r?a?|vipe?r?s?|guar?d?i?a?n?s?|leuc?r?o?s?|malod?o?r?o?u?s?|bucc?a?|dokt?|sorr?o?w?s?|misens?e?o?r?|beis?s?w?u?r?m?s?|ston?e?c?l?a?n?|bone?w?o?l?f?|germ?i?s?h?d?i?n?|alfr?e?n?s?|cara?v?a?n?s?a?r?y?)\b") then return
+               pause 0.3
+               if ($roomid != 484) then gosub AUTOMOVE 484
+               if ($roomid != 484) then goto CROSS_PORTAL
+               pause 0.2
+               var ported 1
+               put go portal
+               wait
+               pause 0.4
+               pause 0.1
+               put #mapper reset
+               pause 0.4
+               if ($roomid = 0) then gosub MOVERANDOM
+               if ($roomid = 0) then gosub MOVERANDOM
+               if matchre("%destination", "aesr?y?") then goto ARRIVED
+          }
+## AESRY PORTAL ENTRANCE Zone 99 Room 115
+AESRY_PORTAL:
+     if ("$zoneid" = "99") then
+          {
+               if matchre("%destination", "aesr?y?") then return
+               pause 0.3
+               if ($roomid != 115) then gosub AUTOMOVE 115
+               if ($roomid != 115) then goto AESRY_PORTAL
+               pause 0.2
+               var ported 1
+               put go portal
+               wait
+               pause 0.4
+               pause 0.1
+               put #mapper reset
+               pause 0.2
+               if ($roomid = 0) then gosub MOVERANDOM
+               if ($roomid = 0) then gosub MOVERANDOM
+               if matchre("%destination", "shard?") then goto ARRIVED
+               if matchre("%destination", "\b(grani?t?e?|garg?o?y?l?e?|spir?e?|horse?c?l?a?n?|fayr?i?n?s?|steel?c?l?a?w?|cori?k?s?|ada?n?f?|ylo?n?o?|wyve?r?n?|rave?n?s?|fan?g?|cov?e?)\b") then
+                    {
+                         gosub clear
+                         goto ILITHI
+                    }
+          }
+## SHARD PORTAL ENTRANCE Zone 67 Room 455
+SHARD_PORTAL:
+     if ("$zoneid" = "67") then
+          {
+               if matchre("%destination", "\b(grani?t?e?|garg?o?y?l?e?|spir?e?|horse?c?l?a?n?|fayr?i?n?s?|steel?c?l?a?w?|cori?k?s?|ada?n?f?|ylo?n?o?|wyve?r?n?|rave?n?s?|fan?g?|cov?e?|shard?)\b") then return
+               if ($roomid != 455) then gosub AUTOMOVE 455
+               if ($roomid != 455) then goto SHARD_PORTAL
+               pause 0.2
+               var ported 1
+               put go portal
+               wait
+               pause 0.4
+               pause 0.1
+               put #mapper reset
+               pause 0.4
+               if ($roomid = 0) then gosub MOVERANDOM
+               if ($roomid = 0) then gosub MOVERANDOM
+               if matchre("%destination", "merk?r?e?s?h?") then goto ARRIVED
+          }
+## MERKRESH PORTAL ENTRANCE Zone 107 Room 273
+MERKRESH_PORTAL:
+     if ("$zoneid" = "107") then
+          {
+               if matchre("%destination", "merk?r?e?s?h?") then return
+               pause 0.3
+               if ($roomid != 273) then gosub AUTOMOVE 273
+               if ($roomid != 273) then goto MERKRESH_PORTAL
+               pause 0.2
+               var ported 1
+               put go portal
+               wait
+               pause 0.4
+               pause 0.1
+               put #mapper reset
+               pause 0.4
+               if ($roomid = 0) then gosub MOVERANDOM
+               if ($roomid = 0) then gosub MOVERANDOM
+               if matchre("%destination", "(rive?r?h?a?v?e?n?|have?n?|rossm?a?n?)") then goto ARRIVED
+          }
+## RIVERHAVEN PORTAL ENTRANCE Zone 30 Room 331
+RIVERHAVEN_PORTAL:
+     if ("$zoneid" = "30") then
+          {
+               if matchre("%destination", "(riverh?a?v?e?n?|haven|rossman)") then return
+               pause 0.3
+               if ($roomid != 331) then gosub AUTOMOVE 331
+               if ($roomid != 331) then goto RIVERHAVEN_PORTAL
+               pause 0.2
+               var ported 1
+               put go portal
+               wait
+               pause 0.4
+               pause 0.1
+               put #mapper reset
+               pause 0.4
+               if ($roomid = 0) then gosub MOVERANDOM
+               if ($roomid = 0) then gosub MOVERANDOM
+               if matchre("%destination", "(ratha?)") then goto ARRIVED
+          }
+## RATHA PORTAL ENTRANCE Zone 90 Room 468
+RATHA_PORTAL:
+     if ("$zoneid" = "90") then
+          {
+               if matchre("%destination", "(ratha?)") then return
+               pause 0.3
+               if ($roomid != 468) then gosub AUTOMOVE 468
+               if ($roomid != 468) then goto RATHA_PORTAL
+               pause 0.2
+               var ported 1
+               put go portal
+               wait
+               pause 0.4
+               pause 0.1
+               put #mapper reset
+               pause 0.4
+               if ($roomid = 0) then gosub MOVERANDOM
+               if ($roomid = 0) then gosub MOVERANDOM
+               if matchre("%destination", "(el\'?b?a?i?n?s?|elbai?n?s?)") then goto ARRIVED
+               if matchre("%destination", "\b(ther?e?n?b?o?r?o?u?g?h?|lang?e?n?f?i?r?t?h?|el\'?b?a?i?n?s?|elb?a?i?n?s?|raka?s?h?|thro?n?e?|forn?s?t?e?d?|hvar?a?l?)\b") then
+                    {
+                         gosub clear
+                         goto THERENGIA
+                    }
+          }
+## ELBAINS PORTAL ENTRANCE Zone 40 Room 254
+ELBAINS_PORTAL:
+     if ("$zoneid" = "40") then
+          {
+               if matchre("%destination", "\b(ther?e?n?b?o?r?o?u?g?h?|lang?e?n?f?i?r?t?h?|el\'?b?a?i?n?s?|elb?a?i?n?s?|raka?s?h?|thro?n?e?|forn?s?t?e?d?|hvar?a?l?|el\'?b?a?i?n?s?|elbai?n?s?)\b") then return
+               if ($roomid != 254) then gosub AUTOMOVE 254
+               if ($roomid != 254) then goto ELBAINS_PORTAL
+               pause 0.2
+               var ported 1
+               put go portal
+               wait
+               pause 0.4
+               pause 0.1
+               put #mapper reset
+               pause 0.4
+               if ($roomid = 0) then gosub MOVERANDOM
+               if ($roomid = 0) then gosub MOVERANDOM
+               if matchre("%destination", "(mus?p?a?r?i?)") then goto ARRIVED
+          }
+## MUSPARI PORTAL ENTRANCE Zone 47 Room 97
+MUSPARI_PORTAL:
+     if ("$zoneid" = "47") then
+          {
+               if matchre("%destination", "(mus?p?a?r?i?)") then return
+               if ($roomid != 97) then gosub AUTOMOVE 97
+               if ($roomid != 97) then goto MUSPARI_PORTAL
+               pause 0.2
+               var ported 1
+               put go portal
+               wait
+               pause 0.4
+               pause 0.1
+               put #mapper reset
+               pause 0.4
+               if ($roomid = 0) then gosub MOVERANDOM
+               if ($roomid = 0) then gosub MOVERANDOM
+               if matchre("%destination", "(hiba?r?n?h?v?i?d?a?r?)") then goto ARRIVED
+               if matchre("%destination", "\b(aing?h?a?z?a?l?|rave?n?s?|hib?a?r?n?h?v?i?d?a?r?|out?e?r?|inne?r?|boar?c?l?a?n?)\b") then
+                    {
+                         gosub clear
+                         goto FORD
+                    }
+          }
+## HIBAR PORTAL ENTRANCE Zone 116 Room 188
+HIB_PORTAL:
+     if ("$zoneid" = "127") then gosub AUTOMOVE boar
+     if ("$zoneid" = "126") then gosub AUTOMOVE boar
+     put east
+     pause 0.5
+     pause 0.2
+     if ("$zoneid" = "116") then
+          {
+               if matchre("%destination", "\b(aing?h?a?z?a?l?|rave?n?s?|hib?a?r?n?h?v?i?d?a?r?|out?e?r?|inne?r?|boar?c?l?a?n?|hiba?r?n?h?v?i?d?a?r?)\b") then return
+               if ($roomid != 188) then gosub AUTOMOVE 188
+               if ($roomid != 188) then goto HIB_PORTAL
+               pause 0.2
+               var ported 1
+               put go portal
+               wait
+               pause 0.4
+               pause 0.1
+               put #mapper reset
+               pause 0.1
+               if ($roomid = 0) then gosub MOVERANDOM
+               if ($roomid = 0) then gosub MOVERANDOM
+               if matchre("%destination", "cross?i?n?g?s?") then goto ARRIVED
+               if matchre("%destination", "\b(knif?e?c?l?a?n?|tige?r?c?l?a?n?|dirg?e?|arth?e?d?a?l?e?|kaer?n?a?|ilay?a?t?a?i?p?|illa?y?a?t?a?i?p?a?|taipa|leth?d?e?r?i?e?l?|acen?a?m?a?c?r?a?|vipe?r?s?|guar?d?i?a?n?s?|leuc?r?o?s?|malod?o?r?o?u?s?|bucc?a?|dokt?|sorr?o?w?s?|misens?e?o?r?|beis?s?w?u?r?m?s?|ston?e?c?l?a?n?|bone?w?o?l?f?|germ?i?s?h?d?i?n?|alfr?e?n?s?|cara?v?a?n?s?a?r?y?)\b") then
+                    {
+                         gosub clear
+                         goto CROSSING
+                    }   
+          }
+     goto CROSS_PORTAL
+###############################################################
+#### END OF PLAT PORTAL LOGIC
+###############################################################
+NECRO_PREP:
+     if ("$guild" != "Necromancer") then return
+     var donotcastlist The Crossing, Western Gate|Northeast Wilds, Outside Northeast Gate
+     pause 0.1
+     if ($spellEOTB = 0) then gosub EOTB
+     if ($SpellTimer.EyesoftheBlind.active = 0) then gosub EOTB
+     if ($SpellTimer.RiteofContrition.active = 0) then gosub ROC
+     return
+JUSTICE_CHECK:
+     pause 0.001
+     matchre NECRO_KNOWN sorcerer|monster|necromancer
+     matchre NECRO_UNKNOWN You|You\'re
+     send justice
+     matchwait 8
+     goto NECRO_KNOWN
+NECRO_KNOWN:
+     var Necro.Known 1
+     echo * KNOWN AS A NECRO!
+     return
+NECRO_UNKNOWN:
+     var Necro.Known 0
+     echo * NOT KNOWN AS A NECRO
+     return
+ROC:
+     var ROCLoop 0
+     var NecroPrep ROC
+ROC_1:
+     math ROCLoop add 1
+     # if matchre("%spelltimer", "Liturgy") && ($Utility.Ranks >= 800) then var NecroPrep ROG
+     if (%ROCLoop > 1) then var NecroPrep ROC
+     if (($spellROC = 1) && ("%NecroPrep" = "ROC")) then goto NECRO.DONE
+     # if (($spellROG = 1) && ("%NecroPrep" = "ROG")) then goto NECRO.DONE
+     echo **** Prepping %NecroPrep ****
+     pause 0.1
+     if ("$preparedspell" != "None") then send release spell
+     pause 0.3
+     if (((matchre("$roomobjs", "exchange board")) || (matchre("$roomname", "([T|t]eller|[E|e]xchange|[B|b]ank)")) || (matchre("$roomname", "(%donotcastlist)"))) then
+          {
+               echo *** BAD ROOM
+               return
+          }
+     # gosub NECRO.CHECKROOM
+     if ($Utility.Ranks < 40) then var NecroMana 2
+     if ($Utility.Ranks >= 40) && ($Utility.Ranks < 120) then var NecroMana 5
+     if ($Utility.Ranks >= 120) && ($Utility.Ranks < 240) then var NecroMana 7
+     if ($Utility.Ranks >= 240) && ($Utility.Ranks < 400) then var NecroMana 8
+     if ($Utility.Ranks >= 400) && ($Utility.Ranks < 550) then var NecroMana 10
+     if ($Utility.Ranks >= 550) && ($Utility.Ranks < 800) then var NecroMana 15
+     if ($Utility.Ranks >= 800) then var NecroMana 20
+     pause 0.2
+     put prep %NecroPrep %NecroMana
+     pause 17
+     if ((!("$roomplayers" = "")) && (matchre("$preparedspell", "(Rite of Contrition|Eyes of the Blind)")) then gosub RANDOMMOVE
+     put cast
+     pause 0.6
+     pause 0.3
+     matchre ROC_1 ivory mask|bone structure beneath is subtly altered|gleaming with arcane power|mutative nervous system|whitened ridges|black mist|sheath of spell\-disrupting miasma|sensitive eye\-cysts
+     matchre ROC_RETURN You are
+     put look $charactername
+     matchwait 2
+ROC_RETURN:
+     if (($spellROC = 0) && ($spellROG = 0) && (ROCLoop < 3)) then goto ROC_1
+     var ROCLoop 0
+     return
+EOTB:
+     var EOTBLoop 0
+EOTB_1:
+     if (($spellEOTB = 1) && ($invisible = 1)) then goto NECRO.DONE
+     pause 0.1
+     echo  **** Prepping EOTB ****
+     if ("$preparedspell" != "None") then send release spell
+     pause 0.3
+     ## ** Waits for invis pulse or casts the spell if invisible is off..
+     pause 0.1
+     if (($spellEOTB = 1) && ($invisible = 0)) then
+          {
+               ## ** This return is slightly different, it will not wait for pulse inside the exchange.
+               ## ** It will also not wait for a pulse if destination = exchange, account or any teller trips to the exchange when moving areas.
+               ## ** It should wait for a pulse inside the teller if going anywhere else.
+               if (((matchre("$roomobjs", "exchange rate board")) || (matchre("$roomname", "([T|t]eller|[E|e]xchange|[B|b]ank)")) || (matchre("$roomname", "(%donotcastlist)"))) && ((matchre("$roomname", "([T|t]eller|[E|e]xchange|[B|b]ank)")) && (matchre("%Destination", "(teller|exchange)")))) then return
+               matchre EOTB_1 ^Your spell subtly|^Your corruptive mutation fades
+               matchwait 30
+               put #echo >log Red *** Error with EOTB not pulsing invis. Attempting to recast.
+          }
+     if ($invisible = 1) then return
+     ## ** If script made it to this section then EOTB must be recast.
+     ## ** This will not cast while inside the bank or any other unapproved rooms.
+     if (((matchre("$roomobjs", "exchange rate board")) || (matchre("$roomname", "([T|t]eller|[E|e]xchange|[B|b]ank)")) || (matchre("$roomname", "(%donotcastlist)"))) then return
+     if ($stamina < 30) then return
+     # gosub NECRO.CHECKROOM
+     if ($Utility.Ranks < 40) then var NecroMana 2
+     if ($Utility.Ranks >= 40) && ($Utility.Ranks < 120) then var NecroMana 5
+     if ($Utility.Ranks >= 120) && ($Utility.Ranks < 240) then var NecroMana 7
+     if ($Utility.Ranks >= 240) && ($Utility.Ranks < 400) then var NecroMana 8
+     if ($Utility.Ranks >= 400) && ($Utility.Ranks < 500) then var NecroMana 10
+     if ($Utility.Ranks >= 500) && ($Utility.Ranks < 700) then var NecroMana 12
+     if ($Utility.Ranks >= 700) then var NecroMana 20
+     pause 0.4
+     put prep EOTB %NecroMana
+     pause 16
+     put cast 
+     pause 0.5
+     if (($spellEOTB = 0) && (EOTBLoop < 3)) then goto EOTB_1
+     var EOTBLoop 0
+     return
+NECRO.DONE:
+     delay 0.0001
+     return
+NECRO.CHECKROOM:
+     pause 0.01
+     pause 0.01
+     pause 0.01
+     if !("$roomplayers" = "") then gosub RANDOMMOVE
+     send search
+     pause $roundtime
+     pause 0.5
+     if !("$roomplayers" = "") then gosub RANDOMMOVE
+     echo **** FOUND EMPTY ROOM! ***
+     return
+###############################################################
 ## Stow
 STOWING:
      delay 0.0001
      var LOCATION STOWING
-     if "$righthand" = "vine" then put drop vine
-     if "$lefthand" = "vine" then put drop vine
+     if ("$righthand" = "vine") then put drop vine
+     if ("$lefthand" = "vine") then put drop vine
      if "$righthandnoun" = "rope" then put coil my rope
      if "$righthand" = "bundle" || "$lefthand" = "bundle" then put wear bund;drop bun
      #if matchre("$righthandnoun","(crossbow|bow|short bow)") then gosub unload
@@ -2273,8 +3339,9 @@ STOWING:
      if matchre("$righthand","(partisan|shield|buckler|lumpy bundle|halberd|staff|longbow|khuj)") then gosub wear my $1
      if matchre("$lefthand","(partisan|shield|buckler|lumpy bundle|halberd|staff|longbow|khuj)") then gosub wear my $1
      if matchre("$lefthand","(longbow|khuj)") then gosub stow my $1 in my %SHEATH
-     if "$righthand" != "Empty" then GOSUB STOW right
-     if "$lefthand" != "Empty" then GOSUB STOW left
+     if ("$righthand" != "Empty") then GOSUB STOW right
+     if ("$lefthand" != "Empty") then GOSUB STOW left
+     if ("$righthand" != "Empty") then put sheath
      RETURN
 STOW:
      var todo $0
@@ -2361,160 +3428,623 @@ REM.WEAR:
      wait
      pause 0.5
      goto WEAR1
-
-## Movement
-MOVE.RETRY:
-  math move.retry add 1
-  if %move.retry > 3 then goto move.fail
-  pause 0.2
-  pause 0.1
-  echo *** Move Failed...
-  echo *** Retrying move to $1 $2 in %move.retry second(s).
-  echo ***
-  pause %move.retry
-  goto MOVE.GOTO
-MOVE:
-  delay 0.0001
-  var move.skip 0
-  var move.retry 0
-  var move.fail 0
-  var move.room $0
-MOVE.GOTO:
-  #gosub retreat
-  matchre MOVE.GOTO ^\.\.\.wait|^Sorry\,
-  matchre MOVE.RETURN ^You are already traveling
-  matchre MOVE.RETURN ^YOU HAVE ARRIVED
-  matchre MOVE.RETURN ^Darkness settles like a thick cloak 
-  matchre MOVE.SKIP ^SHOP CLOSED
-  matchre MOVE.RETRY ^MOVE FAILED
-  matchre MOVE.FAIL ^DESTINATION NOT FOUND
-  matchre MOVE.RETRY ^You will have to climb that\.
-  matchre MOVE.RETRY ^You can't go
-  matchre MOVE.RETRY ^You're still recovering from your recent attack\.
-  matchre MOVE.RETREAT ^You are engaged
-  matchre MOVE.RETREAT ^You can't do that while engaged\!
-  put #goto %move.room
-  matchwait
-MOVE.FAIL:
-  var move.fail 1
-  pause 0.1
-  pause 0.1
-  goto MOVE.RETURN
-MOVE.RETREAT:
-  pause 0.1
-  gosub RETREAT
-  pause 0.1
-  goto MOVE.RETRY
-MOVE.SKIP:
-  var move.skip 1
-RETREAT:
-  pause 0.1
-  pause 0.1
-  send retreat;retreat
-  pause 0.1
-  pause 0.1
-  RETURN
-MOVE.RETURN:
-  pause 0.001
-  pause 0.1
-  pause 0.1
-  #put #mapper reset
-  RETURN
-RETURN:
-  delay 0.001
-  pause 0.001
-  RETURN
-
-MOVE_RANDOM:
+######################################################################
+EHHRSK_ESCAPE:
+     if (($roomid >= 734) && ($roomid <= 755)) then goto KRAHEI_ESCAPE_1
+     if (($roomid >= 756) && ($roomid <= 770)) then goto KRAHEI_ESCAPE_2
+     if (($roomid >= 771) && ($roomid <= 782)) then goto KRAHEI_ESCAPE_3
+KRAHEI_ESCAPE_1:
+     gosub AUTOMOVE 747 
+     put go valve
+     wait
+     pause 0.1
+     return
+KRAHEI_ESCAPE_2:
+     gosub AUTOMOVE 760
+     put go valve
+     wait
+     pause 0.1
+     return
+KRAHEI_ESCAPE_3:
+     gosub AUTOMOVE 771
+     put go valve
+     wait
+     pause 0.1
+     return
+MAELSHYVE_FORTRESS_ESCAPE:
+     echo ===========================
+     echo ** ESCAPING FROM MAELSHYVE'S FORTRESS
+     echo ===========================
+     gosub AUTOMOVE 109
+	gosub MOVE south
+     gosub circle
+     gosub RETREAT
+	move south
+	gosub AUTOMOVE 93
+	put touch etching
+	pause 0.5
+	pause 0.5
+	pause 0.5
+	gosub MOVE south
+     gosub MOVE south
+     return
+BENEATH_ZAULFUNG_ESCAPE:
+     echo =======================
+     echo ** ESCAPING FROM BENEATH ZAULFUNG
+     echo =======================
+     pause 0.4
+     pause 0.5
+     gosub AUTOMOVE 5
+     pause 0.5
+     if ($zoneid = 31b) then goto BENEATH_ZAULFUNG_ESCAPE
+ZAULFUNG_ESCAPE_0:
+     gosub AUTOMOVE 121
+ZAULFUNG_ESCAPE:
+### LESSER SHADOW HOUNDS MAZE Map 31a (Rancid Mire)
+if matchre("$roomname", "Trackless Swamp") then gosub ZAULFUNG_ESCAPE_2
+     echo ======================
+     echo ** ESCAPING FROM LESSER SHADOW HOUNDS
+     echo ======================
+     if matchre("$roomobjs", "curving path") then goto ZAULFUNG_MAZE_2
+     gosub RANDOMWEIGHT west
+     if matchre("$roomobjs", "curving path") then goto ZAULFUNG_MAZE_2
+     gosub RANDOMWEIGHT west
+     if matchre("$roomobjs", "curving path") then goto ZAULFUNG_MAZE_2
+     gosub RANDOMWEIGHT west
+     if matchre("$roomobjs", "curving path") then goto ZAULFUNG_MAZE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "curving path") then goto ZAULFUNG_MAZE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "curving path") then goto ZAULFUNG_MAZE_2
+     gosub RANDOMMOVE
+ZAULFUNG_MAZE_2:
+     pause 0.2
+     put go path
+     wait
+     pause 0.5
+     return
+ZAULFUNG_ESCAPE_2:
+     if matchre("$roomdesc", "Rancid mire")) then gosub ZAULFUNG_ESCAPE
+     echo ======================
+     echo ** ESCAPING FROM SWAMP TROLLS
+     echo ======================
+     if !$standing then put stand
+     gosub TRUE_RANDOM_2
+     if ($up) then gosub MOVE up
+     pause 0.1
+     if ($roomid != 0) then return
+     gosub TRUE_RANDOM_2
+     if ($up) then gosub MOVE up
+     pause 0.1
+     if ($roomid != 0) then return
+     pause 0.1
+     pause 0.1
+     goto ZAULFUNG_ESCAPE_2
+ZAULFUNG_ESCAPE_3:
+     if matchre("$roomname", "Zaulfung, Chickee")) then gosub ZAULFUNG_ESCAPE
+     echo ======================
+     echo ** ESCAPING FROM SWAMP TROLLS
+     echo ======================
+     if !$standing then put stand
+     gosub TRUE_RANDOM_2
+     if ($up) then gosub MOVE up
+     pause 0.1
+     if ($roomid != 0) then return
+     gosub TRUE_RANDOM_2
+     if ($up) then gosub MOVE up
+     pause 0.1
+     if ($roomid != 0) then return
+     pause 0.1
+     pause 0.1
+     goto ZAULFUNG_ESCAPE_2
+BROCKET_ESCAPE:
+     echo ===================
+     echo ** ESCAPING BROCKET DEER
+     echo ==================
+	 if ($east) then gosub move east
+      if ($east) then gosub move east
+      if ($east) then gosub move east
+      if matchre("$roomobjs", "rolling hill") then
+          {
+               send climb hill
+               pause 0.5
+               pause 0.1
+          }
+      if matchre("$roomobjs", "log fence") then
+          {
+               send climb fence
+               pause 0.5
+               gosub move NE
+          }
+      if ($roomid != 0) then return
+      if ($west) then gosub move west
+      if ($west) then gosub move west
+      if ($west) then gosub move west
+      if matchre("$roomobjs", "gentle hill") then
+          {
+               send climb hill
+               pause 0.5
+               pause 0.1
+          }
+	 if ($east) then gosub move east
+      if ($east) then gosub move east
+      if ($east) then gosub move east
+      if matchre("$roomobjs", "log fence") then
+          {
+               send climb fence
+               pause 0.5
+               gosub move NE
+          }
+      if ($roomid != 0) then return
+     goto BROCKET_ESCAPE
+DEADMAN_ESCAPE:
+     echo ===================
+     echo ** ESCAPING DEADMAN'S CONFIDE BEACH
+     echo ===================
+     pause 0.3
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     if matchre("$roomdesc", "A cliff wall rises out of sight") then goto DEADMAN_ESCAPE_2
+     gosub TRUE_RANDOM_2
+     goto DEADMAN_ESCAPE
+DEADMAN_ESCAPE_2:
+     gosub RETREAT
+     pause 0.001
+     put climb handhold
+     wait
+     pause 0.2
+     pause 0.2
+     put look
+     pause 0.2
+     if matchre("$roomname", "Deadman's Confide, Beach") then
+          {
+               gosub TRUE_RANDOM_2
+               pause 0.1
+               gosub TRUE_RANDOM_2
+               pause 0.1
+               goto DEADMAN_ESCAPE
+          }
+     return
+     
+USHNISH_ESCAPE:
+     echo ==================================
+     echo ** ESCAPING FANGS OF USHNISH - SHIFTING MAZE
+     echo ==================================
+USHNISH_ESCAPE_1:
+     pause 0.001
+     if matchre("$roomname", "Temple of Ushnish") then goto USHNISH_ESCAPE_TEMPLE
+     if matchre("$roomname", "Beyond the Gate of Souls") then goto USHNISH_ESCAPE_3
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMNORTH
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMNORTH
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMNORTH
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMSOUTH
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMSOUTH
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMSOUTH
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMSOUTH
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     gosub RANDOMSOUTH
+     if matchre("$roomobjs", "steep cliff") then goto USHNISH_ESCAPE_2
+     goto USHNISH_ESCAPE_1
+USHNISH_ESCAPE_2:
+     pause 0.1
+     pause 0.1
+     put climb cliff
+     pause 0.5
+     pause 0.2
+USHNISH_ESCAPE_TEMPLE:
+     echo =========================
+     echo ** ESCAPING TEMPLE OF USHNISH
+     echo =========================
+     pause 0.5
+     if matchre("$roomname", "The Fangs of Ushnish") then goto USHNISH_ESCAPE_1
+     if matchre("$roomname", "Temple of Ushnish") then gosub AUTOMOVE 224
+     if matchre("$roomname", "Before the Temple of Ushnish") then goto USHNISH_ESCAPE_3
+USHNISH_ESCAPE_3:
+     pause 0.1
+     gosub RETREAT
+     put go lava field
+     pause 0.5
+     pause 0.2
+USHNISH_ESCAPE_GATE:
+     echo =======================================
+     echo ** ESCAPING GATE OF SOULS BLASTED PLAINS MAZE
+     echo =======================================
+USHNISH_ESCAPE_GATE_1:
+     gosub RANDOMMOVE
+     if matchre("$roomname", "The Fangs of Ushnish") then goto USHNISH_ESCAPE_1
+     if matchre("$roomobjs", "low cavern") then goto USHNISH_ESCAPE_4
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "low cavern") then goto USHNISH_ESCAPE_4
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "low cavern") then goto USHNISH_ESCAPE_4
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "low cavern") then goto USHNISH_ESCAPE_4
+     gosub RANDOMNORTH
+     if matchre("$roomobjs", "low cavern") then goto USHNISH_ESCAPE_4
+     gosub RANDOMNORTH
+     if matchre("$roomobjs", "low cavern") then goto USHNISH_ESCAPE_4
+     gosub RANDOMNORTH
+     if matchre("$roomobjs", "low cavern") then goto USHNISH_ESCAPE_4
+     gosub RANDOMNORTH
+     if matchre("$roomobjs", "low cavern") then goto USHNISH_ESCAPE_4
+     gosub RANDOMNORTH
+     if matchre("$roomobjs", "low cavern") then goto USHNISH_ESCAPE_4
+     goto USHNISH_ESCAPE_GATE_1
+USHNISH_ESCAPE_4:
+     pause 0.2
+     pause 0.1
+     send go cavern
+     pause 0.5
+     pause 0.5
+     send lie
+     pause 0.2
+     send go tunnel
+     waitforre Rising in a snubbed tower
+     pause 0.2
+     gosub STAND
+     gosub AUTOMOVE 104
+     return
+VELAKA_ESCAPE:
+     echo ===============================
+     echo ** ESCAPING FROM VELAKA DESERT MAZE
+     echo ===============================
+VELAKA_ESCAPE_1:
+     pause 0.001
+     if matchre("$roomname", "Walk of Bones") then gosub AUTOMOVE 118
+     if matchre("$roomobjs", "rocky trail") then goto VELAKA_ESCAPE_2
+     gosub RANDOMWEIGHT west
+     if matchre("$roomobjs", "rocky trail") then goto VELAKA_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "rocky trail") then goto VELAKA_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "rocky trail") then goto VELAKA_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "rocky trail") then goto VELAKA_ESCAPE_2
+     gosub RANDOMWEIGHT west
+     if matchre("$roomobjs", "rocky trail") then goto VELAKA_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "rocky trail") then goto VELAKA_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "rocky trail") then goto VELAKA_ESCAPE_2
+     gosub RANDOMMOVE
+     if matchre("$roomobjs", "rocky trail") then goto VELAKA_ESCAPE_2
+     goto VELAKA_ESCAPE_1
+VELAKA_ESCAPE_2:
+     send go trail
+     wait
+     pause 0.1
+     return
+WARRENS_ESCAPE:
+     echo ==========================
+     echo ** ESCAPING FROM SHARD WARRENS
+     echo ==========================
+     pause 0.1
+     if ("$guild" = "Necromancer") then
+          {
+               gosub AUTOMOVE 316
+               gosub AUTOMOVE 29
+               pause 0.5
+               return
+          }
+     if ("$guild" = "Thief") then
+          {
+               gosub AUTOMOVE 279
+               gosub AUTOMOVE 292
+               gosub AUTOMOVE 596
+               pause 0.2
+               gosub AUTOMOVE 8
+               return
+          }
+     if ("$guild" != "Thief") then
+          {
+               gosub AUTOMOVE 255
+               gosub AUTOMOVE 381
+               pause 0.5
+               gosub AUTOMOVE 185
+               pause 0.2
+               send go grate
+               waitforre Flush against the rock foundations|Obvious|The water shoves you out|^I could|^YOU HAVE
+               return
+          }
+     return
+MAELSHYVE_ASCENT_ESCAPE:
+     echo ==============================
+     echo ** ESCAPING FROM MAESHYVE'S ASCENT
+     echo ==============================
+     if ($hidden = 0) then gosub HIDE
+     pause 0.1
+     gosub AUTOMOVE 447
+     pause 0.2
+     if ($roomid != 447) then goto MAELSHYVE_ASCENT_ESCAPE
+     send go throne
+     pause 8
+ABYSSAL_ESCAPE:
+     pause
+     echo ===================
+     echo ** ESCAPING FROM ABYSS
+     echo ===================
+     pause 0.2
+     if ($stunned) then waiteval (!$stunned)
+     pause
+     gosub AUTOMOVE 199
+     return
+ADDERNEST_ESCAPE:
+     echo ===========================
+     echo ** ESCAPING FROM ADDER'S NEST
+     echo ===========================
+     pause 0.2
+     gosub AUTOMOVE 434
+     gosub PUT climb open
+     gosub PUT go port
+     pause 0.5
+     pause 0.2
+NORTHWIND_ESCAPE:
+     pause 0.2
+     gosub AUTOMOVE 506
+     pause 0.5
+     send pull sconce
+     pause 0.5
+     pause 0.3
+     gosub MOVE go door
+     pause 0.3
+     gosub MOVE SE
+     pause 0.3
+ASKETI_ESCAPE:
+     put #queue clear
+     echo ============================
+     echo ** ESCAPING FROM ASKETI'S MOUNT
+     echo ============================
+     ### 100 foot cliff
+     gosub AUTOMOVE 369
+     pause 0.1
+     gosub AUTOMOVE 124
+     pause 0.1
+     gosub AUTOMOVE south
+     return
+CROC_ESCAPE:
+     pause 0.1
+     echo ============================
+     echo ** ESCAPING FROM CROCODILE MAZE
+     echo ============================
+     var croc.count 0
+     var direction sw
+     goto CROC_MOVE
+CROC_RET:
+     gosub retreat
+     pause 0.1
+CROC_MOVE:
+     math croc.count add 1
+     if (%croc.count > 5) && ("%direction" = "sw") then
+          {
+               var direction north
+               var croc.count 0
+          }
+     if (%croc.count > 5) && ("%direction" = "north") then
+          {
+               var direction south
+               var croc.count 0
+          }
+     if (%croc.count > 5) && ("%direction" = "south") then
+          {
+               var direction east
+               var croc.count 0
+          }
+     if (%croc.count > 5) && ("%direction" = "east") then
+          {
+               var direction sw
+               var croc.count 0
+          }
+     pause 0.0001
+     pause 0.0001
+     matchre CROC_RET ^You are engaged
+     matchre CROC_MOVE ^\.\.\.wait|^Sorry, you may only type|^You.*are.*still.*stunned\.
+     matchre REEDGO ^Roundtime
+     put %direction
+     matchwait 20
+     goto CROC_MOVE
+REEDGO:
+     pause .0001
+     pause .0001
+     matchre CROC_RET ^You are engaged
+     matchre REEDGO ^\.\.\.wait|^Sorry, you may only type|^You.*are.*still.*stunned\.
+     matchre CROC_MOVE ^\[The Marsh\, In The Water\]|^What were you
+     matchre OUT_OF_CROCS ^\[The Marsh\, Stone Road\]
+     put go reed
+     matchwait 20
+     goto CROC_MOVE
+OUT_OF_CROCS:
+     pause .0001
+     pause .0001
+     put south
+     wait
+     pause 0.1
+     put south
+     wait
+     pause 0.1
+     put south
+     wait
+     put southeast
+     pause 0.5
+     if matchre("$roomname", "The Marsh, In The Water") then goto CROC_ESCAPE
+     put #parse OUT OF CROCS
+     pause 0.5
+     return
+EMPTY_HANDS:
      delay 0.0001
-     random 1 13
-     if (%r = 1) && (!$north) then goto MOVE_RANDOM
-     if (%r = 2) && (!$northeast) then goto MOVE_RANDOM
-     if (%r = 3) && (!$east) then goto MOVE_RANDOM
-     if (%r = 4) && (!$southeast) then goto MOVE_RANDOM
-     if (%r = 5) && (!$south) then goto MOVE_RANDOM
-     if (%r = 6) && (!$southwest) then goto MOVE_RANDOM
-     if (%r = 7) && (!$west) then goto MOVE_RANDOM
-     if (%r = 8) && (!$northwest) then goto MOVE_RANDOM
-     if (%r = 9) && (!$out) then goto MOVE_RANDOM
-     if (%r = 10) && (!$up) then goto MOVE_RANDOM
-     if (%r = 11) && (!$down) then goto MOVE_RANDOM
-     if (%r = 12) && !matchre("$roomobjs","doorway|door") then goto MOVE_RANDOM
-     if (%r = 13) && !matchre("$roomobjs","archway|arch") then goto MOVE_RANDOM
-     #
-     if (%r = 1) then var Direction north
-     if (%r = 2) then var Direction northeast
-     if (%r = 3) then var Direction east
-     if (%r = 4) then var Direction southeast
-     if (%r = 5) then var Direction south
-     if (%r = 6) then var Direction southwest
-     if (%r = 7) then var Direction west
-     if (%r = 8) then var Direction northwest
-     if (%r = 9) then var Direction out
-     if (%r = 10) then var Direction up
-     if (%r = 11) then var Direction down
-     if (%r = 12) then var Direction go door
-     if (%r = 13) then var Direction go arch
-     #
-     if (%r = 1) then var Reverse.Direction south
-     if (%r = 2) then var Reverse.Direction southwest
-     if (%r = 3) then var Reverse.Direction west
-     if (%r = 4) then var Reverse.Direction northwest
-     if (%r = 5) then var Reverse.Direction north
-     if (%r = 6) then var Reverse.Direction northeast
-     if (%r = 7) then var Reverse.Direction east
-     if (%r = 8) then var Reverse.Direction southeast
-     if (%r = 9) then var Reverse.Direction out
-     if (%r = 10) then var Reverse.Direction down
-     if (%r = 11) then var Reverse.Direction up
-     if (%r = 12) then var Reverse.Direction go door
-     if (%r = 13) then var Reverse.Direction go arch
-     #
-     var Exits 0
-     if ($north) then math Exits add 1
-     if ($northeast) then math Exits add 1
-     if ($east) then math Exits add 1
-     if ($southeast) then math Exits add 1
-     if ($south) then math Exits add 1
-     if ($southwest) then math Exits add 1
-     if ($west) then math Exits add 1
-     if ($out) then math Exits add 1
-     if ($up) then math Exits add 1
-     if ($down) then math Exits add 1
-     if matchre("$roomobjs","doorway|door") then math Exits add 1
-     if matchre("$roomobjs","archway|arch") then math Exits add 1
-     #
-     # don't move "back" on a path unless we'we hit a dead end
-     if (%Exits > 1) && ("%Last.Direction" = "%Reverse.Direction") then goto MOVE_RANDOM
-     #
-     var Last.Direction %Direction
-     gosub MOVE_RESUME
-     RETURN
-
-MOVEIT:
+     if ("$lefthand" != "Empty") then gosub STOW my $lefthandnoun
+     if ("$righthand" != "Empty") then gosub STOW my $righthandnoun
+     return
+#### PUT SUB
+PUT_UNTIE:
+     pause 0.2
+     eval putaction replacere("%putaction", "\bget\b", "")
+     eval putaction replacere("%putaction", "\bmy\b", "")
+     put untie %putaction
+     pause 0.4
+     return
+PUT_STOW:
+     gosub EMPTY_HANDS
+     goto PUT_1
+PUT_STAND:
+     gosub stand
+     goto PUT_1
+PUT:
+     delay 0.0001
+     var putaction $0
+     var LOCATION PUT_1
+     PUT_1:
+     pause 0.001
+     matchre WAIT ^\.\.\.wait|^Sorry\,|^Please wait\.
+     matchre IMMOBILE ^You don't seem to be able to move to do that
+     matchre WEBBED ^You can't do that while entangled in a web
+     matchre STUNNED ^You are still stunned
+     matchre PUT_UNTIE ^You should untie
+     matchre PUT_STOW ^You need a free hand|^Free one of your hands
+     matchre PUT_STAND ^You should stand up first\.|^Maybe you should stand up\.
+     matchre WAIT ^\[Enter your command again if you want to\.\]
+     matchre RETURN_CLEAR You'?r?e? (?:hand|slip|put|get|.+ to|.+ fan|can't|leap|tug|quickly|dance|reverently|breathe|switch|deftly|swiftly|untie|sheathe|strap|slide|desire|raise|sling|pull|drum|trace|wear|tap|recall|press|hang|gesture|push|move|whisper|lean|tilt|cannot|mind|drop|drape|loosen|work|lob|spread|not|fill|will|now|slowly|quickly|spin|filter|need|shouldn't|pour|blow|twist|struggle|place|knock|toss|set|add|search|circle|fake|weave|shove|try|must|wave|sit|fail|turn|already|can\'t|glance|bend|swing|chop|bash|dodge|feint|draw|parry|carefully|quietly|sense|begin|rub|sprinkle|stop|combine|take|decide|insert|lift|retreat|load|fumble|exhale|yank|allow|have|are|wring|icesteel|scan|vigorously|adjust|bundle|ask|form|lose|remove|accept|pick|silently|realize|open|grab|fade|offer|tap|aren't|kneel|don\'t|close|let|find|attempt|tie|roll|attach|feel(?! fully rested)|read|reach|gingerly|come|effortlessly|corruption|count|secure|unload|briefly|zills|remain|release|shield) .*(?:\.|\!|\?)?
+     matchre RETURN_CLEAR ^Brother Durantine|^Durantine|^Mags|^Ylono|^Malik|^Kilam|^Ragge|^Randal|^Catrox|^Kamze|^Unspiek|^Wyla|^Ladar|^Dagul|^Granzer|^Fekoeti|^Diwitt|(?:An|The|A) attendant|^The clerk|A Dwarven|^.*He says\,
+     matchre RETURN_CLEAR ^The (?: clerk|teller|attendant|mortar|pestle|tongs|bowl|riffler|hammer|gem|book|page|lockpick|sconce|voice|waters|contours) .*(?:\.|\!|\?)?
+     matchre RETURN_CLEAR ^Quietly touching your lips with the tips of your fingers as you kneel\, you make the Cleric's sign with your hand\.
+     matchre RETURN_CLEAR ^You sense that you are as pure of spirit as you can be\, and you are ready for whatever rituals might face you\.
+     matchre RETURN_CLEAR ^You don't have a (.+) coin on you\!\s*The (.+) spider looks at you in forlorn disappointment\.|^The (.+) spider turns away
+     matchre RETURN_CLEAR ^It would be a shame|It's already open\!|^Brushing your fingers|There are already openings|Sensing your intent
+     matchre RETURN_CLEAR ^Roundtime\:?|^\[Roundtime\:?|^\(Roundtime\:?|^\[Roundtime|^Roundtime|\[Roundtime
+     matchre RETURN_CLEAR That will cost .* to repair\.\s*Just give it to me again if you want\, and I'll have it ready in .*\.
+     matchre RETURN_CLEAR It will cost .* and take .* to repair .*\.\s*Just ask me again and I can get started\.
+     matchre RETURN_CLEAR Lucky for you\!\s*That isn't damaged\!|I will not repair something that isn't broken\.
+     matchre RETURN_CLEAR I'm sorry\, but I don't work on those|There isn't a scratch on that\, and I'm not one to rob you\.
+     matchre RETURN_CLEAR I don't work on those here\.|I don\'t repair those here|Please don't lose this ticket\!
+     matchre RETURN_CLEAR This is an exclusive item reserved for a certain subset of the population
+     matchre RETURN_CLEAR suddenly leaps toward you|and flies towards you|with a flick
+     matchre RETURN_CLEAR ^Please rephrase that command\.|^I could not find|^Perhaps you should|^I don\'t|^Weirdly\,
+     matchre RETURN_CLEAR ^That (?:is|has) already|^(.+) what\?
+     matchre RETURN_CLEAR ^The .*(is|has|are|slides|fades)
+     matchre RETURN_CLEAR ^Obvious (?:exits|paths)
+     matchre RETURN_CLEAR \[You're|\[This is|too injured
+     matchre RETURN_CLEAR ^Moving|Brushing|Recalling|Unaware
+     matchre RETURN_CLEAR ^.*\[Praying for \d+ sec\.\]
+     matchre RETURN_CLEAR ^You cannot do that while engaged\!
+     matchre RETURN_CLEAR ^.+ is not in need|^That is closed\.
+     matchre RETURN_CLEAR ^This is a .* spell|The spell requires
+     matchre RETURN_CLEAR ^But (?:that|you|the)
+     matchre RETURN_CLEAR ^What (?:were you|is it)
+     matchre RETURN_CLEAR ^There (?:is|is not|isn't|doesn\'t)
+     matchre RETURN_CLEAR ^In the name of love\?|^Play on
+     matchre RETURN_CLEAR ^That (?:cannot|area|can't|won't|would)
+     matchre RETURN_CLEAR ^With a (?:keen|practiced)
+     matchre RETURN_CLEAR ^Some (?:polished|people|tarnished|.* zills)
+     matchre RETURN_CLEAR ^(\S+) has accepted
+     matchre RETURN_CLEAR ^Subservient type|^The shadows|^Close examination|^Try though
+     matchre RETURN_CLEAR ^USAGE\:|^Using your|^You.*analyze
+     matchre RETURN_CLEAR ^Allows a Moon Mage|^Smoking commands are
+     matchre RETURN_CLEAR ^A (?:slit|pair|shadow) .*(?:\.|\!|\?)?
+     matchre RETURN_CLEAR ^Your (?:actions|dance|nerves) .*(?:\.|\!|\?)?
+     matchre RETURN_CLEAR ^Having no further use for .*\, you discard it\.
+     matchre RETURN_CLEAR ^After a moment\, .*\.
+     matchre RETURN_CLEAR ^.* (?:is|are) not in need of cleaning\.
+     matchre RETURN_CLEAR ^The .* is not damaged enough to warrant repair\.
+     matchre RETURN_CLEAR \[Type INVENTORY HELP for more options\]|\[Use INVENTORY HELP for more options\.\]
+     matchre RETURN_CLEAR ^A vortex|^A chance for|^In a flash|^It is locked|^An aftershock
+     matchre RETURN_CLEAR ^In the .* you see .*\.
+     matchre RETURN_CLEAR .* (?:Dokoras|Kronars|Lirums)
+     matchre RETURN_CLEAR ^This spell cannot be targeted\.|^You cannot figure out how to do that\.S
+     matchre RETURN_CLEAR ^You will now store .* in your .*\.
+     matchre RETURN_CLEAR ^That tool does not seem suitable for that task\.
+     matchre RETURN_CLEAR ^There (isn\'t|doesn\'t seem to be) any more room in .*
+     matchre RETURN_CLEAR ^\[Ingredients can be added by using ASSEMBLE Ingredient1 WITH Ingredient2\]
+     matchre RETURN_CLEAR ^\s*LINK ALL CANCEL\s*\- Breaks all links
+     matchre RETURN_CLEAR ^This ritual may only be performed on a corpse\.
+     matchre RETURN_CLEAR ^There is nothing else to face\!
+     matchre RETURN_CLEAR ^Stalking is an inherently stealthy endeavor\, try being out of sight\.
+     matchre RETURN_CLEAR ^You're already stalking|^There aren't any
+     matchre RETURN_CLEAR ^You don't think you have enough focus to do that\.
+     matchre RETURN_CLEAR ^You have no idea how to cast that spell\.
+     matchre RETURN_CLEAR ^An offer|shakes (his|her) head
+     matchre RETURN_CLEAR ^Tie it off when it's empty\?
+     matchre RETURN_CLEAR ^But the merchant can't see you|are invisible
+     matchre RETURN_CLEAR Page|^As the world|^Obvious|^A ravenous energy
+     matchre RETURN_CLEAR ^In the|^The attendant|^That is already open\.|^Your inner
+     matchre RETURN_CLEAR ^(\S+) hands you|^Searching methodically|^But you haven\'t prepared a symbiosis\!
+     matchre RETURN_CLEAR ^Illustrations of complex\,|^It is labeled|^Your nerves
+     matchre RETURN_CLEAR ^The lockpick|^Doing that|is not required to continue crafting
+     matchre RETURN_CLEAR ^Without (any|a|the)
+     send %putaction
+     matchwait 20
+     put #echo >Log Crimson *** MISSING MATCH IN PUT! (%scriptname.cmd) ***
+     put #echo >Log Crimson Command = %putaction
+     put #log $datetime MISSING MATCH IN PUT! Command = %putaction (%scriptname.cmd)
+     return
+######################################################################
+## Movement
+MOVE:
      delay 0.0001
      var Direction $0
      var movefailCounter 0
+     var randomloop 0
+     var lastmoved %Direction
 MOVE_RESUME:
-     matchre MOVE_RESUME ^\.\.\.wait|^Sorry\,
+     matchre MOVE_RETRY ^\.\.\.wait|^Sorry\, you may only type|^Please wait\.|You are still stunned\.
      matchre MOVE_RESUME ^You make your way up the .*\.\s*Partway up\, you make the mistake of looking down\.\s*Struck by vertigo\, you cling to the .* for a few moments\, then slowly climb back down\.
      matchre MOVE_RESUME ^You pick your way up the .*\, but reach a point where your footing is questionable\.\s*Reluctantly\, you climb back down\.
      matchre MOVE_RESUME ^You approach the .*\, but the steepness is intimidating\.
      matchre MOVE_RESUME ^You struggle
      matchre MOVE_RESUME ^You blunder
-     matchre MOVE_RESUME ^You wander
-     matchre MOVE_RESUME ^You turn
-     matchre MOVE_RESUME ^You are already
      matchre MOVE_RESUME ^You slap
      matchre MOVE_RESUME ^You work
      matchre MOVE_RESUME make much headway
      matchre MOVE_RESUME ^You flounder around in the water\.
-     matchre MOVE_RETREAT ^You are engaged to .*\!|^You cannot do that while engaged
+     matchre MOVE_RETREAT ^You are engaged to .*\!
+     matchre MOVE_RETREAT ^You can't do that while engaged\!
      matchre MOVE_STAND ^You start up the .*\, but slip after a few feet and fall to the ground\!\s*You are unharmed but feel foolish\.
      matchre MOVE_STAND ^Running heedlessly over the rough terrain\, you trip over an exposed root and land face first in the dirt\.
-     matchre MOVE_STAND ^You can't do that while lying down\.
-     matchre MOVE_STAND ^You can't do that while sitting\!
+     matchre MOVE_STAND ^You can\'t do that while lying down\.
+     matchre MOVE_STAND ^You can\'t do that while sitting\!
+     matchre MOVE_STAND ^You can\'t do that while kneeling\!
      matchre MOVE_STAND ^You must be standing to do that\.
+     matchre MOVE_STAND ^You don\'t seem
      matchre MOVE_STAND ^You must stand first\.
      matchre MOVE_STAND ^Stand up first.
      matchre MOVE_DIG ^You make no progress in the mud \-\- mostly just shifting of your weight from one side to the other\.
@@ -2523,70 +4053,85 @@ MOVE_RESUME:
      matchre MOVE_DIG ^Like a blind\, lame duck\, you wallow in the mud in a feeble attempt at forward motion\.
      matchre MOVE_DIG ^The mud holds you tightly\, preventing you from making much headway\.
      matchre MOVE_DIG ^You fall into the mud with a loud \*SPLUT\*\.
-     matchre MOVE_FAILED ^You can't go there
+     matchre MOVE_FAIL_BAIL ^You can't go there
+     matchre MOVE_FAILED ^Noticing your attempt
      matchre MOVE_FAILED ^I could not find what you were referring to\.
      matchre MOVE_FAILED ^What were you referring to\?
-     matchre MOVE_END ^It's pitch dark
-     matchre MOVE_END ^Obvious
+     matchre MOVE_RETURN ^It's pitch dark
+     matchre MOVE_RETURN ^Obvious
      send %Direction
-     matchwait
+     matchwait 15
+     goto MOVE_RETURN
+MOVE_RETRY:
+     pause
+     echo *** Retrying.... 
+     pause 0.5
+     goto MOVE_RESUME
 MOVE_STAND:
      pause 0.1
-     matchre MOVE_STAND ^\.\.\.wait|^Sorry\,
+     matchre MOVE_STAND ^\.\.\.wait|^Sorry\,|^Please wait\.
      matchre MOVE_STAND ^You are overburdened and cannot manage to stand\.
      matchre MOVE_STAND ^The weight
      matchre MOVE_STAND ^You try
+     matchre MOVE_STAND ^You don\'t
      matchre MOVE_RETREAT ^You are already standing\.
      matchre MOVE_RETREAT ^You stand(?:\s*back)? up\.
      matchre MOVE_RETREAT ^You stand up\.
-     matchre MOVE_RETREAT ^You stand up in the water
      send stand
-     matchwait
+     matchwait 15
+     goto MOVE_STAND
 MOVE_RETREAT:
      pause 0.1
-     matchre MOVE_RETREAT ^\.\.\.wait|^Sorry\,
+     if ($invisible = 1) then gosub STOP_INVIS
+     matchre MOVE_RETREAT ^\.\.\.wait|^Sorry\,|^Please wait\.
      matchre MOVE_RETREAT ^You retreat back to pole range\.
+     matchre MOVE_RETREAT ^You stop advancing
      matchre MOVE_RETREAT ^You try to back away
      matchre MOVE_STAND ^You must stand first\.
      matchre MOVE_RESUME ^You retreat from combat\.
      matchre MOVE_RESUME ^You are already as far away as you can get\!
      send retreat
-     matchwait
+     matchwait 10
+     goto MOVE_RETREAT
 MOVE_DIG:
      pause 0.1
-     matchre MOVE_DIG ^\.\.\.wait|^Sorry\,
+     matchre MOVE_DIG ^\.\.\.wait|^Sorry\,|^Please wait\.
      matchre MOVE_DIG ^You struggle to dig off the thick mud caked around your legs\.
      matchre MOVE_STAND ^You manage to dig enough mud away from your legs to assist your movements\.
      matchre MOVE_DIG_STAND ^Maybe you can reach better that way\, but you'll need to stand up for that to really do you any good\.
      matchre MOVE_RESUME ^You will have to kneel
      send dig
-     matchwait
+     matchwait 10
+     goto MOVE_DIG
 MOVE_DIG_STAND:
      pause 0.1
-     matchre MOVE_DIG_STAND ^\.\.\.wait|^Sorry\,
+     matchre MOVE_DIG_STAND ^\.\.\.wait|^Sorry\,|^Please wait\.
      matchre MOVE_DIG_STAND ^The weight
      matchre MOVE_DIG_STAND ^You try
      matchre MOVE_DIG_STAND ^You are overburdened and cannot manage to stand\.
      matchre MOVE_DIG ^You stand(?:\s*back)? up\.
      matchre MOVE_DIG ^You are already standing\.
-     matchre MOVE_DIG ^You stand up in the water
      send stand
-     matchwait
+     matchwait 10
+     goto MOVE_DIG_STAND
 MOVE_FAILED:
-     evalmath movefailCounter (movefailCounter + 1)
+     var moved 0
+     math movefailCounter add 1
      if (%movefailCounter > 3) then goto MOVE_FAIL_BAIL
      pause 0.5
+     put look
+     pause 0.4
      goto MOVE_RESUME
 MOVE_FAIL_BAIL:
      put #echo
-     put #echo >$Log Crimson *** MOVE FAILED. ***
-     put #echo Crimson *** MOVE FAILED.  ***
-     put #echo
-     put #parse MOVE FAILED
-     RETURN
-MOVE_END:
-     pause 0.0001
-     RETURN
+     # put #echo >$Log Crimson *** MOVE FAILED. ***
+     ## put #echo Crimson *** MOVE FAILED.  ***
+     return
+MOVE_RETURN:
+     var moved 1
+     pause 0.001
+     return
+
 STAND:
      delay 0.0001
      var LOCATION STAND_1
@@ -2608,6 +4153,533 @@ STAND:
      pause 0.1
      if (!$standing) then goto STAND
      return
+     
+### GO IN RANDOM DIRECTIONS AND DON'T BACKTRACK FROM LAST MOVED DIRECTION IF POSSIBLE
+RANDOMMOVE:
+MOVERANDOM:
+     pause 0.001
+     var moved 0
+     var NPC.count 0
+     math randomloop add 1
+     if (%randomloop > 60) then
+          {
+               echo *** Cannot find a room exit???!! Stupid fog???
+               echo *** SEND ME THE ROOM DESCRIPTION AND EXITS WHEN YOU TYPE LOOK 
+               echo *** ATTEMPTING RANDOM DIRECTIONS...
+               put look
+               pause 0.1
+               if matchre("$roomobjs $roomdesc","pitch black") then gosub LIGHT_SOURCE
+               pause 0.2
+               gosub TRUE_RANDOM_2
+               var lastmoved null
+               var randomloop 0
+               return
+          }
+     if matchre("$roomname", "Deadman's Confide, Beach") || (matchre("$roomobjs","thick fog") || matchre("$roomexits","thick fog")) then
+          {
+               gosub TRUE_RANDOM_2
+               return
+          }
+     if matchre("$roomname","Temple Hill Manor, Grounds") then
+          {
+               gosub MOVE go gate
+               return
+          }
+     if matchre("$roomname","Darkling Wood, Ironwood Tree") then
+          {
+               gosub MOVE climb pine branches
+               return
+          }
+     if matchre("$roomname","Darkling Wood, Pine Tree") then
+          {
+               gosub MOVE climb white pine
+               return
+          }
+     if matchre("$roomobjs","strong creeper") then
+          {
+               gosub MOVE climb ladder
+               return
+          }
+     random 1 11
+     if (%moved = 1) then return
+     if ((%r = 1) && ($north) && ("%lastmoved" != "south")) then gosub MOVE north
+     if ((%r = 2) && ($northeast) && ("%lastmoved" != "southwest")) then gosub MOVE northeast
+     if ((%r = 3) && ($east) && ("%lastmoved" != "west")) then gosub MOVE east
+     if (%moved = 1) then return
+     if ((%r = 4) && ($northwest) && ("%lastmoved" != "southeast")) then gosub MOVE northwest
+     if ((%r = 5) && ($southeast) && ("%lastmoved" != "northwest")) then gosub MOVE southeast
+     if ((%r = 6) && ($south) && ("%lastmoved" != "north")) then gosub MOVE south
+     if ((%r = 7) && ($southwest) && ("%lastmoved" != "northeast")) then gosub MOVE southwest
+     if (%moved = 1) then return
+     if ((%r = 8) && ($west) && ("%lastmoved" != "east")) then gosub MOVE west
+     if (%r = 9) && ($out) then gosub MOVE out
+     if ((%r = 10) && ($up) && ("%lastmoved" != "up")) then gosub MOVE up
+     if ((%r = 11) && ($down) && ("%lastmoved" != "down")) then gosub MOVE down
+     if (%moved = 1) then return
+     if (%randomloop > 10) then
+          {
+               if ($out) then gosub MOVE out
+               if (%moved = 1) then return
+               if matchre("$roomobjs $roomdesc","\bcrevice") && ("%lastmoved" != "go crevice") then gosub MOVE go crevice
+               if matchre("$roomobjs $roomdesc","\bgate") && ("%lastmoved" != "go gate") then gosub MOVE go gate
+               if matchre("$roomobjs $roomdesc","\barch") && ("%lastmoved" != "go arch") then gosub MOVE go arch
+               if (%moved = 1) then return
+               if matchre("$roomobjs $roomdesc","\bexit\b") && ("%lastmoved" != "go exit") then gosub MOVE go exit
+               if matchre("$roomobjs $roomdesc","\bpath\b") && ("%lastmoved" != "go path") then gosub MOVE go path
+               if (%moved = 1) then return
+               if matchre("$roomobjs $roomdesc","\btrapdoor\b") && ("%lastmoved" != "go trapdoor") then gosub MOVE go trapdoor
+               if matchre("$roomobjs $roomdesc","\bcurtain\b") && ("%lastmoved" != "go curtain") then gosub MOVE go curtain
+               if matchre("$roomobjs $roomdesc","\bdoor") && ("%lastmoved" != "go door") then gosub MOVE go door
+               if (%moved = 1) then return
+               if matchre("$roomobjs $roomdesc","\bportal\b") && ("%lastmoved" != "go portal") then gosub MOVE go portal
+               if matchre("$roomobjs $roomdesc","\btunnel\b") && ("%lastmoved" != "go tunnel") then gosub MOVE go tunnel
+               if (%moved = 1) then return
+               if matchre("$roomobjs $roomdesc","\b(stairs|staircase|stairway)\b") && ("%lastmoved" != "climb stair") then gosub MOVE climb stair
+               if matchre("$roomobjs $roomdesc","\bsteps\b") && ("%lastmoved" != "climb step") then gosub MOVE climb step
+               if (%moved = 1) then return
+               if matchre("$roomobjs $roomdesc","\bpanel\b") && ("%lastmoved" != "go panel") then gosub MOVE go panel
+               if matchre("$roomobjs $roomdesc","\bnarrow track\b") && ("%lastmoved" != "go track") then gosub MOVE go track
+               if matchre("$roomobjs $roomdesc","\blava field\b") && ("%lastmoved" != "go lava field") then gosub MOVE go lava field
+          }
+     if (%moved = 0) then goto RANDOMMOVE
+     # if ($roomid = 0) then goto RANDOMMOVE
+     # if $roomid == 0 then goto moveRandomDirection_2
+     return
+### RANDOM CARDINAL DIRECTIONS ONLY
+RANDOMMOVE_CARDINAL:
+     pause 0.001
+     var moved 0
+     var NPC.count 0
+     math randomloop add 1
+     if (%randomloop > 50) then
+          {
+               echo *** Cannot find room exit??
+               echo *** Reverting back
+               if matchre("$roomobjs $roomdesc","pitch black") then gosub LIGHT_SOURCE
+               pause 0.2
+               gosub TRUE_RANDOM_2
+               var lastmoved null
+               var randomloop 0
+               return
+          }
+     if matchre("$roomname", "Deadman's Confide, Beach") || (matchre("$roomobjs","thick fog") || matchre("$roomexits","thick fog")) then
+          {
+               gosub TRUE_RANDOM_2
+               return
+          }
+     if matchre("$roomname","Temple Hill Manor, Grounds") then
+          {
+               gosub MOVE go gate
+               return
+          }
+     if matchre("$roomname","Darkling Wood, Ironwood Tree") then
+          {
+               gosub MOVE climb pine branches
+               return
+          }
+     if matchre("$roomname","Darkling Wood, Pine Tree") then
+          {
+               gosub MOVE climb white pine
+               return
+          }
+     if matchre("$roomobjs","strong creeper") then
+          {
+               gosub MOVE climb ladder
+               return
+          }
+     random 1 11
+     if (%moved = 1) then return
+     if ((%r = 1) && ($north) && ("%lastmoved" != "south")) then gosub MOVE north
+     if ((%r = 2) && ($northeast) && ("%lastmoved" != "southwest")) then gosub MOVE northeast
+     if ((%r = 3) && ($east) && ("%lastmoved" != "west")) then gosub MOVE east
+     if (%moved = 1) then return
+     if ((%r = 4) && ($northwest) && ("%lastmoved" != "southeast")) then gosub MOVE northwest
+     if ((%r = 5) && ($southeast) && ("%lastmoved" != "northwest")) then gosub MOVE southeast
+     if ((%r = 6) && ($south) && ("%lastmoved" != "north")) then gosub MOVE south
+     if ((%r = 7) && ($southwest) && ("%lastmoved" != "northeast")) then gosub MOVE southwest
+     if (%moved = 1) then return
+     if ((%r = 8) && ($west) && ("%lastmoved" != "east")) then gosub MOVE west
+     if (%r = 9) && ($out) then gosub MOVE out
+     if ((%r = 10) && ($up) && ("%lastmoved" != "up")) then gosub MOVE up
+     if ((%r = 11) && ($down) && ("%lastmoved" != "down")) then gosub MOVE down
+     if (%moved = 1) then return
+     if (%moved = 0) then goto RANDOMMOVE_CARDINAL
+     # if ($roomid = 0) then goto RANDOMMOVE
+     # if $roomid == 0 then goto moveRandomDirection_2
+     return
+### GO IN RANDOM DIRECTIONS, PREFER A SOUTHERN / WESTERN DIRECTION IF AVAILABLE
+RANDOMMOVE_SOUTH:
+     pause 0.0001
+     var moved 0
+     math randomloop add 1
+     if (%randomloop > 5) then
+          {
+               var lastmoved null
+               var randomloop 0
+               return
+          }
+     if $south then
+          {
+               gosub MOVE south
+               return
+          }
+     if $southwest then
+          {
+               gosub MOVE southwest
+               return
+          }
+     if $southeast then
+          {
+               gosub MOVE southeast
+               return
+          }
+     if $northwest then
+          {
+               gosub MOVE northwest
+               return
+          }
+     if $west then
+          {
+               gosub MOVE west
+               return
+          }
+     if $north then
+          {
+               gosub MOVE north
+               return
+          }
+     if $northeast then
+          {
+               gosub MOVE northeast
+               return
+          }
+     if $east then
+          {
+               gosub MOVE east
+               return
+          }
+
+     if $out then
+          {
+               gosub MOVE out
+               return
+          }
+     if $up then
+          {
+               gosub MOVE up
+               return
+          }
+     if $down then
+          {
+               gosub MOVE down
+               return
+          }
+     pause 0.01
+     if (%moved = 0) then goto RANDOMMOVE_SOUTH
+     # if $roomid == 0 then goto moveRandomDirection_2
+     return
+
+TRUE_RANDOM:
+     pause 0.001
+     var moved 0
+     math randomloop add 1
+     if (%randomloop > 12) then
+          {
+               var lastmoved null
+               var randomloop 0
+          }
+     random 1 16
+     if (%r = 1) then gosub MOVE n
+     if (%r = 2) then gosub MOVE ne
+     if (%r = 3) then gosub MOVE e
+     if (%r = 4) then gosub MOVE nw
+     if (%r = 5) then gosub MOVE se
+     if (%r = 6) then gosub MOVE s
+     if (%r = 7) then gosub MOVE sw
+     if (%r = 8) then gosub MOVE w
+     if (%r = 9) then gosub MOVE out
+     if (%r = 10) then gosub MOVE up
+     if (%r = 11) then gosub MOVE go door
+     if (%r = 12) then gosub MOVE go path
+     if (%r = 13) then gosub MOVE climb stair
+     if (%r = 14) then gosub MOVE climb step
+     if (%r = 15) then gosub MOVE go panel
+     if (%r = 16) then gosub MOVE go arch
+     if (%moved = 0) then goto TRUE_RANDOM
+     return
+TRUE_RANDOM_2:
+     pause 0.001
+     var moved 0
+     math randomloop add 1
+     if (%randomloop > 12) then
+          {
+               var lastmoved null
+               var randomloop 0
+               return
+          }
+     random 1 8
+     if (%r = 1) then gosub MOVE n
+     if (%r = 2) then gosub MOVE ne
+     if (%r = 3) then gosub MOVE e
+     if (%r = 4) then gosub MOVE nw
+     if (%r = 5) then gosub MOVE se
+     if (%r = 6) then gosub MOVE s
+     if (%r = 7) then gosub MOVE sw
+     if (%r = 8) then gosub MOVE w
+     if ($out) then gosub MOVE out
+     if (%moved = 1) then return
+     if matchre("$roomobjs $roomdesc","\bexit\b") && ("%lastmoved" != "go exit") then gosub MOVE go exit
+     if matchre("$roomobjs $roomdesc","\bpath\b") && ("%lastmoved" != "go path") then gosub MOVE go path
+     if matchre("$roomobjs $roomdesc","\btrapdoor\b") && ("%lastmoved" != "go trapdoor") then gosub MOVE go trapdoor
+     if matchre("$roomobjs $roomdesc","\bcurtain\b") && ("%lastmoved" != "go path") then gosub MOVE go curtain
+     if matchre("$roomobjs $roomdesc","\bdoor") && ("%lastmoved" != "go door") then gosub MOVE go door
+     if matchre("$roomobjs $roomdesc","\bgate") && ("%lastmoved" != "go gate") then gosub MOVE go gate
+     if matchre("$roomobjs $roomdesc","\barch") && ("%lastmoved" != "go arch") then gosub MOVE go arch
+     if (%moved = 1) then return
+     if matchre("$roomobjs $roomdesc","\bportal\b") && ("%lastmoved" != "go portal") then gosub MOVE go portal
+     if matchre("$roomobjs $roomdesc","\btunnel\b") && ("%lastmoved" != "go tunnel") then gosub MOVE go tunnel
+     if matchre("$roomobjs $roomdesc","\b(stairs|staircase|stairway)\b") && ("%lastmoved" != "climb stair") then gosub MOVE climb stair
+     if matchre("$roomobjs $roomdesc","\bsteps\b") && ("%lastmoved" != "climb step") then gosub MOVE climb step
+     if (%moved = 1) then return
+     if matchre("$roomobjs $roomdesc","\bpanel\b") && ("%lastmoved" != "go panel") then gosub MOVE go panel
+     if matchre("$roomobjs $roomdesc","\bnarrow track\b") && ("%lastmoved" != "go track") then gosub MOVE go track
+     if (%moved = 0) then goto TRUE_RANDOM_2
+     return
+
+
+RANDOMWEIGHT:
+     var weight $1
+     var randomweight
+     if $UC_%weight then var randomweight %randomweight|%weight
+     if $north%weight then var randomweight %randomweight|north%weight
+     if $south%weight then var randomweight %randomweight|south%weight
+     eval randomweightcount count("%randomweight", "|")
+RANDOMWEIGHT_2:
+     if ("%randomweight" = "") then return
+     random 1 %randomweightcount
+     gosub MOVE %randomweight(%r)
+     return
+RANDOMNORTH:
+     if (($north) && ("%lastmoved" != "south")) then
+          {
+               gosub MOVE north
+               return
+          }
+     if (($northeast) && ("%lastmoved" != "southwest")) then
+          {
+               gosub MOVE northeast
+               return
+          }
+     if (($northwest) && ("%lastmoved" != "southeast")) then
+          {
+               gosub MOVE northwest
+               return
+          }
+     if (($west) && ("%lastmoved" != "east")) then
+          {
+               gosub MOVE west
+               return
+          }
+     if (($east) && ("%lastmoved" != "west")) then
+          {
+               gosub MOVE east
+               return
+          }
+     return
+RANDOMSOUTH:
+     if (($south) && ("%lastmoved" != "north")) then
+          {
+               gosub MOVE south
+               return
+          }
+     if (($southeast) && ("%lastmoved" != "northwest")) then
+          {
+               gosub MOVE southeast
+               return
+          }
+     if (($southwest) && ("%lastmoved" != "northeast")) then
+          {
+               gosub MOVE southwest
+               return
+          }
+     if (($east) && ("%lastmoved" != "west")) then
+          {
+               gosub MOVE east
+               return
+          }
+     if (($west) && ("%lastmoved" != "east")) then
+          {
+               gosub MOVE west
+               return
+          }
+     return
+###########################################################
+AUTOMOVE:
+     delay 0.0001
+     action (moving) on
+     var Moving 0
+     var randomloop 0
+     var Destination $0
+     var automovefailCounter 0
+     if ($hidden = 1) then 
+          {
+               send unhide
+               pause 0.5
+          }
+     if ($standing = 0) then gosub AUTOMOVE_STAND
+     if ($roomid = 0) then gosub RANDOMMOVE
+     if ("$roomid" = "%Destination") then return
+AUTOMOVE_GO:
+     pause 0.0001
+     matchre AUTOMOVE_FAILED ^(?:AUTOMAPPER )?MOVE(?:MENT)? FAILED
+     matchre AUTOMOVE_RETURN ^YOU HAVE ARRIVED(?:\!)?
+     matchre AUTOMOVE_RETURN ^SHOP CLOSED(?:\!)?
+     matchre AUTOMOVE_FAIL_BAIL ^DESTINATION NOT FOUND
+     matchre AUTOMOVE_FAILED ^You don\'t seem
+     put #goto %Destination
+     matchwait 4
+     if (%Moving = 0) then goto AUTOMOVE_FAILED
+     matchre AUTOMOVE_FAILED ^(?:AUTOMAPPER )?MOVE(?:MENT)? FAILED
+     matchre AUTOMOVE_RETURN ^YOU HAVE ARRIVED(?:\!)?
+     matchre AUTOMOVE_RETURN ^SHOP CLOSED(?:\!)?
+     matchre AUTOMOVE_FAIL_BAIL ^DESTINATION NOT FOUND
+     matchwait 160
+     goto AUTOMOVE_FAILED
+AUTOMOVE_STAND:
+     pause 0.1
+     if ($standing = 1) then goto AUTOMOVE_RETURN
+     matchre AUTOMOVE_STAND ^\.\.\.wait|^Sorry\,|^Please wait\.
+     matchre AUTOMOVE_STAND ^Roundtime\:?|^\[Roundtime\:?|^\(Roundtime\:?|^\[Roundtime|^Roundtime
+     matchre AUTOMOVE_STAND ^The weight of all your possessions prevents you from standing\.
+     matchre AUTOMOVE_STAND ^You are still stunned\.
+     matchre AUTOMOVE_RETURN ^You stand(?:\s*back)? up\.
+     matchre AUTOMOVE_RETURN ^You are already standing
+     send stand
+     matchwait 20
+     goto AUTOMOVE_STAND
+AUTOMOVE_FAILED:
+     pause 0.1
+     # put #script abort automapper
+     pause 0.2
+     math automovefailCounter add 1
+     if (%automovefailCounter > 3) then goto AUTOMOVE_FAIL_BAIL
+     send #mapper reset
+     pause 0.1
+     put look
+     pause 0.5
+     pause 0.2
+     if ($roomid = 0) || (%automovefailCounter > 2) then gosub RANDOMMOVE
+     goto AUTOMOVE_GO
+AUTOMOVE_FAIL_BAIL:
+     action (moving) off
+     put #echo
+     put #echo >Log Crimson *** AUTOMOVE FAILED. ***
+     put #echo >Log Destination: %Destination
+     put #echo Crimson *** AUTOMOVE FAILED.  ***
+     put #echo Crimson Destination: %Destination
+     put #echo
+     return
+AUTOMOVE_RETURN:
+     action (moving) off
+     pause 0.1
+     pause 0.2
+     return
+###########################################################
+STAND_RET:
+     pause 0.1
+     put stand
+     pause 0.5
+RETREAT_PAUSE:
+     pause
+RETREAT:
+     var retreatLoop 0
+1RETREAT:
+     pause 0.1
+     math retreatLoop add 1
+     var LOCATION RETREAT
+     if (%retreatLoop > 5) then goto RETREAT_RETURN
+     if ($standing = 0) then gosub STAND
+     matchre RETREAT ^\.\.\.wait|^Sorry\,|^Please wait\.
+     matchre WAIT ^\.\.\.wait|^Sorry\,|^Please wait\.
+     matchre STUNNED ^You are still stunned
+     matchre WEBBED ^You can't do that while entangled in a web
+     matchre IMMOBILE ^You don't seem to be able to move to do that
+     matchre RETREAT ^You stop advancing
+     matchre 2RETREAT ^You retreat back to pole range\.
+     matchre 2RETREAT ^You sneak back out
+     matchre STAND_RET ^You must stand first\.
+     matchre RETURN ^You retreat from combat\.
+     matchre RETURN ^You are already as far away as you can get\!
+     matchre RETURN ^You stop
+     matchre 1RETREAT ^You try to
+     matchre 1RETREAT revealing your hiding place\!
+     put retreat
+     matchwait 20
+     put #echo >Log Crimson *** MISSING MATCH IN RETREAT! (ubercombat.cmd) ***
+     put #log $datetime MISSING MATCH IN RETREAT (ubercombat.cmd)
+2RETREAT:
+     pause 0.1
+     var LOCATION 2RETREAT
+     math retreatLoop add 1
+     if ($standing = 0) then gosub STAND
+     if (%retreatLoop > 6) then goto RETREAT_RETURN
+     matchre 2RETREAT ^\.\.\.wait|^Sorry\,|^Please wait\.
+     matchre WAIT ^\.\.\.wait|^Sorry\,|^Please wait\.
+     matchre STUNNED ^You are still stunned
+     matchre WEBBED ^You can't do that while entangled in a web
+     matchre IMMOBILE ^You don't seem to be able to move to do that
+     matchre RETURN ^You stop advancing
+     matchre RETURN ^You retreat from combat\.
+     matchre RETURN ^You retreat back to pole range\.
+     matchre RETURN ^You sneak back out
+     matchre RETURN ^You are already as far away as you can get\!
+     matchre RETURN ^You stop
+     matchre 2RETREAT ^You try to
+     matchre 2RETREAT revealing your hiding place\!
+     put retreat
+     matchwait 20
+     goto retry
+     put #echo >Log Crimson *** MISSING MATCH IN RETREAT! (ubercombat.cmd) ***
+     put #log $datetime MISSING MATCH IN RETREAT (ubercombat.cmd)
+     return
+RETREAT_RETURN:
+     pause 0.001
+     return
+RETREAT_FLEE:
+     var retreatloop 0
+RETREAT_FLEE_1:
+     var LOCATION RETREAT_FLEE_1
+     math retreatloop add 1
+     pause 0.01
+     pause 0.1
+     if ($standing = 0) then gosub STAND
+     if (%retreatloop > 6) then goto FLEE_NOW
+     matchre RETREAT_FLEE_1 ^\.\.\.wait|^Sorry\,|^Please wait\.
+     matchre WAIT ^\.\.\.wait|^Sorry\,|^Please wait\.
+     matchre STUNNED ^You are still stunned
+     matchre WEBBED ^You can't do that while entangled in a web
+     matchre IMMOBILE ^You don't seem to be able to move to do that
+     matchre RETREAT_FLEE_1 ^You stop advancing
+     matchre RETREAT_FLEE_1 ^You retreat back to pole range\.
+     matchre RETREAT_FLEE_1 ^You sneak back out
+     matchre RETREAT_FLEE_1 ^You must stand first\.
+     matchre RETREAT_FLEE_1 ^You stop
+     matchre RETREAT_FLEE_1 ^You try to
+     matchre RETREAT_FLEE_1 revealing your hiding place\!
+     matchre RETURN ^You retreat from combat\.
+     matchre RETURN ^You are already as far away as you can get\!
+     put retreat
+     matchwait 20
+     put #echo >Log Crimson *** MISSING MATCH IN RETREAT_FLEE_1! (ubercombat.cmd) ***
+     put #log $datetime MISSING MATCH IN RETREAT_FLEE_1 (ubercombat.cmd)
+FLEE_NOW:
+     pause 0.1
+     if ($standing = 0) then gosub STAND
+     pause 0.001
+     matchre RETURN ^Obvious|Roundtime|^A master|^Your?
+     put flee
+     matchwait 5
+     return  
 #### CATCH AND RETRY SUBS
 WAIT:
      delay 0.0001
@@ -2634,3 +4706,32 @@ CALMED:
      if ($stunned) then waiteval (!$stunned)
      if (!$standing) then gosub STAND
      goto %LOCATION 
+STOPINVIS:
+     if ("$guild" = "Necromancer") then
+          {
+               put release eotb
+               pause 0.3
+          }
+     if ("$guild" = "Thief") then
+          {
+               put khri stop silence vanish
+               pause 0.3
+          }
+     if ("$guild" = "Moon Mage") then
+          {
+               put release rf
+               pause 0.3
+          }
+     pause 0.3
+     return
+#### RETURNS
+RETURN_CLEAR:
+     delay 0.0001
+     put #queue clear
+     pause 0.0001
+     pause 0.0001
+     return
+RETURN:
+     delay 0.0001
+     pause 0.001
+     return
