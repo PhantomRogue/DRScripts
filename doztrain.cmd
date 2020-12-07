@@ -12,13 +12,13 @@
 action exit when eval $health < 45
 action goto fullpouch when is too full to fit any more gems
 action goto fullpouch when You think the (.*) gem pouch is too full to fit another gem into
-action put tie pou when You've already got a wealth of gems in there
+action put tie pou;stow $lefthandnoun when You've already got a wealth of gems in there
 action goto HealNow when You're not in any condition to be stalking anyone
 
 debug 10
 var MoveToMob east gate|285
 var MoveToGemsFromHunt shard|portal|618|gems
-var MoveToShard e gate
+var MoveToShard shard
 var MoveToSprites 9|sprites|19
 var MoveFromSprites ratha
 
@@ -116,7 +116,7 @@ GoingToCrossing:
 
 ## BackTraining
 	## DD Paran 1 = BackTrain, Param 2 = Only once
-	send .dd Yes Yes   
+	send .dd Yes Yes
 	waitfor HUNTINGISDONE
 	pause 1
 	put rel ee
@@ -149,7 +149,8 @@ HealerSub:
 	gosub MoveLooper MoveFromHealer
 	counter set 0
 	pause .5
-	gosub MoveLooper MoveToShard
+	put go gate
+	counter set 0
 
 
 LooperInfo:

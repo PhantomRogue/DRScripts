@@ -1,3 +1,4 @@
+#debug 10
 goto start
 
 start:
@@ -14,12 +15,13 @@ start:
 	put prep bless
 	put #goto TGNE
 	waitfor YOU HAVE ARRIVED
-	put get vial
+	put get bottle
 	pause 5
-	put fill vial with water
-	put cast water in vial
+	put fill bottle with water
+	pause 5
+	put cast water in bottle
 	pause 2
-	put stow vial
+	put stow bottle
 	goto bath
 
 bath:
@@ -116,7 +118,7 @@ touch:
 	put touch altar
 	match stand You see yourself laughing
 	match stand vision
-	match touch K>
+	match touch your skin as you touch the altar
 	matchwait
 	
 stand:
@@ -171,7 +173,7 @@ waitfor YOU HAVE ARRIVED
 put meditate
 pause 1
 pause 1
-put #goto 349
+put #goto 348
 waitfor YOU HAVE ARRIVED
 goto seed4
 
@@ -179,9 +181,9 @@ seed4:
 put plant seed
 pause 2
 pause
-put get vial
-put sprinkle vial on room
-put stow vial
+put get bottle
+put sprinkle bottle on room
+put stow bottle
 pause
 put go arch
 pause

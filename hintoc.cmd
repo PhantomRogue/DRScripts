@@ -115,28 +115,27 @@ var BowHide No
 ###                                               ###
 #####################################################
 
+var DoNecroHealing No
 
-
-#gosub starBuffCheckt
-
-Koil:
-Hint:
-Hintoc:
-var SkipHide Yes
-setvariable weapons foil|PM
-setvariable WSkill Small_Edged|Targeted_Magic
-var SPELL ff.10
-var DEBIL sick.3
-goto goon
-
-
-HintUndead:
-var SkipHide Yes
-setvariable weapons PM
-setvariable WSkill Targeted_Magic
-var SPELL HE.8
-var DEBIL sick.5
-goto goon
+if_1 then 
+{
+## First Parameter is setup for Backtraining
+	var SkipHide Yes
+	setvariable weapons foil|PM
+	setvariable WSkill Small_Edged|Targeted_Magic
+	var SPELL ff.10
+	var DEBIL sick.3
+	goto goon
+}
+else
+{	
+	var SkipHide Yes
+	setvariable weapons foil|PM
+	setvariable WSkill Small_Edged|Targeted_Magic
+	var SPELL ff.10
+	var DEBIL sick.3
+	goto goon
+}
 
 
 goon:
@@ -336,11 +335,26 @@ loopArray:
 	return	
 
 HOLD:
-#math ArrayIndex subtract %total
-setvariable ArrayIndex 0
-gosub SetupWeapons
-return
+## Script completed a loop, lets exit
+if_2 then
+{
+	put #parse HUNTINGISDONE
+	put #script abort hintoc
+	exit
+}
+if_1 then
+{
+	var ArrayIndex 0
+	gosub SetupWeapons
+}
+else
+{
+	put #parse HUNTINGISDONE
+	put #script abort hintoc
+}
 
+
+return
 CritterCheck:
 if %skill = Bow && %WearBow = Off then gosub RangedPrep
 gosub HuntTime

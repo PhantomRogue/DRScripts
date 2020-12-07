@@ -69,7 +69,7 @@ var UtilSpell GAF
 var UtilMana 18
 var WardSpell mpp
 var WardMana 21
-var camb pend
+var camb squircle
 var cambCharge 2
 if_1 gosub %1
 goto Looper

@@ -338,9 +338,9 @@ HOLD:
 ## Script completed a loop, lets exit
 if_2 then
 {
-	put #script abort dd
 	put rel ee
 	put #parse HUNTINGISDONE
+	put #script abort dd
 	exit
 }
 if_1 then
@@ -351,8 +351,8 @@ if_1 then
 else
 {
 	put #parse HUNTINGISDONE
-	put #script abort dd
 	put rel ee
+	put #script abort dd
 }
 
 
