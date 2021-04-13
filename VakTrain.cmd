@@ -17,12 +17,19 @@ action goto HealNow when You're not in any condition to be stalking anyone
 action quit when "Stop right there!"  The shout reverberates through the area as the guardsman charges towards you.  "You're under arrest!"
 
 debug 10
-var MoveToMob rossm|138
-var MoveToGemsFromHunt lang|portal|375|gems
-var GiantsToPawn lang|pawn
-var MoveToHealer portal|375|healer
-var MoveFromHealer exit|139
-var MoveToGems portal|375|gems
+	var MoveToMob rossm|138
+	var MoveToGemsFromHunt lang|fang|gems
+	var GiantsToPawn lang|pawn
+	var MoveToHealer map150|healer
+	var MoveFromHealer exit|139
+	var MoveToGems fang|gems
+
+#BackTrainingGiants
+	var MoveToBackTrain raven|180
+	var MoveFromBackTrain hib
+
+	var MoveToEngineering engineer
+
 var TotalLoops 0
 var WeHunting 0
 counter set 0
@@ -75,7 +82,7 @@ GatheringSub:
 ## Finished burgling  Time to pop boxes
 BoxPoppinRoutine:
 	send .newdisarm
-	match GoGetHealed YOUBLEWIT
+	match GoGetHealed YOUBLEWIT	
 	match MoveToArmor BOXESAREPOPPED
 	matchwait
 
@@ -86,8 +93,46 @@ MoveToArmor:
 	counter set 0
 	GoGetHealed:
 	pause 1
+	
+EngineeringSub:
+## Lets do 2 work orders, lets head to riverhaven
+	send .ptravel river
+	waitfor DonePortalhax
+	gosub MoveLooper MoveToEngineering
+	counter set 0
+	pause 2
+	put sano
+	pause 1
+	send .mastercraft
+	waitfor MASTERCRAFT DONE
+	pause 1
 
-
+BackTrain:
+	send .ptravel hib
+	waitfor DonePortalhax
+	pause 1
+	put sano
+	pause 1	
+	gosub MoveLooper MoveToBackTrain
+	counter set 0
+	pause 1
+	send .backtrainvak BackTrainTHE
+	waitfor HUNTINGISDONE
+	put she;stow right
+	pause 1
+	put ret;ret
+	gosub MoveLooper MoveFromBackTrain
+	counter set 0
+	
+	
+RavenSub:
+	send .ptravel cros
+	waitfor DonePortalhax
+	pause 1
+## We in Crossing, run the Raven!
+	send .raven
+	waitfor RAVENDONE
+	
 HealerSub:
 ## Go to the AutoHealer
 	gosub MoveLooper MoveToHealer
@@ -112,7 +157,11 @@ HealerSub:
 
 
 LooperInfo:
-	var EndTimer %t
+	## Lets go back to Elbains, since we were in Crossing for Scholarship
+	send .ptravel elb
+	waitfor DonePortalhax
+	pause 1
+	
 	goto start
 
 
@@ -139,7 +188,7 @@ fullpouch:
 	## We at the Gemsmith, remove pouch, put it in our water sack and get a new one
 	put rem pou;put pou in wa sa
 	pause .5
-	put ask wick for pouch;ask gems for pouch;wear pou
+	put ask wick for pouch;ask clerk for pouch;wear pou
 	pause .5
 	counter set 0
 	gosub MoveLooper MoveFromHealer

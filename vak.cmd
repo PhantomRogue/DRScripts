@@ -29,6 +29,7 @@ put wie glad
 # Variable to stop hunting after you get the Box Liimt (Defined below, no variable for it)
 ## Use .vak 1 from the Master Trainer if you want to stop hunting after getting boxes, no parameter if you just want to AFK hunt
 
+
 setvariable AFKVersion 0
 if_1 then setvariable AFKVersion 1
 
@@ -40,7 +41,7 @@ setvariable Golds 0
 setvariable Silvers 0
 
 start:
-if (%AFKVersion == 1 && %TotalBoxes > 11) then goto HunterDone
+if (%AFKVersion == 1 && %TotalBoxes > 10) then goto HunterDone
 
 put tb
 pause 10

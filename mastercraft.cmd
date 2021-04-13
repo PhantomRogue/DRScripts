@@ -2,7 +2,7 @@
 # Mastercraft by Dasffion
 # Based on MasterCraft - by the player of Jaervin Ividen
 # A crafting script suite...
-#v 1.2.1
+# many versions later - Latest updates 02/07/2021
 #
 # Script Usage: .mastercraft                                        --to only do one work order
 #                    .mastercraft <no. of orders>                    --to perform more than one
@@ -26,23 +26,23 @@
 #        used standalone. Also, some subscripts (pound, carve, knit, sew, etc.) check to see if Mastercraft.cmd is running before continuing certain
 #        tasks. Be careful when renaming scriptfiles.
 #      
-#     Be sure to setup your character's crafting profile in **MC INCLUDE.CMD BEFORE USING THESE SCRIPTS.** There are some things scripting
+#     Be sure to setup your character's crafting profile in **MC_SETUP.CMD BEFORE USING THESE SCRIPTS.** There are some things scripting
 #     cannot do for you, such as make personal decisions.
 #
 #     Included in this suite:
 #          mastercraft.cmd
 #          mc_include.cmd
-#          pound.cmd
-#          sew.cmd
-#          knit.cmd
-#          carve.cmd
-#          enchant.cmd
-#          shape.cmd
-#          smelt.cmd
-#          grind.cmd
-#          weave.cmd
-#          spin.cmd
-#          tinker.cmd
+#          mc_pound.cmd
+#          mc_sew.cmd
+#          mc_knit.cmd
+#          mc_carve.cmd
+#          mc_enchant.cmd
+#          mc_shape.cmd
+#          mc_smelt.cmd
+#          mc_grind.cmd
+#          mc_weave.cmd
+#          mc_spin.cmd
+#          mc_tinker.cmd
 #     
 #     Each script can be run completely standalone from Mastercraft if you want to create multiple items or just individual orders. Using them
 #     as such will require you to be responsible for your own material management and quality control. Be sure to read the beginning section for
@@ -98,8 +98,11 @@ include mc_include.cmd
      var full.order.noun
      var coin.intake 0
      var orders.completed 0
+	 var gottools 0
      var tool.gone 0
      var oil.gone 0
+	 var polish.gone 0
+	 var stain.gone 0
      var brush.gone 0
      var fail2 0
      var tool.repair 0
@@ -112,7 +115,7 @@ include mc_include.cmd
      var difficultytry add 0
      var NOWO $MC_%society.type_NOWO
      gosub clearvolume
-
+	 var all.tools $MC_HAMMER|$MC_TONGS|$MC_SHOVEL|$MC_BELLOWS|$MC_STIRROD|$MC_PLIERS|$MC_NEEDLES|$MC_SCISSORS|$MC_SLICKSTONE|$MC_AWL|$MC_CHISEL|$MC_RIFFLER|$MC_RASP|$MC_SAW|$MC_DRAWKNIFE|$MC_SHAPER|$MC_CLAMP|$MC_TINKERTOOL|$MC_CARVINGKNIFE|$MC_BOWL|$MC_MORTAR|$MC_PESTLE|$MC_STICK|$MC_SIEVE|$MC_LOOP|$MC_BURIN|$MC_IMBUE.ROD|$MC_BRAZIER
 
       
      if matchre("%discipline", "weapon|blacksmith") then var work.tools $MC_HAMMER|$MC_TONGS|$MC_SHOVEL|$MC_BELLOWS|$MC_STIRROD
@@ -146,7 +149,7 @@ include mc_include.cmd
           }
      if "%discipline" = "artif" then
           {
-               var work.tools $MC_LOOP
+               var work.tools $MC_LOOP|$MC_BURIN|$MC_IMBUE.ROD|$MC_BRAZIER
           }
      if $MC_END.EARLY = 1 then 
           {
@@ -164,13 +167,14 @@ include mc_include.cmd
      action instant math coin.intake subtract $1 when pay the sales clerk (\d+)
      action instant math coin.intake subtract %coin.temp when takes some coins from you and hands you.*\.$
      action instant var tool.repair $2 when This appears to be a crafting tool and .* (is|are|have|has) (.*?)(?: \(\d+-\d+\%\))?\.
-     action instant var tool.gone 1; var oil.gone 1 when The oil is all used up, so you toss
-     action instant var tool.gone 1; var brush.gone 1 when The brush is all used up, so you toss
+     action instant var tool.gone 1; var $1.gone 1 when The (.+) is all used up, so you toss
      action instant var grind 1 when TURN the GRINDSTONE several times
      action instant var chapter $1 when You seem to recall this item being somewhere in chapter (\d+) of the instruction book.
      action goto lack.coin when ^LACK COIN
      action (analyze) off
 
+	 if (matchre("(%clerktools)", "%work.tools") && (%gottools = 0)) then gosub get.tools
+	 var gottools 1
 
 ##############################
 #
@@ -306,7 +310,7 @@ identify.order:
                matchre chapter.1 This logbook is tracking a work order requiring you to craft (a small stone block|a deep stone basin|a large stone block|a small stone sphere|a thin stone slab|a flat slickstone|a short stone pole|a large stone sphere|a thick stone slab|a grooved stone stirring rod|a smooth slickstone|a polished slickstone|a stout stone stirring rod|a notched stone stirring rod|a shallow stone basin|a forked stone stirring rod|a long stone pole|a slender stone stirring rod) from any material\.
                matchre chapter.2 This logbook is tracking a work order requiring you to craft (a rough stone table|a stone buffet table|a high stone table|a stone dining table|a square stone table|a stone refectory table|a round stone table|a stone meditation table|an oval stone table|a stone parquet table|a long stone table) from any material\.
                matchre chapter.3 This logbook is tracking a work order requiring you to craft (some smooth stones|a stone bola|a stone bludgeon|a stone hand sword|a stone carving knife|a heavy stone mallet|some elongated stones|a stone javelin|a stone hand axe|a stone spear|a stone war club|a stone war mattock|some balanced stones|a stone maul|a stone war hammer|a stone flail|some stone spikes|some stone shards) from any material\.
-               matchre chapter.4 This logbook is tracking a work order requiring you to craft (a stone band|a stone talisman case|a stone toe ring|a stone belt buckle|a stone nose ring|a stone armband|a stone pin|an articulated stone bracelet|a stone anklet|a stone tiara|a stone bracelet|a stone locket|a stone tailband|a stone choker|a stone hairpin|a stone diadem|a stone cloak pin|a stone circlet|a pair of stone earrings|an articulated stone necklace|a stone medallion|a stone crown|a stone amulet|an articulated stone belt|a stone pendant|a stone mask|a stone brooch|a stone earcuff) from any material\.
+               matchre chapter.4 This logbook is tracking a work order requiring you to craft (a stone band|a stone talisman case|a stone toe ring|a stone belt buckle|a stone nose ring|a stone armband|a stone pin|an articulated stone bracelet|a stone anklet|a stone tiara|a stone bracelet|a stone tailband|a stone choker|a stone hairpin|a stone diadem|a stone cloak pin|a stone circlet|a pair of stone earrings|a stone crown|an articulated stone belt|a stone pendant|a stone mask|a stone brooch|a stone earcuff) from any material\.
                matchre chapter.5 This logbook is tracking a work order requiring you to craft (a Human image|an Elothean image|a Kaldar image|a Prydaen image|an Elf image|a Rakash image|a Gor'Tog image|a S'Kra Mur image|a Halfling image|a Dwarf image|a Gnome image) from any material\.
                matchre chapter.6 This logbook is tracking a work order requiring you to craft (a long bone pole|a short bone pole) from any material\.
                matchre chapter.7 This logbook is tracking a work order requiring you to craft (a round bone table|a square bone table) from any material\.
@@ -348,8 +352,8 @@ identify.order:
           {
                action var volume $1 when ^The notes indicate that remedies such as this must be bundled in quantities containing exactly (\d+) uses
                matchre chapter.2 This logbook is tracking a work order requiring you to craft (some blister cream|some moisturizing ointment|some itch salve|some lip balm)
-               matchre chapter.3 This logbook is tracking a work order requiring you to craft (some limb salve|some limb ungent|some neck salve|some abdominal salve|some chest salve|some neck ungent|some abdominal ungent|some chest ungent|some head ungent)
-               matchre chapter.4 This logbook is tracking a work order requiring you to craft (a neck potion|an eye potion|some neck tonic|some back tonic|some eye tonic)
+               matchre chapter.3 This logbook is tracking a work order requiring you to craft (some limb salve|some limb ungent|some neck salve|some abdominal salve|some chest salve|some neck ungent|some abdominal ungent|some chest ungent|some head ungent|some head salve)
+               matchre chapter.4 This logbook is tracking a work order requiring you to craft (a neck potion|an eye potion|some neck tonic|some back tonic|some eye tonic|a back potion)
                matchre chapter.5 This logbook is tracking a work order requiring you to craft (some body ointment|some body poultices)
                matchre chapter.6 This logbook is tracking a work order requiring you to craft (a body draught|a body elixer)
                put read my %society.type logbook
@@ -362,7 +366,7 @@ identify.order:
                matchre chapter.2 This logbook is tracking a work order requiring you to craft (a radiant trinket|a mana trinket|a cambrinth retuner|a flash trinket|a wind trinket|an earth trinket)
                matchre chapter.3 This logbook is tracking a work order requiring you to craft (training ritual focus|basic lunar ritual focus|basic elemental ritual focus|basic life ritual focus|basic holy ritual focus)
                matchre chapter.4 This logbook is tracking a work order requiring you to craft (common material minor fount|common material lesser fount|common material greater fount)
-               matchre chapter.6 This logbook is tracking a work order requiring you to craft (a bubble wand|ease burden runestone|seal cambrinth runestone|(?<!ease )burden runestone|manifest force runestone|strange arrow runestone|gauage flow runestone|dispel runestone|lay ward runestone)
+               matchre chapter.6 This logbook is tracking a work order requiring you to craft (a bubble wand|ease burden runestone|seal cambrinth runestone|(?<!ease )burden runestone|manifest force runestone|strange arrow runestone|gauge flow runestone|dispel runestone|lay ward runestone)
                put read my %society.type logbook
                matchwait 1
                goto new.order.wait
@@ -544,7 +548,7 @@ calc.material:
                echo Inventory: %material.volume volumes
                if %oil.count < 1 then
                {
-                    gosub automove $tool.room
+                    gosub automove $oil.room
                     action (order) on
                     gosub ORDER
                     pause .5
@@ -597,7 +601,14 @@ calc.material:
                send read my book
                waitforre .*bone stack.*\((\d+) (piece|pieces)\)
                var volume $1
-               action (book) off          
+               action (book) off   
+			   var tmp.volume %volume
+               math tmp.volume multiply %order.quantity
+			   if $MC_LOW_VOLUME < %tmp.volume then
+                    {
+                         goto new.order
+                    }
+			   
                gosub STUDY my book
                if (($MC_DIFFICULTY < 4) && (!%NOWO)) then 
                     {
@@ -631,7 +642,7 @@ calc.material:
                          gosub PUT_IT my polish in my %main.storage
                     }
           }
-     if ((matchre("%discipline", "tinkering|shaping")) && ("%order.pref" = lumber")) then
+     if ((matchre("%discipline", "tinkering|shaping")) && ("%order.pref" = "lumber")) then
           {
                pause .1
                action (book) on
@@ -658,7 +669,16 @@ calc.material:
                echo Pieces per Item: %volume
                echo Number of Items Req'd: %order.quantity
                echo Inventory: %material.volume pieces
-          }     
+                if %stain.count < 1 then
+                    {
+                         gosub automove $tool.room
+                         action (order) on
+                         gosub ORDER
+                         action (order) off
+                         gosub ORDER $stain.order
+                         gosub PUT_IT my stain in my %main.storage
+                    }
+         }     
      if matchre("%discipline", "remed") then
           {
                pause .1
@@ -670,7 +690,7 @@ calc.material:
                var herb2 NULL
                var herb1.volume 5
                if %order.chapter = 2 then var herb2.volume 1
-               if matchre("%full.order.noun", "some blister cream|some moisturizing ointment|some itch salve|some lip balm") then var herb1 red.flowers
+               if matchre("%full.order.noun", "some blister cream|some moisturizing ointment|some itch salve|some lip balm") then var herb1 flowers
                if "%full.order.noun" = "some blister cream" then var herb2 nemoih
                if "%full.order.noun" = "some moisturizing ointment" then var herb2 plovik
                if "%full.order.noun" = "some itch salve" then var herb2 jadice
@@ -684,6 +704,7 @@ calc.material:
                if matchre("%full.order.noun", "a chest potion|some chest tonic") then var herb1 root
                if matchre("%full.order.noun", "a back potion|some back tonic") then var herb1 junliar
                if (("$zoneid" = "150") && (matchre("%full.order.noun", "a back potion|some back tonic"))) then var herb1 junilar
+               if (("$zoneid" = "67") && (matchre("%full.order.noun", "a back potion|some back tonic"))) then var herb1 junilar
                if matchre("%full.order.noun", "an eye potion|some eye tonic") then var herb1 aevaes
                if matchre("%full.order.noun", "some face ointment|some face poultices") then var herb1 pollen
                if matchre("%full.order.noun", "some body ointment|some body poultices") then var herb1 genich
@@ -772,11 +793,15 @@ calc.material:
           if (%order.quantity > %%order.pref.item.count) then gosub lack.material
           pause 0.5
           echo Number of Items Req'd: %order.quantity
-          if %fount.count < 1 then
+          if ("%discipline" = "artif") then gosub count.material fount
+          if %fount.uses < %order.quantity then
                {
-                    gosub automove enchanting tool
+			        gosub get my fount
+					put drop my fount
+					math fount.count subtract 1
                     if %fount.count < 1 then 
                               {
+								   gosub automove enchanting tool
                                    gosub ORDER 3
                                    gosub PUT_IT my fount in my %main.storage
                               }
@@ -818,7 +843,7 @@ calc.parts:
      if matchre("%assemble", "(\S+)\s(\S+)") then math asmCount1 subtract %$1.$2.count
      if (matchre("%assemble2", "(\S+)") && ("%assemble2" != "mechanism")) then math asmCount2 subtract %$1.count
      if matchre("%assemble2", "(\S+)\s(\S+)") then math asmCount2 subtract %$1.$2.count
-     if matchre("%assemble2", "(\S+)") then math asmCount2 subtract %$1.count
+#     if matchre("%assemble2", "(\S+)") then math asmCount2 subtract %$1.count
      if "%assemble2" = "mechanism" then 
           {
                put #tvar totalmechanisms %asmCount2
@@ -844,6 +869,7 @@ parts.inv:
      var permutation.count 0
      var rarefaction.count 0
      var fount.count 0
+	 var fount.uses 0
      var water.count 0
      var alcohol.count 0
      var coal.count 0
@@ -859,6 +885,8 @@ parts.inv:
      var long.cord.count 0
      var short.cord.count 0
      var pins.count 0
+	 var backer.count 0
+	 var strips.count 0
      var oil.count 0
      var polish.count 0
      var stain.count 0
@@ -873,7 +901,7 @@ parts.inv:
      action (assemble) math handle.count add 1 when ^\s+(a|an) \S+ shield handle
      action (assemble) math hilt.count add 1 when ^\s+a \S+ \S+ hilt
      action (assemble) math haft.count add 1 when ^\s+a \S+ \S+ haft
-     action (assemble) math oil.count add 1 when ^\s+a flask of(?: azure| violet)? oil
+     action (assemble) math oil.count add 1 when ^\s+a(?: big)? flask of(?: azure| violet)? oil
      action (assemble) math large.backing.count add 1 when ^\s+a large \S+ backing
      action (assemble) math small.backing.count add 1 when ^\s+a small \S+ backing
      action (assemble) math large.padding.count add 1 when ^\s+(a|some) large \S+ padding
@@ -883,11 +911,15 @@ parts.inv:
      action (assemble) math long.cord.count add 1 when ^\s+a long \S+ cord
      action (assemble) math short.cord.count add 1 when ^\s+a short \S+ cord
      action (assemble) math pins.count add 1 when ^\s+some .*?pins
+	 action (assemble) math backer.count add 1 when backing material
+	 action (assemble) math strips.count add 1 when leather strips
      action (outfitting) math %order.pref.item.count add 1 when ^\s+(?:an?|some) (%work.material).*(%order.pref)
      action (outfitting) math %order.pref.deed.count add 1 when ^\s+a deed for (?:an?|some).*(%work.material).*(%order.pref)
      action (engineering) math polish.count add 1 when ^\s+a jar of surface polish
      action (engineering) math stain.count add 1 when ^\s+some wood stain
      action (engineering) math string.count add 1 when ^\s+some bow string
+     action (engineering) math backer.count add 1 when ^\s+some .+ backer
+     action (engineering) math strips.count add 1 when ^\s+some leather strips
      action (engineering) math mechanism.count add 1 when ^\s+(?:an?|some) (\S+) mechanism
      action (engineering) math lenses.count add 1 when ^\s+some lenses
      action (engineering) math %order.pref.item.count add 1 when ^\s+(?:an?|some) (%work.material).*(%order.pref|stack)
@@ -973,17 +1005,34 @@ count.material:
                          var mechnumber 0
                          return
                     }
-               action var mechs $1 when ^There(?:'s only| are) (\S+) parts? left of the (?:\S+) mechanism(?:s)?
+               action var mechs $1 when ^There(?:'s only| are| is) (\S+) ((?:parts? left of the (?:\S+) mechanism(?:s)?)|(?:mechanism(?:s)? left for use with))
                var i 0
                send count my mech
                pause 1
                gosub mechcount
                return
           }
+	 if "%count" = "fount" then
+	      {
+               if %fount.count = 0 then 
+                    {
+                         var fount.uses 0
+                         return
+                    }
+		       action (fountcount) var fount.uses $1 when approximately (\d+) uses? remaining
+			   action (fountcount) on
+			   var i 0
+			   gosub get my fount
+			   send anal my fount
+			   waitforre ^You.*analyze
+			   action (fountcount) off
+			   gosub PUT_IT my fount in my %main.storage
+			   return
+		  }
 count.material2:
      action (count) on
      pause 1
-     if "%ordinal(%tempcount)" = "zeroth" then math temp add 1
+     if "%ordinal(%tempcount)" = "zeroth" then math tempcount add 1
      send %c.action %ordinal(%tempcount) %work.material %count in my %main.storage
      pause 1
      if %manual =  1 then 
@@ -991,7 +1040,7 @@ count.material2:
                var bagcount %tempcount
                goto manual.count
           }
-     var volume.%ordinal(%tempcount) %itemvolume
+     var vol.%ordinal(%tempcount) %itemvolume
      math tempcount subtract 1
      action (count) off
      pause 1
@@ -1065,6 +1114,7 @@ purchase.assemble_1:
      gosub ORDER
      action (order) off
 purchase.assemble_2:
+     if $roomid != $part.room then gosub automove $part.room
      if !matchre("%discipline", "tailor|artif") then gosub ORDER %assemble
      else if matchre("%discipline", "tailor|artif") then
           {
@@ -1075,19 +1125,23 @@ purchase.assemble_2:
                     }
                if "%discipline" = "artif" then
                     {
-                         gosub ORDER $%assemble.order
+                         if (($zoneid = 150) && ("%assemble" = "abolition")) then gosub order $abolution.order
+                         else gosub ORDER $%assemble.order
                     }
           }
      math asmCount1 subtract 1
      pause .2
      if "%discipline" = "artif" then gosub PUT_IT my sigil in my %main.storage
      else gosub PUT_IT my %assemble in my %main.storage
-     if %asmCount1 = 0 then return
+     if %asmCount1 <= 0 then return
      goto purchase.assemble_2
 
 purchase.assemble2:
      if "%assemble2" = "NULL" then return
-     if (matchre("%discipline", "weapon|armor|blacksmith") && matchre("%assemble2", "strips|backing|string|backing|padding|hilt|haft|cord|pole|handle|boss") && ($roomid != $part.room)) then gosub automove $part.room
+     if (matchre("%discipline", "weapon|armor|blacksmith") && matchre("%assemble2", "strips|backing|string|backing|padding|hilt|haft|cord|pole|handle|boss|backer") then 
+		{
+			if ($roomid != $part.room)) then gosub automove $part.room
+		}
      elseif $roomid != $supply.room then 
           {
                if "%assemble2" = "mechanism" && $roomid != $ingot.buy then gosub automove $ingot.buy
@@ -1117,7 +1171,8 @@ purchase.assemble2:
                     }
                if "%discipline" = "artif" then
                     {
-                         gosub ORDER $%assemble2.order
+                         if (($zoneid = 150) && ("%assemble2" = "abolition")) then gosub order $abolution.order
+                         else gosub ORDER $%assemble2.order
                     }
           }
      else gosub ORDER %assemble2
@@ -1129,7 +1184,7 @@ purchase.assemble2:
                else gosub PUT_IT my %assemble2 in my %main.storage
           }
      if "%assemble2" = "mechanism" then gosub PUT_IT my ingot in my %main.storage
-     if %asmCount2 = 0 then return
+     if %asmCount2 <= 0 then return
      goto purchase.assemble2_2
 
 
@@ -1229,8 +1284,8 @@ process.order:
                     {
                          gosub gather.material stack
                          send count my stack
-                         waitforre You count out (\d+) (piece|pieces) of material there
-                         if %volume > $1 then gosub small.mat stack
+                         waitforre You count out (\d+) (piece|pieces) of material there						 
+                         if %volume > $1 then gosub small.mat other stack
                          gosub GET my %discipline book
                          gosub STUDY my book
                          if (($MC_DIFFICULTY < 4) && (!%NOWO)) then 
@@ -1338,7 +1393,7 @@ process.order:
                          goto new.order
                     }
                gosub PUT_IT my book in my %main.storage
-               send .MC_enchant %order.pref $MC.order.noun
+               send .MC_enchant "%work.material %order.pref" $MC.order.noun
                waitforre ^ENCHANTING DONE
           }
      if (($MC_END.EARLY = 1) || (%NOWO = 1)) then gosub expcheck
@@ -1359,10 +1414,16 @@ expcheck:
      return
 
 endearly:
-     if matchre("$roomobjs", "(bucket|bin)") then gosub PUT_IT my $MC.order.noun in $1
-     if matchre("$righthand|$lefthand", "$MC.order.noun") then gosub PUT drop my $MC.order.noun
+     if matchre("$roomobjs", "(bucket|bin)") then
+          {
+          if matchre("$lefthand", "$MC.order.noun") then gosub PUT_IT #$lefthandid in $1
+          if matchre("$righthand", "$MC.order.noun") then gosub PUT_IT #$lefthandid in $1
+          }
+     if matchre("$lefthand", "$MC.order.noun") then gosub PUT drop #$lefthandid
+     if matchre("$righthand", "$MC.order.noun") then gosub PUT drop #$lefthandid
      gosub untie.early
      gosub PUT_IT my %society.type logbook in my %main.storage
+	 if matchre("(%clerktools)", "(%work.tools)") then gosub return.tools
      put #parse MASTERCRAFT DONE
      exit
      
@@ -1374,8 +1435,13 @@ untie.early:
 
 trash.early:
      var trash $1
-     if matchre("$roomobjs", "(bucket|bin)") then gosub PUT_IT my %trash in $1
-     if matchre("$righthand|$lefthand", "%trash") then gosub PUT drop my %trash
+     if matchre("$roomobjs", "(bucket|bin)") then
+          {
+          if matchre("$lefthand", "%trash") then gosub PUT_IT #$lefthandid in $1
+          if matchre("$righthand", "%trash") then gosub PUT_IT #$lefthandid in $1
+          }
+     if matchre("$lefthand", "%trash") then gosub PUT drop #$lefthandid
+     if matchre("$righthand", "%trash") then gosub PUT drop #$lefthandid
      goto untie.early
 
 
@@ -1390,14 +1456,20 @@ codex:
 bundle.order:
      if $MC_%society.type_NOWO then 
           {
-               if matchre("$roomobjs", "(bucket|bin)") then gosub PUT_IT my $MC.order.noun in $1
-               if matchre("$righthand|$lefthand", "$MC.order.noun") then gosub PUT drop my $MC.order.noun
+               if matchre("$roomobjs", "(bucket|bin)") then
+                    {
+                    if matchre("$lefthand", "$MC.order.noun") then gosub PUT_IT #$lefthandid in $1
+                    if matchre("$righthand", "$MC.order.noun") then gosub PUT_IT #$lefthandid in $1
+                    }
+               if matchre("$lefthand", "$MC.order.noun") then gosub PUT drop #$lefthandid
+               if matchre("$righthand", "$MC.order.noun") then gosub PUT drop #$lefthandid
                math order.quantity subtract 1
                return
           }
      action (analyze) on
      math order.quantity subtract 1
-     send analyze my $MC.order.noun
+     if matchre("$lefthand", "$MC.order.noun") then send analyze #$lefthandid
+     if matchre("$righthand", "$MC.order.noun") then send analyze #$righthandid
      waitforre ^You.*analyze
      pause .5
      action (analyze) off
@@ -1417,8 +1489,13 @@ bundle.order:
      gosub PUT_IT my %society.type logbook in my %main.storage
      if contains("$righthand|$lefthand", "$MC.order.noun") then
           {
-               if matchre("$roomobjs", "(bucket|bin)" then gosub PUT_IT my $MC.order.noun in $1
-               else gosub PUT drop my $MC.order.noun
+               if matchre("$roomobjs", "(bucket|bin)") then
+                    {
+                    if matchre("$lefthand", "$MC.order.noun") then gosub PUT_IT #$lefthandid in $1
+                    if matchre("$righthand", "$MC.order.noun") then gosub PUT_IT #$lefthandid in $1
+                    }
+               if matchre("$lefthand", "$MC.order.noun") then gosub PUT drop #$lefthandid
+               if matchre("$righthand", "$MC.order.noun") then gosub PUT drop #$lefthandid
                var NOWO 1
           }
      gosub EMPTY_HANDS
@@ -1447,11 +1524,11 @@ gather.ingot:
      if %bigenoughfinal < %order.quantity then gosub smelt
      gosub setold
 gather.ingot1:
-     if %volume.%ordinal(%tempingot) >= %volume then 
+     if %vol.%ordinal(%tempingot) >= %volume then 
           {
                gosub GET %ordinal(%tempingot) %work.material ingot from my %main.storage
                var ingotchange %ordinal(%tempingot)
-               evalmath newvolume %volume.%ordinal(%tempingot) - %volume
+               evalmath newvolume %vol.%ordinal(%tempingot) - %volume
                goto ingotchange
           }
      math tempingot add 1
@@ -1467,9 +1544,9 @@ bigenoughcheck:
      var tracker 1
 bigenoughcheck1:
      if %tracker > %ingot.item.count then return
-     if "%volume.%ordinal(%tracker)" != "" then
+     if "%vol.%ordinal(%tracker)" != "" then
           {
-               evalmath bigenoughfinal (floor(%volume.%ordinal(%tracker)/%volume))+%bigenoughfinal
+               evalmath bigenoughfinal (floor(%vol.%ordinal(%tracker)/%volume))+%bigenoughfinal
           }
      math tracker add 1
      goto bigenoughcheck1
@@ -1478,13 +1555,13 @@ setold:
      var oldvolume 1
 setold_1:
      if %oldvolume > %ingot.item.count then return
-     var oldvolume.%ordinal(%oldvolume) %volume.%ordinal(%oldvolume)
+     var oldvol.%ordinal(%oldvolume) %vol.%ordinal(%oldvolume)
      math oldvolume add 1
      goto setold_1
      
 ingotchange:
      var tempchange %ingot.item.count
-     if %volume.%ingotchange = %volume then 
+     if %vol.%ingotchange = %volume then 
           {
                var old %ingot.item.count
                evalmath ingot.item.count %ingot.item.count - 1
@@ -1493,14 +1570,14 @@ ingotchange:
 ingotchange1:
      if %new < 1 then 
           {
-               if %new != %old then var volume.%ordinal(%old)
+               if %new != %old then var vol.%ordinal(%old)
                return
           }
-     var volume.%ordinal(%new) %oldvolume.%ordinal(%tempchange)
+     var vol.%ordinal(%new) %oldvol.%ordinal(%tempchange)
      math tempchange subtract 1
      if "%ordinal(%tempchange)" = "%ingotchange" then math tempchange subtract 1
      math new subtract 1
-     if ((%tempchange < 1) && (%newvolume != 0)) then var volume.first %newvolume
+     if ((%tempchange < 1) && (%newvolume != 0)) then var vol.first %newvolume
      goto ingotchange1
      
 
@@ -1515,7 +1592,7 @@ gather.material:
                if "%order.pref" = "runestone" then var work.material basic
                if "%order.pref" = "sphere" then var work.material small
                evalmath %get.mat.item.count %%get.mat.item.count - 1
-               gosub GET %work.material %get.mat
+               gosub GET %work.material %get.mat from my %main.storage
                return
           }
      if ("%discipline" = "remed") then 
@@ -1526,17 +1603,17 @@ gather.material:
                     gosub lack.material
                     }
                evalmath %get.mat.material.volume %%get.mat.material.volume - 25
-               gosub GET %get.mat
+               gosub GET %get.mat from my %main.storage
                return
           }
 #     if "%get.mat" = "stone" then {}
      var itemno 1
 gather.material_1:
-     if %volume.%ordinal(%itemno) >= %volume then 
+     if %vol.%ordinal(%itemno) >= %volume then 
           {
                gosub GET %ordinal(%itemno) %work.material %get.mat from my %main.storage
                var itemchange %ordinal(%itemno)
-               evalmath newvolume %volume.%ordinal(%itemno) - %volume
+               evalmath newvolume %vol.%ordinal(%itemno) - %volume
                goto itemchange
           }
      math itemno add 1
@@ -1572,7 +1649,7 @@ gather.material_1:
 
 itemchange:
      var tempchange %%get.mat.item.count
-     if %volume.%itemchange = %volume then 
+     if %vol.%itemchange = %volume then 
           {
                var old %%get.mat.item.count
                evalmath %get.mat.item.count %%get.mat.item.count - 1
@@ -1581,14 +1658,14 @@ itemchange:
 itemchange1:
      if %new < 1 then 
           {
-               if %new != %old then var volume.%ordinal(%old)
+               if %new != %old then var vol.%ordinal(%old)
                return
           }
-     var volume.%ordinal(%new) %oldvolume.%ordinal(%tempchange)
+     var vol.%ordinal(%new) %oldvol.%ordinal(%tempchange)
      math tempchange subtract 1
      if "%ordinal(%tempchange)" = "%itemchange" then math tempchange subtract 1
      math new subtract 1
-     if ((%tempchange < 1) && (%newvolume != 0)) then var volume.first %newvolume
+     if ((%tempchange < 1) && (%newvolume != 0)) then var vol.first %newvolume
      goto itemchange1
 
 small.mat:
@@ -1597,7 +1674,7 @@ small.mat:
      if "$righthand" != "Empty" then gosub PUT_IT my %tempitem in my %main.storage
      gosub parts.inv
      unvar tempitem
-     if ((%%order.pref.item.count = 1) && (%material.volume < %mass.volume)) then gosub lack.material
+     if (%material.volume < %mass.volume) then gosub lack.material
      gosub clear
      goto process.order
    
@@ -1612,11 +1689,8 @@ combine.check:
                return
           }
      var combine.parts 0
-     if %%order.pref.item.count > 1 then 
-          {
-               if contains("$righthand|$lefthand", "book") then gosub PUT_IT book in %main.storage
-               gosub combine
-          }
+	 if contains("$righthand|$lefthand", "book") then gosub PUT_IT book in %main.storage
+	 gosub combine
      if matchre("$righthand|$lefthand", "%combine.temp") then gosub PUT_IT my %combine.temp in my %combine.storage
      return
 
@@ -1627,21 +1701,27 @@ smelt_2:
      put .MC_Smelt %work.material
      waitfor SMELTING DONE
      put get ingot from %main.storage
-     var volume.first %material.volume
+     var vol.first %material.volume
      return
      
 combine:
-     if !matchre("$righthand|$lefthand", "%combine.temp") then gosub GET %combine.temp from my %combine.storage
-     if %%order.pref.item.count <= 1 then goto combine.end
-     gosub GET %combine.temp from %combine.storage
+     if !matchre("$righthand|$lefthand", "%combine.temp") then gosub GET my %combine.temp
+#     if %%order.pref.item.count <= 1 then goto combine.end
+     gosub GET my %combine.temp from %combine.storage
+	 combine2:
+	 matchre combine.end You must be holding both substances to combine them.  For more information, see HELP VERB COMBINE.
+	 matchre combine.end ^That (.*) is too large to add more to\.|^The resulting
+	 matchre combine.continue You combine
      send combine
-     pause 1
+	 matchwait 5
+	 combine.continue:
      math %order.pref.item.count subtract 1
      if !matchre("$lefthand|$righthand", "Empty") then goto combine.end
      pause 0.5
      goto combine
 
 combine.end:
+	 var vol.first %material.volume
      if matchre("$righthand|$lefthand", "%combine.temp") then gosub PUT_IT %combine.temp in %combine.storage
      if matchre("$righthand|$lefthand", "%combine.temp") then gosub PUT_IT %combine.temp in %combine.storage
      gosub GET %discipline book from %main.storage
@@ -1719,7 +1799,6 @@ turn.in1:
      echo ***  Order Complete!
      echo Total orders completed: %orders.completed
      echo Total coin intake: %coin.intake
-	 put #statusbar 2 Money: %coin.intake
      pause 3
      if %repeat > 0 then
           {
@@ -1732,6 +1811,7 @@ turn.in1:
      if (("%discipline" = "remed") && ($Alchemy.LearningRate < 20)) then goto new.order
      if (("%discipline" = "artif") && ($Enchanting.LearningRate < 20)) then goto new.order
      gosub PUT_IT my logbook in my %main.storage
+	 if matchre("(%clerktools)", "(%work.tools)") then gosub return.tools
      put #parse MASTERCRAFT DONE
      exit
 
@@ -1751,6 +1831,45 @@ deed.order:
 #  Commonly referenced Gosubs
 #
 #################################
+
+get.tools:
+     var temp.room $roomid
+	 gosub automove $repair.room
+     var toolcount 0
+     eval toolstotal count("%work.tools","|")
+	 gosub EMPTY_HANDS
+get.tools1:
+     if matchre ("(?i)%work.tools(%toolcount)", "(?i)%clerktools") then 
+	 {
+          matchre got.tool \"Ah, yes, we have one of your tools like that.\" 
+          matchre missing.tool \"It doesn't look like we have anything like that of yours here.\"
+          matchre tool.error \"Well, you need a free hand if I'm going to help you.\"
+          put ask $repair.clerk for %work.tools(%toolcount)
+          matchwait 10
+     }
+     math toolcount add 1
+     if (%toolcount > %toolstotal) then goto clerk.tools.done
+     goto get.tools1
+
+tool.error:
+     echo >log green MASTERCRAFT: Error getting tools from clerk - hands full even after clearing
+	 goto clerk.tools.done
+
+missing.tool:
+     put #echo >log green MASTERCRAFT: %work.tools(%toolcount) tool not in storage?
+     math toolcount add 1
+     if %toolcount > %toolstotal then goto clerk.tools.done
+     goto get.tools1
+
+got.tool:
+     gosub EMPTY_HANDS
+     math toolcount add 1
+     if %toolcount > %toolstotal then goto clerk.tools.done
+     goto get.tools1
+	 
+clerk.tools.done:
+     gosub automove %temp.room
+	 return
 
 check.tools:
      evalmath lastToolRepairTime $gametime - $last%society.typeRepair
@@ -1831,7 +1950,9 @@ toolcheck:
      action var brush.gone 0 when ^You tap an iron wire brush
      action var oil.gone 0 when ^You tap a flask of oil
      gosub put tap brush
+	 gosub put tap brush in portal
      gosub put tap oil
+	 gosub put tap oil in portal
      pause 0.5
      if ((%brush.gone = 1) || (%oil.gone = 1)) then gosub new.tool
      return
@@ -1887,15 +2008,22 @@ new.tool:
      gosub GET %work.material
      gosub PUT_IT %work.material in my %main.storage
      var temp.room $roomid
-     gosub automove forging tool
+     gosub automove $tool.room
      action (order) on
      gosub ORDER
      action (order) off
+     if %oil.gone = 1 then gosub summonoil
      if %oil.gone = 1 then
           {
                gosub ORDER $oil.order
                gosub PUT_IT my oil in my %main.storage
                var oil.gone 0
+          }
+     if %stain.gone = 1 then
+          {
+               gosub ORDER $stain.order
+               gosub PUT_IT my oil in my %main.storage
+               var stain.gone 0
           }
      if %brush.gone = 1 then
           {
@@ -1913,14 +2041,18 @@ lack.coin:
      if "%get.coin" = "off" then goto lack.coin.exit
      var temp.room $roomid
      action (withdrawl) goto lack.coin.exit when (^The clerk flips through her ledger|^The clerk tells you)
-     if matchre("90|116", "\b$zoneid\b") then gosub automove 1teller
+     if matchre("116", "\b$zoneid\b") then gosub automove 1teller
      else gosub automove teller
      gosub PUT withd $MC_WITHD.AMOUNT
      gosub automove %temp.room
      var need.coin 0
      action remove (^The clerk flips through her ledger|^The clerk tells you)
      pause 1
-     goto purchase.material
+     if matchre("$scriptlist", "MC_") then return
+     if %reqd.order > 0 then goto purchase.material
+     if %asmCount1 > 0 then gosub purchase.assemble
+     if %asmCount2 > 0 then gosub purchase.assemble2
+	 goto purchase.material
 
 lack.coin.exit:
      echo You need some startup coin to purchase stuff! Go to the bank and try again!
@@ -1934,14 +2066,14 @@ buyingvolumechange:
      var tracker 1
 buyingvolumechange1:
      if %tracker > %ingotdiff then return
-     if "%work.material" = "bronze" then var volume.%ordinal(%tracker) 5
-     if "%work.material" = "steel" then var volume.%ordinal(%tracker) 10
+     if "%work.material" = "bronze" then var vol.%ordinal(%tracker) 5
+     if "%work.material" = "steel" then var vol.%ordinal(%tracker) 10
      math tracker add 1
      goto buyingvolumechange1
      
 oldchange:
      if %oldnumber < 1 then return
-     var volume.%ordinal(%tempnumber) %volume.%ordinal(%oldnumber)
+     var vol.%ordinal(%tempnumber) %vol.%ordinal(%oldnumber)
      math tempnumber subtract 1
      math oldnumber subtract 1
      goto oldchange
@@ -2028,11 +2160,24 @@ lack.material:
           }
      if matchre("%discipline", "tinkering|shaping") then
           {
-               if "%work.material" = "pine" then var order.num 9
-               if "%work.material" = "maple" then var order.num 10
-               if "%work.material" = "balsa" then var order.num 11
-               evalmath reqd.order (%mass.volume-%material.volume)/5
-               evalmath reqd.order ceiling(%reqd.order)
+               if "%work.material" = "pine" then 
+                    {
+                         var order.num 9
+                         evalmath reqd.order (%mass.volume-%material.volume)/5
+                         evalmath reqd.order ceiling(%reqd.order)
+                    }
+               if "%work.material" = "maple" then 
+                    {
+                         var order.num 10
+                         evalmath reqd.order (%mass.volume-%material.volume)/5
+                         evalmath reqd.order ceiling(%reqd.order)
+                    }
+               if "%work.material" = "balsa" then  
+                    {
+                         var order.num 11
+                         evalmath reqd.order (%mass.volume-%material.volume)/10
+                         evalmath reqd.order ceiling(%reqd.order)
+                    }
                var main.storage $MC_ENGINEERING.STORAGE
                goto purchase.material
           }
@@ -2049,7 +2194,7 @@ lack.material:
                if "%order.type" = "aevaes" then var order.num 10
                if "%order.type" = "genich" then var order.num 11
                if "%order.type" = "ojhenik" then var order.num 12
-               if "%order.type" = "red.flowers" then var order.num 13
+               if "%order.type" = "flowers" then var order.num 13
                if "%order.type" = "root" then var order.num 14
                if "%order.type" = "pollen" then var order.num 15     
                if !matchre("%order.type", "pollen|root") then evalmath reqd.order ceiling((%mass.volume-%%order.type.material.volume)/25)
@@ -2073,21 +2218,31 @@ purchase.material:
      var purchaselabel purchase.material
      action var need.coin 1 when ^The attendant shrugs and says, "Ugh, you don't have enough
      if $roomid != $supply.room then gosub automove $supply.room
+	 gosub EMPTY_HANDS
 first.order:
      if matchre("%discipline", "carving|shaping|tailor|tinkering") then
           {
-               gosub EMPTY_HANDS
+               if (!matchre("$righthand", "Empty") && !matchre("$lefthand", "Empty")) then gosub EMPTY_HANDS
                if %reqd.order >= 1 then    
                     {
                          gosub ORDER %order.num
                          math reqd.order subtract 1
-                         gosub PUT_IT my %order.type in my %main.storage
+#                         gosub PUT_IT my %order.type in my %main.storage
                          math %order.pref.item.count add 1
-                         if matchre("%order.type", "lumber") then math material.volume add 5
+						 gosub combine.order
+                         if matchre("%order.type", "lumber") then 
+                              {
+                                   if "%work.material" = "balsa" then math material.volume add 10
+                                   else math material.volume add 5
+                              }
                          if matchre("%order.type", "leather|cloth|stack") then math material.volume add 10
                          if matchre("%order.type", "yarn") then math material.volume add 100
                          if ("%discipline" = "remed") then math %herb1.material.volume add 25
-                         if %reqd.order < 1 then return
+                         if %reqd.order < 1 then 
+							{
+								gosub PUT_IT my %order.type in my %main.storage
+								return
+							}
                          goto first.order
                     }
                else return
@@ -2142,17 +2297,24 @@ first.order:
      return
      
 combine.order:
+	 gosub GET my %work.material %order.type from my %main.storage
+	 if ("$righthand" != "$lefthand") then 
+		{
+			gosub EMPTY_HANDS
+			return
+		}
      matchre combine.order ^\.\.\.wait|^Sorry
-     match return You combine
-     match switch too large
+     match combine.order.return You combine
+     match return too large
      match return You must be holding
-     match stowright You must be holding
-     match stowright You must be holding
-     put comb %order.type with %order.type
+     put combine
      matchwait
+combine.order.return:
+     math %order.pref.item.count subtract 1
+	 return
      
 stowright:
-     gosub PUT_IT $righthandnoun in %main.storage
+     gosub PUT_IT #$righthandid in %main.storage
      gosub GET %order.type from %main.storage
      goto combine.order
      
@@ -2165,22 +2327,59 @@ switch:
 lack.material.exit:
          echo Not Enough Material To Make %order.quantity $MC.order.noun !
          put #parse Need material
+	     if matchre("(%clerktools)", "(%work.tools)") then gosub return.tools
          exit
+
+return.tools:
+	 gosub automove $repair.room
+     var toolcount 0
+     eval toolstotal count("%work.tools","|")
+	 gosub EMPTY_HANDS
+return.tools1:
+     if matchre ("%work.tools(%toolcount)", "%clerktools") then 
+	 {
+		  gosub GET %work.tools(%toolcount)
+          matchre next.tool ^What were you referring to?
+          matchre next.tool \"Feel free to come back for your item any time,\"
+          matchre not.a.tool \"This isn't the kind of thing I store
+          matchre no.clerk.room \"You don't have enough space in your storage.  Clear some things out first.\"
+          put put my %work.tools(%toolcount) on counter
+          matchwait 10
+		  put #echo >log green MASTERCRAFT: Missing match in return.tools
+     }
+     math toolcount add 1
+     if (%toolcount > %toolstotal) then return
+     goto return.tools1
+
+next.tool:
+     math toolcount add 1
+     if (%toolcount > %toolstotal) then return
+     goto return.tools1
+
+not.a.tool:
+	 put #echo >log green MASTERCRAFT: %work.tools(%toolcount) is not a tool that can be stored - adjust your variables
+     math toolcount add 1
+     if (%toolcount > %toolstotal) then return
+     goto return.tools1
+
+no.clerk.room:
+     put #echo >log green MASTERCRAFT: Ran out of room with clerk - adjust your variables
+     return
+
 
 return:
      return
 
 clearvolume:
-     var volume.first
-     var volume.second
-     var volume.third
-     var volume.fourth
-     var volume.fifth
-     var volume.sixth
-     var volume.seventh
-     var volume.eighth
-     var volume.ninth
-     var volume.tenth
-     var volume.eleventh
+     var vol.first
+     var vol.second
+     var vol.third
+     var vol.fourth
+     var vol.fifth
+     var vol.sixth
+     var vol.seventh
+     var vol.eighth
+     var vol.ninth
+     var vol.tenth
+     var vol.eleventh
      return
-

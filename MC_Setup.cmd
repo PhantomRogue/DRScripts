@@ -1,5 +1,7 @@
 if $charactername = "Spac" then goto CHARACTER2
 if $charactername = "Hintoc" then goto CHARACTER3
+if $charactername = "Vakroth" then goto CHARACTER4
+
 else goto CHARACTER2
 echo You did not set your character name correctly. Please edit MC_SETUP
 exit
@@ -17,7 +19,7 @@ CHARACTER1:
 #	MC_FORGING.DIFFICULTY: Order difficulty easy, challenging, hard
 #	MC_FORGING.DEED: DEED orders instead of bundling items on or off
 #	MC_SMALL.ORDERS: For only working orders 5 volumes or smaller, 0 for off, 1 for on
-put #var MC_FORGING.STORAGE shoulder pack
+put #var MC_FORGING.STORAGE lootsack
 put #var MC_FORGING.DISCIPLINE blacksmith
 put #var MC_FORGING.MATERIAL steel
 put #var MC_FORGING.DIFFICULTY challenging
@@ -62,7 +64,7 @@ put #var MC_Outfitting_NOWO 0
 #	Variables are case sensitive
 #	MC_ALC.DISCIPLINE: OPTIONS remed NOTE: Do not do remedy or remedies. This is the only way to get the book to work for all types
 #	MC_ALC.DIFFICULTY: Order difficulty easy, challenging, hard
-put #var MC_ALCHEMY.STORAGE shoulder pack
+put #var MC_ALCHEMY.STORAGE lootsack
 put #var MC_ALC.DISCIPLINE remed
 put #var MC_ALC.DIFFICULTY challenging
 put #var MC_Alchemy_NOWO 1
@@ -76,7 +78,7 @@ put #var MC_Alchemy_NOWO 1
 # 	MC_IMBUE.MANA: Amount of mana you want to cast at if you're using MC_IMBUE SPELL
 #	MC_FOCUS.WAND: The name of the wand you are using for focusing. If you are a magic user it's not needed, leave it commented. If you are using it I suggest being as descriptive as possible
 
-put #var MC_ENCHANTING.STORAGE shoulder pack
+put #var MC_ENCHANTING.STORAGE lootsack
 put #var MC_ENCHANTING.DISCIPLINE artif
 put #var MC_ENCHANTING.DIFFICULTY challenging
 put #var MC_IMBUE ROD
@@ -181,7 +183,7 @@ CHARACTER2:
 #	MC_FORGING.DIFFICULTY: Order difficulty easy, challenging, hard
 #	MC_FORGING.DEED: DEED orders instead of bundling items on or off
 #	MC_SMALL.ORDERS: For only working orders 5 volumes or smaller, 0 for off, 1 for on
-put #var MC_FORGING.STORAGE shoulder pack
+put #var MC_FORGING.STORAGE lootsack
 put #var MC_FORGING.DISCIPLINE weapon
 put #var MC_FORGING.MATERIAL steel
 put #var MC_FORGING.DIFFICULTY hard
@@ -197,7 +199,7 @@ put #var MC_Forging_NOWO 0
 #	MC_ENG.PREF: Material type noun i.e. lumber, bone, stone
 #	MC_ENG.DIFFICULTY: Order difficulty easy, challenging, hard
 #	MC_ENG.DEED: DEED orders instead of bundling items on or off
-put #var MC_ENGINEERING.STORAGE shoulder pack
+put #var MC_ENGINEERING.STORAGE lootsack
 put #var MC_ENG.DISCIPLINE carving
 put #var MC_ENG.MATERIAL wolf-bone
 put #var MC_ENG.PREF bone
@@ -226,7 +228,7 @@ put #var MC_Outfitting_NOWO 0
 #	Variables are case sensitive
 #	MC_ALC.DISCIPLINE: OPTIONS remed NOTE: Do not do remedy or remedies. This is the only way to get the book to work for all types
 #	MC_ALC.DIFFICULTY: Order difficulty easy, challenging, hard
-put #var MC_ALCHEMY.STORAGE shoulder pack
+put #var MC_ALCHEMY.STORAGE lootsack
 put #var MC_ALC.DISCIPLINE remed
 put #var MC_ALC.DIFFICULTY challenging
 put #var MC_Alchemy_NOWO 0
@@ -240,7 +242,7 @@ put #var MC_Alchemy_NOWO 0
 # 	MC_IMBUE.MANA: Amount of mana you want to cast at if you're using MC_IMBUE SPELL
 #	MC_FOCUS.WAND: The name of the wand you are using for focusing. If you are a magic user it's not needed, leave it commented. If you are using it I suggest being as descriptive as possible
 
-put #var MC_ENCHANTING.STORAGE shoulder pack
+put #var MC_ENCHANTING.STORAGE lootsack
 put #var MC_ENCHANTING.DISCIPLINE artif
 put #var MC_ENCHANTING.DIFFICULTY challenging
 put #var MC_IMBUE ROD
@@ -332,6 +334,12 @@ put #var MC_TOOLBELT_Enchanting NULL
 put #var MC_TOOL.STORAGE_Enchanting valise
 goto endsetup
 
+
+
+
+
+
+
 #######################################################################
 ##################  CHARACTER 3 VARIABLES   HINTOC       ##############
 #######################################################################
@@ -390,7 +398,7 @@ put #var MC_Outfitting_NOWO 0
 #	Variables are case sensitive
 #	MC_ALC.DISCIPLINE: OPTIONS remed NOTE: Do not do remedy or remedies. This is the only way to get the book to work for all types
 #	MC_ALC.DIFFICULTY: Order difficulty easy, challenging, hard
-put #var MC_ALCHEMY.STORAGE shoulder pack
+put #var MC_ALCHEMY.STORAGE lootsack
 put #var MC_ALC.DISCIPLINE remed
 put #var MC_ALC.DIFFICULTY challenging
 put #var MC_Alchemy_NOWO 0
@@ -404,7 +412,7 @@ put #var MC_Alchemy_NOWO 0
 # 	MC_IMBUE.MANA: Amount of mana you want to cast at if you're using MC_IMBUE SPELL
 #	MC_FOCUS.WAND: The name of the wand you are using for focusing. If you are a magic user it's not needed, leave it commented. If you are using it I suggest being as descriptive as possible
 
-put #var MC_ENCHANTING.STORAGE shoulder pack
+put #var MC_ENCHANTING.STORAGE lootsack
 put #var MC_ENCHANTING.DISCIPLINE artif
 put #var MC_ENCHANTING.DIFFICULTY challenging
 put #var MC_IMBUE ROD
@@ -462,7 +470,7 @@ put #var MC_PLIERS  pliers
 put #var MC_BELLOWS bellows
 put #var MC_STIRROD stirring rod
 put #var MC_TOOLBELT_Forging NULL
-put #var MC_TOOL.STORAGE_Forging shoulder pack
+put #var MC_TOOL.STORAGE_Forging lootsack
 #ENGINEERING
 put #var MC_CHISEL chisel
 put #var MC_SAW bone saw
@@ -474,7 +482,7 @@ put #var MC_SHAPER wood shaper
 put #var MC_DRAWKNIFE metal drawknife
 put #var MC_CLAMP metal clamps
 put #var MC_TOOLBELT_Engineering NULL
-put #var MC_TOOL.STORAGE_Engineering shoulder pack
+put #var MC_TOOL.STORAGE_Engineering lootsack
 #OUTFITTING
 put #var MC_NEEDLES sewing needles
 put #var MC_SCISSORS scissors
@@ -482,7 +490,7 @@ put #var MC_SLICKSTONE slickstone
 put #var MC_YARDSTICK  yardstick
 put #var MC_AWL uthamar awl
 put #var MC_TOOLBELT_Outfitting NULL
-put #var MC_TOOL.STORAGE_Outfitting shoulder pack
+put #var MC_TOOL.STORAGE_Outfitting lootsack
 #ALCHEMY
 put #var MC_BOWL alabaster bowl
 put #var MC_MORTAR stone mortar
@@ -490,16 +498,20 @@ put #var MC_STICK mixing stick
 put #var MC_PESTLE grooved pestle
 put #var MC_SIEVE wire sieve
 put #VAR MC_TOOLBELT_Alchemy NULL
-put #var MC_TOOL.STORAGE_Alchemy shoulder pack
+put #var MC_TOOL.STORAGE_Alchemy lootsack
 #ENCHANTING
 put #var MC_BURIN burin
 put #var MC_LOOP loop
 put #var MC_TOOLBELT_Enchanting NULL
-put #var MC_TOOL.STORAGE_Enchanting shoulder pack
+put #var MC_TOOL.STORAGE_Enchanting lootsack
 goto endsetup
 
+
+
+
+
 #######################################################################
-##################  CHARACTER 4 VARIABLES  ############################
+##################  CHARACTER 4 VAKROTH  ############################
 #######################################################################
 CHARACTER4:
 #######################################################################
@@ -526,11 +538,11 @@ put #var MC_Forging_NOWO 0
 #	MC_ENG.PREF: Material type noun i.e. lumber, bone, stone
 #	MC_ENG.DIFFICULTY: Order difficulty easy, challenging, hard
 #	MC_ENG.DEED: DEED orders instead of bundling items on or off
-put #var MC_ENGINEERING.STORAGE carry-all
+put #var MC_ENGINEERING.STORAGE lootsack
 put #var MC_ENG.DISCIPLINE carving
 put #var MC_ENG.MATERIAL wolf-bone
 put #var MC_ENG.PREF bone
-put #var MC_ENG.DIFFICULTY hard
+put #var MC_ENG.DIFFICULTY challenging
 put #var MC_ENG.DEED off
 put #var MC_Engineering_NOWO 0
 #######################################################################
@@ -569,7 +581,7 @@ put #var MC_Alchemy_NOWO 0
 # 	MC_IMBUE.MANA: Amount of mana you want to cast at if you're using MC_IMBUE SPELL
 #	MC_FOCUS.WAND: The name of the wand you are using for focusing. If you are a magic user it's not needed, leave it commented. If you are using it I suggest being as descriptive as possible
 
-put #var MC_ENCHANTING.STORAGE shoulder pack
+put #var MC_ENCHANTING.STORAGE lootsack
 put #var MC_ENCHANTING.DISCIPLINE artif
 put #var MC_ENCHANTING.DIFFICULTY challenging
 put #var MC_IMBUE ROD
@@ -597,12 +609,12 @@ put #var MC_Enchanting_NOWO 0
 #	MC_MAX.ORDER: Maximum number of items to craft, will get a new work order if above this number
 # 	MC_MIN.ORDER: Minimum number of items to craft, will get a new work order if below this number
 put #var MC_REPAIR on
-put #var MC_AUTO.REPAIR on
+put #var MC_AUTO.REPAIR off
 put #var MC_GET.COIN on
 put #var MC_WITHD.AMOUNT 5 gold
 put #var MC_REORDER on
 put #var MC.Mark off
-put #var MC_BLACKLIST none
+put #var MC_BLACKLIST amulet|locket
 put #var MC_WORK.OUTSIDE 0
 #put #var MC_PREFERRED.ROOM 
 #put #var MC_FRIENDLIST
@@ -610,6 +622,7 @@ put #var MC_NOWO 0
 put #var MC_END.EARLY 0
 put #var MC_MAX.ORDER 3
 put #var MC_MIN.ORDER 1
+put #var MC_LOW_VOLUME 50
 #######################################################################
 ##########################  TOOL VARIABLES  ###########################
 #######################################################################
@@ -627,19 +640,19 @@ put #var MC_PLIERS hooked pliers
 put #var MC_BELLOWS leather bellows
 put #var MC_STIRROD stirring rod
 put #var MC_TOOLBELT_Forging NULL
-put #var MC_TOOL.STORAGE_Forging satchel
+put #var MC_TOOL.STORAGE_Forging lootsack
 #ENGINEERING
-put #var MC_CHISEL sharpened chisel
-put #var MC_SAW serrated saw
-put #var MC_RASP tapered rasp
-put #var MC_RIFFLER elongated riffler
+put #var MC_CHISEL chisel
+put #var MC_SAW saw
+put #var MC_RASP rasp
+put #var MC_RIFFLER riffler
 put #var MC_TINKERTOOL tools
 put #var MC_CARVINGKNIFE carving knife
 put #var MC_SHAPER wood shaper
 put #var MC_DRAWKNIFE metal drawknife
 put #var MC_CLAMP metal clamps
 put #var MC_TOOLBELT_Engineering NULL
-put #var MC_TOOL.STORAGE_Engineering satchel
+put #var MC_TOOL.STORAGE_Engineering lootsack
 #OUTFITTING
 put #var MC_NEEDLES sewing needles
 put #var MC_SCISSORS ka'hurst scissors
@@ -647,7 +660,7 @@ put #var MC_SLICKSTONE slickstone
 put #var MC_YARDSTICK silversteel yardstick
 put #var MC_AWL uthamar awl
 put #var MC_TOOLBELT_Outfitting NULL
-put #var MC_TOOL.STORAGE_Outfitting satchel
+put #var MC_TOOL.STORAGE_Outfitting lootsack
 #ALCHEMY
 put #var MC_BOWL large bowl
 put #var MC_MORTAR iron mortar
@@ -655,13 +668,28 @@ put #var MC_STICK mixing stick
 put #var MC_PESTLE iron pestle
 put #var MC_SIEVE metal sieve
 put #var MC_TOOLBELT_Alchemy NULL
-put #var MC_TOOL.STORAGE_Alchemy satchel
+put #var MC_TOOL.STORAGE_Alchemy lootsack
 #ENCHANTING
 put #var MC_BURIN burin
 put #var MC_LOOP loop
 put #var MC_TOOLBELT_Enchanting NULL
-put #var MC_TOOL.STORAGE_Enchanting satchel
+put #var MC_TOOL.STORAGE_Enchanting lootsack
 goto endsetup
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #######################################################################
 ##################  CHARACTER 5 VARIABLES  ############################
@@ -676,7 +704,7 @@ CHARACTER5:
 #	MC_FORGING.DIFFICULTY: Order difficulty easy, challenging, hard
 #	MC_FORGING.DEED: DEED orders instead of bundling items on or off
 #	MC_SMALL.ORDERS: For only working orders 5 volumes or smaller, 0 for off, 1 for on
-put #var MC_FORGING.STORAGE shoulder pack
+put #var MC_FORGING.STORAGE lootsack
 put #var MC_FORGING.DISCIPLINE weapon
 put #var MC_FORGING.MATERIAL steel
 put #var MC_FORGING.DIFFICULTY hard
@@ -692,7 +720,7 @@ put #var MC_Forging_NOWO 0
 #	MC_ENG.PREF: Material type noun i.e. lumber, bone, stone
 #	MC_ENG.DIFFICULTY: Order difficulty easy, challenging, hard
 #	MC_ENG.DEED: DEED orders instead of bundling items on or off
-put #var MC_ENGINEERING.STORAGE shoulder pack
+put #var MC_ENGINEERING.STORAGE lootsack
 put #var MC_ENG.DISCIPLINE carving
 put #var MC_ENG.MATERIAL wolf-bone
 put #var MC_ENG.PREF bone
@@ -721,7 +749,7 @@ put #var MC_Outfitting_NOWO
 #	Variables are case sensitive
 #	MC_ALC.DISCIPLINE: OPTIONS remed NOTE: Do not do remedy or remedies. This is the only way to get the book to work for all types
 #	MC_ALC.DIFFICULTY: Order difficulty easy, challenging, hard
-put #var MC_ALCHEMY.STORAGE shoulder pack
+put #var MC_ALCHEMY.STORAGE lootsack
 put #var MC_ALC.DISCIPLINE remed
 put #var MC_ALC.DIFFICULTY challenging
 put #var MC_Alchemy_NOWO 0
@@ -735,7 +763,7 @@ put #var MC_Alchemy_NOWO 0
 # 	MC_IMBUE.MANA: Amount of mana you want to cast at if you're using MC_IMBUE SPELL
 #	MC_FOCUS.WAND: The name of the wand you are using for focusing. If you are a magic user it's not needed, leave it commented. If you are using it I suggest being as descriptive as possible
 
-put #var MC_ENCHANTING.STORAGE shoulder pack
+put #var MC_ENCHANTING.STORAGE lootsack
 put #var MC_ENCHANTING.DISCIPLINE artif
 put #var MC_ENCHANTING.DIFFICULTY challenging
 put #var MC_IMBUE ROD
@@ -763,7 +791,7 @@ put #var MC_Enchanting_NOWO 0
 #	MC_MAX.ORDER: Maximum number of items to craft, will get a new work order if above this number
 # 	MC_MIN.ORDER: Minimum number of items to craft, will get a new work order if below this number
 put #var MC_REPAIR on
-put #var MC_AUTO.REPAIR on
+put #var MC_AUTO.REPAIR off
 put #var MC_GET.COIN on
 put #var MC_WITHD.AMOUNT 5 gold
 put #var MC_REORDER on
@@ -792,11 +820,11 @@ put #var MC_PLIERS hooked pliers
 put #var MC_BELLOWS corrugated-hide bellows
 put #var MC_STIRROD stirring rod
 put #var MC_TOOLBELT_Forging NULL
-put #var MC_TOOL.STORAGE_Forging shoulder pack
+put #var MC_TOOL.STORAGE_Forging lootsack
 #ENGINEERING
-put #var MC_CHISEL iron chisel
+put #var MC_CHISEL icesteel chisel
 put #var MC_SAW bone saw
-put #var MC_RASP iron rasp
+put #var MC_RASP serrated rasp
 put #var MC_RIFFLER square riffler
 put #var MC_TINKERTOOL tools
 put #var MC_CARVINGKNIFE carving knife
@@ -804,7 +832,7 @@ put #var MC_SHAPER wood shaper
 put #var MC_DRAWKNIFE metal drawknife
 put #var MC_CLAMP metal clamps
 put #var MC_TOOLBELT_Engineering NULL
-put #var MC_TOOL.STORAGE_Engineering shoulder pack
+put #var MC_TOOL.STORAGE_Engineering lootsack
 #OUTFITTING
 put #var MC_NEEDLES sewing needles
 put #var MC_SCISSORS ka'hurst scissors
@@ -812,7 +840,7 @@ put #var MC_SLICKSTONE slickstone
 put #var MC_YARDSTICK silversteel yardstick
 put #var MC_AWL uthamar awl
 put #var MC_TOOLBELT_Outfitting NULL
-put #var MC_TOOL.STORAGE_Outfitting shoulder pack
+put #var MC_TOOL.STORAGE_Outfitting lootsack
 #ALCHEMY
 put #var MC_BOWL alabaster bowl
 put #var MC_MORTAR stone mortar
@@ -820,12 +848,12 @@ put #var MC_STICK mixing stick
 put #var MC_PESTLE grooved pestle
 put #var MC_SIEVE wire sieve
 put #var MC_TOOLBELT_Alchemy NULL
-put #var MC_TOOL.STORAGE_Alchemy shoulder pack
+put #var MC_TOOL.STORAGE_Alchemy lootsack
 #ENCHANTING
 put #var MC_BURIN burin
 put #var MC_LOOP loop
 put #var MC_TOOLBELT_Enchanting NULL
-put #var MC_TOOL.STORAGE_Enchanting shoulder pack
+put #var MC_TOOL.STORAGE_Enchanting lootsack
 goto endsetup
 
 endsetup:
