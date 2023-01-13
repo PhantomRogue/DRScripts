@@ -7,12 +7,16 @@
 ###
 ###
 
+#roomid 239 for Clerics in Bloodvines
+#roomid 131 for Clerics in Serpents
+
 #debug 10
-var MoveToHunt e gate|131
+var MoveToHunt boar|boar|239
 var MoveToCity river|cleric
 var MoveToHealer portal|healer
+var MoveToHibFromBoar hib|hib
 
-var MoveToMagics cleric
+var MoveToMagics 218
 var MoveToEngineer engineer
 
 var MoveToHealer portal|445|healer
@@ -26,7 +30,7 @@ var MovetoCrossBank teller
 	counter set 0
 
 echo
-echo  MUST START INSIDE RIVERHAVEN
+echo  MUST START INSIDE HIB -- New Starting Location for Better hunting
 echo	
 	
 start:
@@ -46,7 +50,7 @@ HUNTING:
 ## Hunting is done, Lets do all of our other shit
 	put ret;ret
 	pause 3
-	gosub MoveLooper MoveToCity
+	gosub MoveLooper MoveToMagics
 	counter set 0
 
 
@@ -60,6 +64,15 @@ HUNTING:
 	send .rocks
 	waitfor GATHERINGDONE
 	pause .5
+	
+	
+## We in Boar Clan, gotta go to Riverhaven to do Engineering
+	counter set 0
+	gosub MoveLooper MoveToHibFromBoar
+	counter set 0
+	
+	send .ptravel river
+	waitfor DonePortalhax
 
 ## Doing some Engineering work orders
 	gosub MoveLooper MoveToEngineer
@@ -109,8 +122,8 @@ GoingToCrossing:
 	send .crosscomm
 	waitfor COMMUNEDONE
 	
-## We completed a run!  Lets head back to Riverhaven and hunt some more
-	send .ptravel river
+## We completed a run!  Lets head back to Hib and hunt some more
+	send .ptravel hib
 	waitfor DonePortalhax
 	pause 1
 

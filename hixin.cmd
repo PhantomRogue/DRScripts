@@ -141,8 +141,8 @@ if_1 then
 else
 {	
 	var SkipHide Yes
-	setvariable weapons bastard sword|
-	setvariable WSkill Large_Edged|
+	setvariable weapons broadsword|sabre|crossbow|hammer|hammer
+	setvariable WSkill Large_Edged|Small_Edged|Crossbow|Small_Blunt|Heavy_Thrown
 	var DEBIL frostbite.9
 	var DEBIL.CYCLIC 0
 	var SPELL fb.9
@@ -181,14 +181,14 @@ goto Loop
 ######################################################
 
 Loop:
-eval coinsonground count("$roomobjs", "coins")
-if %coinsonground > 5 then put dump junk
+eval coinsonground count("$roomobjs", ",")
+if %coinsonground > 10 then put dump junk
 if %total > 0 then gosub loopArray
 gosub CritterCheck
 gosub StanceCheck
-if $Tactics.LearningRate < 25 then gosub TacticsTrain
+if $Tactics.LearningRate < 27 then gosub TacticsTrain
 if $Appraisal.LearningRate < 31 then gosub Appraise
-if $Guild = "Cleric" or $Guild = "Warrior Mage" or $Guild = "Necromancer" or $Guild = "Paladin" or $charactername = Lewix then gosub DebilCast
+if $Guild = "Bard" then gosub BardScream
 if %WeaponType = "Magic" then gosub Magic_Kill
 else if %WeaponType = "Thrown" then gosub Throw_Kill
 else if %WeaponType = "Ranged" then gosub Ranged_Kill
@@ -239,8 +239,6 @@ put face next;cast
 goto returnc
 
 TacticsTrain:
-put circl
-pause 5
 put bob
 pause 5
 put circl
@@ -249,12 +247,11 @@ put bob
 pause 5
 put circl
 pause 5
-put bob
-pause 5
-put circl
-pause 5
-put bob
-pause 5
+return
+
+BardScream:
+put scream conc
+pause 4
 return
 
 StanceCheck:
@@ -358,7 +355,6 @@ HOLD:
 ## Script completed a loop, lets exit
 if_2 then
 {
-	put echo IF2
 	put rel ee
 	put #parse HUNTINGISDONE
 	put #script abort dd
@@ -366,13 +362,11 @@ if_2 then
 }
 if_1 then
 {
-	put echo IF1	
 	var ArrayIndex 0
 	gosub SetupWeapons
 }
 else
 {
-	put echo NOIF
 	put #parse HUNTINGISDONE
 	put rel ee
 	put #script abort dd
@@ -724,7 +718,7 @@ ExpStaffTrain:
 
 attpause:
 if $Guild = Barbarian and $stamina < 80 then put bers aval
-put circl
+put bob
 pause 7
 
 Kill:
@@ -758,7 +752,7 @@ goto Kill
 
 
 Tactical:
-put circl
+put bob
 pause .5
 #if $Tactics.LearningRate > 30 
 return

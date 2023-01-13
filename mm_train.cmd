@@ -1,4 +1,5 @@
 ﻿#Moon Mage training script. - Genie3 v6.01 BETA
+##Author: Azarael (aka Malzian)
 ##Change log:
 ## v1.0 : Initial release
 ## v1.x : Archived v1.1 - v1.6
@@ -13,8 +14,8 @@
 ##				Added more documentation to better denote script sections.
 ##				Fixed Pouchsort action for new messaging.
 ##				Removed Prediction interpreter - may rebuild and add in later.
-##			  Relocated all action definitions to the top of the script for
-##			  consistency.
+##			    Relocated all action definitions to the top of the script for
+##			    consistency.
 ## v6.01  Fixed an issue with the obs.count variable not getting the correct value.
 ##
 
@@ -46,7 +47,7 @@ GuildCheck:
 		}
 
 ##First-run check
-if !def("MM_IS_SETUP") then goto Setup
+#if !def("MM_IS_SETUP") then goto Setup
 
 if_1 then
 	{
@@ -74,7 +75,6 @@ ScriptStart:
 	##Script variables
 	##Do NOT change these!!!
 	var script.room $roomid
-	var interp.action.once 0
 	var is.recepticle 0
 	var tool.broken 0
 	var pouch.num first|second|third|fourth|fifth|sixth
@@ -147,7 +147,7 @@ ScriptStart:
 	action var pg.active 0 when The world around you returns to its mundane appearance\.$
 	action var hand.armor $1 when Your efforts are hindered by your \w+ (\w+)
 	action var hand.armor $1 when Your efforts are hindered by your \w+ \w+ (\w+)
-	action (pouchcheck) js doPush("pouchname","$1") when (\S+) pouch\.$
+	action (pouchcheck) js doPush("pouchname","$1") when (\S+) pouch is
 	action (gemcheck) var gemempty 1 when There is nothing in there.
 	action (tool.check) tool.broken = 1;echo Divination tool broken! when referring
 	action (new.tool) var tool.broken 0 when ^You tap
@@ -177,6 +177,8 @@ ScriptStart:
 #############################
 ##    Main Script Body     ##
 #############################
+
+goto MainLoop
 
 ##Initial Script Checks
 HandsEmptyChk:
@@ -263,17 +265,17 @@ if $MM_TRAIN_ASTROLOGY = ON then
 	{
 	if %clear.sky = 1 then
 		{
-		if $Astrology.LearningRate < 10 then gosub astro.begin
+		if $Astrology.LearningRate < 25 then gosub astro.begin
 		}
 	if %clear.sky = 0 then
 		{
 		if %pg.active = 1 then
 			{
-			if $Astrology.LearningRate < 10 then gosub astro.begin
+			if $Astrology.LearningRate < 25 then gosub astro.begin
 			}
 		if %pg.active = 0 then
 			{
-			if $Astrology.LearningRate < 10 then
+			if $Astrology.LearningRate < 25 then
 				{
 				if %pg.known = 1 then
 					{
@@ -284,6 +286,7 @@ if $MM_TRAIN_ASTROLOGY = ON then
 			}
 		}
 	}
+put #parse ASTROLOGYDONE
 
 #Supplementary Training Checks	
 if %gem.pouch then
@@ -299,7 +302,7 @@ if $MM_TRAIN_JUGGLE = ON then
 	}
 if $MM_TRAIN_MECH = ON then
 	{
-	if $Mechanical_Lore.LearningRate < 34 then gosub mech.forage
+	if $Engineering.LearningRate < 34 then gosub mech.forage
 	}
 if $MM_TRAIN_FORAGE = ON then
 	{
@@ -444,7 +447,7 @@ Astro.Begin:
 	var obs.levels %levels.%season
 	eval obs.count count("%obs.night","|")
 	var astro.count 0
-	if ((%tool.check = 0) && !($MM_DIVINATION_TOOL = "visions")) then gosub check.tool
+	#if ((%tool.check = 0) && !($MM_DIVINATION_TOOL = "visions")) then gosub check.tool
 	if $MM_TT_PLUGIN = ON then
 		{
 		if $Time.isDay = 0 then goto pred.night
@@ -454,6 +457,7 @@ Astro.Begin:
 
 Pred.Day:
 	eval obs.count count("%obs.day","|")
+	var obs.levels %levels.day
 	if %astro.count > %obs.count then var astro.count 0
 	eval this.level element("%obs.levels", "%astro.count")
 	if %circle < %this.level then
@@ -513,9 +517,9 @@ Pred.Night:
 Obs:
 	match need.pg Clouds obscure the sky
 	match get.tele is too faint for you to pick out with your naked eye.
-	matchre predict You learned something useful|predict from your observation|Although you don't gain a complete view of the future|Too many futures cloud your mind - you learn nothing|you still learned from your observation|you still learned
+	matchre predict You have not pondered your last observation sufficiently|You learned something useful|predict from your observation|Although you don't gain a complete view of the future|Too many futures cloud your mind - you learn nothing|you still learned from your observation|you still learned
 	matchre obs You see nothing regarding the future
-	matchre next.obs You learn nothing of the future
+	matchre next.obs You learn nothing of the future|too close to the sun
 	match astro.begin is foiled by
 	matchre return You are unable to make use of this latest observation|fruitless|I could not find what you are referring to|no telescope
 	if %need.tele = 1 then
@@ -751,8 +755,8 @@ Predict_Wait:
 		}
 	if matchre("$MM_WAIT_MODE", "juggle") then
 		{
-		if $righthand = Empty then send get my %jugglie
-		send juggle my %jugglie
+		if $righthand = Empty then send get my $MM_JUGGLIE
+		send juggle my $MM_JUGGLIE
 		pause
 		pause 0.5
 		goto Predict_Wait
@@ -785,7 +789,7 @@ Turn_Sigil:
 
 ##PG/CV casting
 PG:
-	put prep PG $MM_PG_PREP
+	put prep PG 12
 	waitfor fully prepared
 	put cast
 	var pg.active 1
@@ -793,7 +797,7 @@ PG:
 	return
 
 CV:
-	put prep CV $MM_CV_PREP
+	put prep CV 12
 	waitfor fully prepared
 	put cast
 	var cv.active 1
@@ -1016,15 +1020,15 @@ Setup:
 	var EXTRA Train Mech|Mech Material|Train Forage|Collect Item|Train Juggle|Jugglie|Back
 	var TOGGLES TRAIN|USE|PLUGIN
 	var MENU_WINDOW Moonmage Training Menu
-	var CV_PREP_DESC This is the mana amount to prepare the Clear Vision Spell during the Astrology section.
-	var PG_PREP_DESC This is the mana amount to prepare the Piercing Gaze Spell during the Astrology section.
-	var DIVINATION_TOOL_DESC This is the method used to make predicitons. The standard form is 'visions'. (Please note that Bowls and Tokka Decks are still currently disabled for the 3.0 update.)
-	var DEAL_TIMES_DESC This is how many cards to deal from your Tokka Deck for predicitons. Must be between 3 and 6.
-	var TT_PLUGIN_DESC This toggles the script to utilize the Time and Moon Tracker plugin. Leave this to OFF if you do not have this plugin.
-	var WAIT_MODE_DESC This sets an option to perform other various tasks during the cooldown on observations. The current options are: juggle (practices with juggling), sigil (studies sigils in sigilbooks- Must have a book with sigils scribed!) and script (must set the 'Wait Script' variable!).
-	var WAIT_SCRIPT_DESC This is the name (note the filename ONLY) of the script to run during the observation cooldown.
-	var WARDING_SPELL_DESC This spell will be used to train Warding. Possible spells are: Psychic Shield [psy], Cage of Light [col]
-	var WARDING_PREP_DESC This is the mana amount to prepare the Warding Spell during the Magic section.
+	var CV_PREP_DESC 12
+	var PG_PREP_DESC 12
+	var DIVINATION_TOOL_DESC NA
+	var DEAL_TIMES_DESC 3
+	var TT_PLUGIN_DESC ON
+	var WAIT_MODE_DESC script
+	var WAIT_SCRIPT_DESC pause
+	var WARDING_SPELL_DESC col
+	var WARDING_PREP_DESC 12
 	var AUGMENTATION_SPELL_DESC This spell will be used to train Augmentation. Possible spells are: Clear Vision [cv], Piercing Gaze [pg], Aura Sight [aus], Tenebrous Sense [ts], Shadows, Seer's Sense [seer]
 	var AUGMENTATION_PREP_DESC This is the mana amount to prepare the Augmentation Spell during the Magic section.
 	var UTILITY_SPELL_DESC This spell will be used to train Utility. Possible spells are: Refractive Field [rf], Steps of Vaun [sov], Shadowing, Shadow Servant [ss], Contingency, Seer's Sense [seer]
@@ -1034,8 +1038,8 @@ Setup:
 	var CAMBRINTH_DESC This is the noun of the cambrinth item you wish to use during the Magic section.
 	var CHARGE_DESC This is the amount of mana to charge your cambrith item with during the Magic section.
 	var USE_CAMBRINTH_DESC This toggles whether or not to utilize cambrinth during the Magic section.
-	var TRAIN_MECH_DESC This toggles whether or not to train Mechanical Lore while other experience drains.
-	var MECH_MATERIAL_DESC This is the material utilize for braiding during Mechanical Lore training, ie.: grass, vines, etc.
+	var TRAIN_MECH_DESC This toggles whether or not to train Engineering while other experience drains.
+	var MECH_MATERIAL_DESC This is the material utilize for braiding during Engineering training, ie.: grass, vines, etc.
 	var TRAIN_FORAGE_DESC This toggles whether to train Outdoorsmanship through collecting while other experience drains.
 	var COLLECT_ITEM_DESC This is the material collected during Outdoorsmanship training. ie.: rock, branch, vine, etc.
 	var TRAIN_JUGGLE_DESC This toggles whether to train Perception through juggline while other experience drains.
@@ -1115,52 +1119,53 @@ Missing.Globals:
 exit
 
 Menu.Build:
-	##Menu Building Routine
-	##Function - Builds a numbered menu of options in link format that saves option information into a variable.
-	##pre - First parameter must be an array of the option names/values. Second parameter is the name of the
-	##	target global variable to store the result of the link click. Third parameyer is a string
-	##	that will be parsed to continue the script after the menu item has been selected. Fourth parameter
-	##	is a string or array of items that are exceptions to be excluded from the menu list. Fifth parameter is a
-	##	window name to echo output to (leave out to echo to Game window).
-	##post - Value of clicked link is stored in target global variable.
-	
-	action (input) var input $1;put #parse input.done when ~(.*)
-	
-	if !%c then
-		{		
-		var this.array $1
-		var target.variable $2
-		var script.trigger $3
-		var exceptions $4
-		if !($5 = "") then 
-			{
-			var this.window $5
-			put #window add "%this.window"
-			put #window open "%this.window"
-			put #clear %this.window
-			send #echo ">%this.window" cyan $selection Menu
-			send #echo ">%this.window"
-			}
-		else var this.window Game
-		var this.option 0
-		eval array.length count("%this.array","|")
-		}
-	if %c > %array.length then
-		{
-		var this.option 0
-		counter set 0
-		return
-		}
-	var this.choice %this.array(%c)
-	if matchre("%exceptions","%this.choice") then
-		{
+##Menu Building Routine
+##Function - Builds a numbered menu of options in link format that saves option information into a variable.
+##pre - First parameter must be an array of the option names/values. Second parameter is the name of the
+##	target global variable to store the result of the link click. Third parameyer is a string
+##	that will be parsed to continue the script after the menu item has been selected. Fourth parameter is a
+##  window name to echo output to (leave out to echo to Game window).
+##	Fifth parameter is a string or array of items that are exceptions to be excluded from the menu list.
+##	
+##post - Value of clicked link is stored in target global variable.
+
+		action (input) var input $1;put #parse input.done when ~(.*)
+
+		if !%c then
+				{		
+				var this.array $1
+				var target.variable $2
+				var script.trigger $3
+				if $4 != "" then 
+						{
+						var this.window $4
+						put #window add "%this.window"
+						put #window open "%this.window"
+						put #clear %this.window
+						send #echo ">%this.window" cyan $selection Menu
+						send #echo ">%this.window"
+						}
+				else var this.window Game
+				if $5 != "" then var exceptions $5
+				var this.option 0
+				eval array.length count("%this.array","|")
+				}
+		if %c > %array.length then
+				{
+				var this.option 0
+				counter set 0
+				return
+				}
+		var this.choice %this.array(%c)
+		if matchre("%exceptions","%this.choice") then
+				{
+				counter add 1
+				goto menu.build
+				}
 		counter add 1
+		math this.option add 1
+		send #link ">%this.window" "%this.option. - %this.choice" "#var %target.variable %this.choice;#parse %script.trigger"
 		goto menu.build
-		}
-	counter add 1
-	math this.option add 1
-	send #link ">%this.window" "%this.option. - %this.choice" "#var %target.variable %this.choice;#parse %script.trigger"
-	goto menu.build
 
 GlobalSet:
 	put #clear "%this.window"

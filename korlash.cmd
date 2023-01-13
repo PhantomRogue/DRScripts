@@ -10,6 +10,7 @@
 ###   If you want an AFK hunter, use .1hunter    ###
 ###                                              ###
 ####################################################
+action put quit when $health < 40
 action put #beep when says
 action put #beep when whispers
 action put #beep when hugs
@@ -24,6 +25,9 @@ action send stand when $prone = 1
 action send stand when $standing = 0
 action put stow left;\pstow right;\p%lastcommand when Free up your hands first
 action put tend my $1 when the bandages binding your (left arm|right arm|left hand|right hand|left leg|right leg|chest|abdomen|back|head|neck|left eye|right eye)
+action goto Dead when your death cry echoes
+action goto Dead when You are a ghost
+action goto Panic when (You're badly hurt, |You're smashed up,|You're very badly hurt)
 action goto Panic when (You're near death,|You're terribly wounded,|You're very beat up)
 action put tend my $1 when The bandages binding your (left arm|right arm|left hand|right hand|left leg|right leg|chest|abdomen|back|head|neck|left eye|right eye)
 action setvariable KillTime YES when BACKSTABTHISSHIT
@@ -102,7 +106,6 @@ var expRanged Bow|Crossbow
 var expBrawling Brawling
 ## End ExpertiseSets
 
-var coinsonground 0
 var CurrentType
 var ArrayIndex 0
 var changed 0
@@ -113,10 +116,6 @@ var CompCounter 0
 var WearBow On
 var BowHide No
 
-## Cyclic Toggles
-var DEBIL.CYCLIC.ON 0
-var SPELL.CYCLIC.ON 0
-
 #####################################################
 ###                                               ###
 ###             VARIABLES                         ###
@@ -124,31 +123,24 @@ var SPELL.CYCLIC.ON 0
 #####################################################
 
 
-var DoNecroHealing No
+var DoNecroHealing Yes
 
-if_1 then 
-{
-## First Parameter is setup for Backtraining
-	var SkipHide Yes
-	setvariable weapons bastard sword|axe|spike|crossbow
-	setvariable WSkill Twohanded_Edged|Heavy_Thrown|Light_Thrown|Crossbow
-	var DEBIL frostbite.9
-	var DEBIL.CYCLIC 0
-	var SPELL fb.6
-	var SPELL.CYCLIC 0
-	goto goon
-}
-else
-{	
-	var SkipHide Yes
-	setvariable weapons bastard sword|
-	setvariable WSkill Large_Edged|
-	var DEBIL frostbite.9
-	var DEBIL.CYCLIC 0
-	var SPELL fb.9
-	var SPELL.CYCLIC 0
-	goto goon
-}
+Yosto:
+Yo:
+var SkipHide Yes
+var BowHide No
+setvariable weapons sabre
+setvariable WSkill Small_Edged
+var DEBIL pv.6
+var SPELL sv.7
+goto goon
+
+
+Melee:
+var SkipHide No
+setvariable weapons rapier
+setvariable WSkill Small_Edged
+goto goon
 
 Ranged:
 if $charactername = Koiln then setvariable weapons bow
@@ -181,12 +173,9 @@ goto Loop
 ######################################################
 
 Loop:
-eval coinsonground count("$roomobjs", "coins")
-if %coinsonground > 5 then put dump junk
 if %total > 0 then gosub loopArray
 gosub CritterCheck
 gosub StanceCheck
-if $Tactics.LearningRate < 25 then gosub TacticsTrain
 if $Appraisal.LearningRate < 31 then gosub Appraise
 if $Guild = "Cleric" or $Guild = "Warrior Mage" or $Guild = "Necromancer" or $Guild = "Paladin" or $charactername = Lewix then gosub DebilCast
 if %WeaponType = "Magic" then gosub Magic_Kill
@@ -212,7 +201,6 @@ return
 ###
 ###################################################################
 DebilCast:
-if DEBIL.CYCLIC.ON = 1 then goto returnc
 put prep %DEBIL
 match castdebil You feel fully prepared
 match returnc You have no idea how to cast that spell
@@ -221,9 +209,7 @@ match redodebil You have already
 matchwait
 castdebil:
 put cast
-if DEBIL.CYCLIC = 1 then var DEBIL.CYCLIC.ON 1
 match fnCast You can't cast that at yourself!
-match returnc Maintaining two cyclic spells at once is beyond your mental comprehension, and the pattern dissipates
 match returnc Roundtime
 matchwait
 returnc:
@@ -241,19 +227,11 @@ goto returnc
 TacticsTrain:
 put circl
 pause 5
-put bob
+put circl
 pause 5
 put circl
 pause 5
-put bob
-pause 5
 put circl
-pause 5
-put bob
-pause 5
-put circl
-pause 5
-put bob
 pause 5
 return
 
@@ -296,8 +274,6 @@ Setup_Magic:
 	var HangBack Off
 	pause 1
 	put stance shie
-	pause .5
-	put wie bas swo
 	return
 
 Setup_Melee:
@@ -356,36 +332,15 @@ loopArray:
 
 HOLD:
 ## Script completed a loop, lets exit
-if_2 then
-{
-	put echo IF2
-	put rel ee
-	put #parse HUNTINGISDONE
-	put #script abort dd
-	exit
-}
-if_1 then
-{
-	put echo IF1	
-	var ArrayIndex 0
-	gosub SetupWeapons
-}
-else
-{
-	put echo NOIF
-	put #parse HUNTINGISDONE
-	put rel ee
-	put #script abort dd
-}
-
-
+#parse HUNTINGISDONE
+put #script abort yosto
 return
 
 CritterCheck:
 if %skill = Bow && %WearBow = Off then gosub RangedPrep
 gosub HuntTime
 gosub BuffCheck
-if $monstercount > 1 then return	
+if $monstercount > %1 then return
 pause 2
 goto CritterCheck
 
@@ -567,8 +522,8 @@ if $charactername = Vedalken then
 
 if $charactername = Doz then 
 {
-	if $SUF = "OFF" then gosub ReBuff SUF 10
-	if $ES = "OFF" then gosub ReBuff ES 10
+	if $SUF = "OFF" then gosub ReBuff SUF 5
+	if $ES = "OFF" then gosub ReBuff ES 5
 	
 }
 if $charactername = Ciravassus || $charactername = Iakku then
@@ -1032,7 +987,7 @@ throwit:
  match throwit ...wait
  match getweapon Roundtime
  match getweapon What are you
- put lob
+ put throw
  matchwait
 
  ReturnThrow:
@@ -1051,13 +1006,8 @@ getweapon:
 #######################################################
 
 Magic_Kill:
-if $Guild = "Warrior Mage" then put path foc damage
+if $Guild = "WarriorMage" then put path foc damage
 if $mana < 60 then gosub MagicAttack
-
-if SPELL.CYCLIC.ON = 1 then goto TM_CHECK_BODIES
-## If we using Cyclic TM, lets do a specific Rotation
-if SPELL.CYCLIC = 1 then goto TM_CYCLIC
-
 	pause 2
 	match facenext Your spell fails completely
 	match facenext You are not engaged to anything, so you must specify a target to focus on
@@ -1066,7 +1016,7 @@ if SPELL.CYCLIC = 1 then goto TM_CYCLIC
 	match Magic_Kill Currently lacking the skill to complete the pattern
 	match facenext I could not find what you were referring to
 	matchre nextup Roundtime|backfire|Your target pattern dissipates because the
-	put target %SPELL;-12cast
+	put prep %SPELL;tar;-12cast
 	matchwait
 	nextup:
 	if matchre ("$roomobjs", "(%critters) ((which|that) appears dead|\(dead\))") then return
@@ -1084,18 +1034,6 @@ MagicAttack:
 pause 10
 put attack
 return
-
-TM_CYCLIC:
-## Start the Cyclic
-	put prep %SPELL
-	pause 10
-	put cast
-	var SPELL.CYCLIC.ON 1
-TM_CHECK_BODIES:
-	pause 5
-	if matchre ("$roomobjs", "(%critters) ((which|that) appears dead|\(dead\))") then return
-	goto TM_CHECK_BODIES
-
 
 
 #######################################################

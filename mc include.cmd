@@ -280,7 +280,8 @@ Haven.Engineering:
 var master Paarupensteen
 var master.room %HE.master.room
 var work.room %HE.work.room
-var supply.room 466
+var supply.room 465
+var material.room 466
 var part.room 466
 var tool.room 465
 var society.type Engineering

@@ -9,34 +9,75 @@
 ####
 
 
-action exit when eval $health < 45
 action goto fullpouch when is too full to fit any more gems
 action goto fullpouch when You think the (.*) gem pouch is too full to fit another gem into
+action goto fullpouch when You think the gem pouch is too full to fit another gem into
 action put tie pou;stow $lefthandnoun when You've already got a wealth of gems in there
 action goto HealNow when You're not in any condition to be stalking anyone
+action (heals) goto HealNow when eval $health < 55
+action (heals) goto HealNow when eval $bleeding > 0
+action put quit when eval $health < 15
 
-debug 10
-var MoveToMob east gate|285
-var MoveToGemsFromHunt shard|portal|618|gems
+
+#debug 10
+# Tresses
+#	var MoveToMob boar|boar|257
+#	var MoveToGemsFromHunt hib|hib|map150|gems
+#	var HuntingToPawn hib|hib|37
+
+# Black Leucs
+#	var MoveToMob negate|leuc|9	
+#	var MoveToGemsFromHunt ntr|cross|map150|gems
+#	var HuntingToPawn ntr|277
+#	var MoveToHealerFromHunting ntr|cross|map150|healer
+
+# Quartz Gargs
+	var MoveToMob fang|72
+	var MoveToGemsFromHunt gems
+	var HuntingToPawn exit|139|202
+	var MoveToHealerFromHunting healer
+	var ReStartLocation cross
+	var HuntingToTown exit|139
+	var MoveFromTownToBurge w gate|tiger|3
+	var MoveFromTigerToPawn cross|cross|pawn
+	var MoveToMagic 150
+	var MoveFromHuntingToTown exit|139
+	var MoveToOutsideBank 42
+
+# Lang Swamps
+#	var MoveToMob 71
+#	var MoveToGemsFromHunt map150|gems
+#	var HuntingToPawn 4
+#	var MoveToHealerFromHunting map150|healer
+#	var ReStartLocation elb
+#	var HuntingToBurgle
+
+	
 var MoveToShard shard
+
 var MoveToSprites 9|sprites|19
 var MoveFromSprites ratha
 
+var MoveToSilverLeucs nw gate|71
+var MoveFromSilverLeucs ratha
+
+var MoveToSerpents e gate|131
+var MoveFromSerpents river
+
+
 ##Burgle Location
-var HuntingToPawn shard|44
 
-
-var MoveToHealer portal|618|healer
-var MoveFromHealer exit|139
-var MoveToGems portal|618|gems
-var MoveToMagic 44
+#var MoveToHealer map150|healer
+#var MoveFromHealer exit|139
+#var MoveToGems map150|gems
+#var MoveToMagic 44
 
 var TotalLoops 0
 var WeHunting 0
 counter set 0
 
 
-pause 1
+if_1 goto %1
 
 start:
 timer clear
@@ -65,27 +106,38 @@ timer start
 ## Hunting is done, go pop boxes
 	put ret;ret
 	pause 3
-	gosub MoveLooper HuntingToPawn
+	gosub MoveLooper MoveFromHuntingToTown
+	counter set 0
+	gosub MoveLooper MoveFromTownToBurge
 	counter set 0
 	
-# Go outside to burgle
-	#put out;tie blue pou
-	pause 2
-	#put rem plat;stow plat
-	#pause 1
-	#send .burgle
-	#waitfor burglecomplete
-	#pause 2
-	#put get plat;wear plat
+	setvariable WeHunting 0
+	
+# Go burgle in Tiger Clan (No Jailtime)
 
+	send .doz remove
+	waitfor ARMORDONE
+	pause 2
+	send .burgle
+	waitfor BURGLECOMPLETE
+	pause 3
+	send .doz wear
+	waitfor ARMORDONE
+	pause 2
+
+	pause 1
+	gosub MoveLooper MoveFromTigerToPawn
+	counter set 0
 
 ## Sell the Item
-	#put #goto pawn
-	#waitfor YOUHAVEARRIVED
-	#put go pawn;sell $lefthandnoun
-	#pause 1
-	#put empty left;out
-	#pause 1
+	put sell $righthandnoun;sell $lefthandnoun
+	pause 1
+	put empty left;empty right
+	pause 1
+	
+#Time to head to TGS to do some Gatherin and Magics
+	gosub MoveLooper MoveToMagic
+	counter set 0
 	
 GatheringSub:	
 ## Lets do some Gathering for Outdoors EXP	
@@ -97,21 +149,30 @@ GatheringSub:
 BoxPoppinRoutine:
 	send .summon
 	waitfor MagicTrainComplete
+	put #var powerwalk 1
 	
 ## Go do a Raven Run (App/Scholarship)
 GoingToCrossing:
-	send .ptravel cro
-	waitfor DonePortalhax
-	pause 1
+#	send .ptravel cro
+#	waitfor DonePortalhax
+#	pause 1
 ## We in Crossing, run the Raven!
 	send .raven
 	waitfor RAVENDONE
+	
+## Do a Climbing Run
+	gosub MoveLooper MoveToOutsideBank
+	counter set 0
 
+	send .cc
+	waitfor CLIMBINGDONE
+	
 
 ## Lets backtrain!	Heading to Sprites
-	send .ptravel rat
+	put #var powerwalk 1
+	send .ptravel river
 	waitfor DonePortalhax
-	gosub MoveLooper MoveToSprites
+	gosub MoveLooper MoveToSerpents
 	counter set 0
 
 ## BackTraining
@@ -120,21 +181,20 @@ GoingToCrossing:
 	waitfor HUNTINGISDONE
 	pause 1
 	put rel ee
-	gosub MoveLooper MoveFromSprites
+	put wear right;stow right
+	gosub MoveLooper MoveFromSerpents
 	counter set 0
 	pause 1
-		
-	send .ptravel shard
-	waitfor DonePortalhax
-#	gosub MoveLooper MoveToGems
 
 HealerSub:
 ## Go to the AutoHealer
 	gosub MoveLooper MoveToHealer
 	counter set 0
 	pause 1
+WeAtHealer:
 	put join list;sit
 	waitfor Yrisa crosses Doz's name from the list.
+	action (heals) on
 
 	
 #
@@ -149,9 +209,11 @@ HealerSub:
 	gosub MoveLooper MoveFromHealer
 	counter set 0
 	pause .5
-	put go gate
-	counter set 0
 
+	
+## Head  back to restart
+	send .ptravel %ReStartLocation
+	waitfor DonePortalhax
 
 LooperInfo:
 	goto start
@@ -165,15 +227,19 @@ MoveLooper1:
     eval number count("%Mover", "|")  
     if %c > %number then return
 	send #goto %item
-	waitfor YOUHAVEARRIVED
+	match MoveLooperFail MOVE FAILED
+	match MoveContinue YOUHAVEARRIVED
+	matchwait
+MoveContinue:
 	counter add 1
+MoveLooperFail:
 	goto MoveLooper1
 	
 	
 fullpouch:
 	put #script abort dd
 	pause .5
-	put put $righthandnoun in backpack;put $lefthandnoun in backpack
+	put put $righthandnoun in haver;put $lefthandnoun in haver
 	counter set 0
 	if %WeHunting == 1 then gosub MoveLooper MoveToGemsFromHunt
 	else gosub MoveLooper MoveToGems
@@ -187,10 +253,11 @@ fullpouch:
 	goto BoxPoppinRoutine
 	
 HealNow:
-	put #script abort yosto;#script abort newdisarm
+	action (heals) off
+	put #script abort dd
 	pause .5
-	put stow right;stow left
 	counter set 0
-	put ret;ret
-	pause .5
-	goto HealerSub
+	if %WeHunting == 1 then gosub MoveLooper MoveToHealerFromHunting
+	counter set 0
+	pause .5	
+	goto WeAtHealer

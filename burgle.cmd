@@ -9,12 +9,13 @@ action var Guild $1;put #var Guild $1 when Guild:\s+(Barbarian|Bard|Cleric|Commo
 
 
 
-put info
+if_1 then goto SkipRope
 
 put get rope
 put uncoil rope
 pause 3
 
+SkipRope:
 prep:
 ##if $Guild = Thief then goto StartKhri
 
@@ -99,8 +100,10 @@ put go window
 pause 1
 put khri stop
 pause 1
+if_1 then goto SkipRope2
 put coil my rope
 put stow rope
+SkipRope2:
 pause 1
 put #parse BURGLECOMPLETE
 exit

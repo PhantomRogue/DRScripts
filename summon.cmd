@@ -1,6 +1,7 @@
+
 #debug 10
 start:
-if $Summoning.LearningRate > 30 then goto end
+if $Summoning.LearningRate > 20 then goto end
 if %lastact = imped then goto imped
 admit:
 var lastact admit

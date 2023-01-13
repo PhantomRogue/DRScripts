@@ -16,19 +16,27 @@ action put tie pou when You've already got a wealth of gems in there
 action goto HealNow when You're not in any condition to be stalking anyone
 
 debug 10
-var MoveToMob Rakash|148
-var MoveToGemsFromHunt lang|portal|375|gems
-var HuntingToPawn lang|pawn
+var MoveToMob portal|fang|67
+var MoveFromHuntToTown exit|139
+var MoveFromCrossingToTiger west|tiger|3
+var MoveFromTigerToPawn crossing|crossing|pawn
+var MoveToGemsFromHunt gems
+var HuntingToPawn exit|139|pawn
 var MoveToHealer portal|375|healer
-var MoveFromHealer exit|139
+var MoveFromHealer 139
 var MoveToGems portal|375|gems
-var MoveToMagic rakash|17
+var MoveToMagic rakash|23
+var MoveToEngineering engineer
+var MoveToBank 42	
+	
 var TotalLoops 0
 var WeHunting 0
 counter set 0
 
 
 pause 1
+## Start in  Lang
+if_1 goto %1
 
 start:
 timer clear
@@ -47,20 +55,51 @@ timer start
 ## Hunting is done, go pop boxes
 	put ret;ret
 	pause 3
-	gosub MoveLooper HuntingToPawn
+## Since we in Fang, Move to a town, then to Crossing	
+	gosub MoveLooper MoveFromHuntToTown
+	counter set 0
+	send .ptravel cro
+	waitfor DonePortalhax
+	
+	gosub MoveLooper MoveFromCrossingToTiger
 	counter set 0
 	
 # Go outside to burgle
 	put out;tie blue pou
 	pause 2
-	send .burgle
+	send .burgle Yes
 	waitfor BURGLECOMPLETE
-
+	pause 1
+	gosub MoveLooper MoveFromTigerToPawn
+	counter set 0
 
 ## Sell the Item
-	put go pawn;sell $lefthandnoun
+	put go pawn
+	pause .5
+	put sell $righthandnoun;sell $lefthandnoun
 	pause 1
-	put empty left;out
+	put empty left;empty right
+	pause 1
+
+## Lets do an Engineer Work Order
+	gosub MoveLooper MoveToEngineering
+	counter set 0
+	pause 1
+	send .mastercraft
+	waitfor MASTERCRAFT DONE
+	pause 1	
+
+StartClimbing:
+	gosub MoveLooper MoveToBank
+	counter set 0
+	send .cc
+	waitfor CLIMBINGDONE
+	pause 1
+	
+Pawn:	
+## Back to Lang
+	send .ptravel elb
+	waitfor DonePortalhax
 	pause 1
 	
 GatheringSub:	
@@ -68,7 +107,10 @@ GatheringSub:
 	send .rocks
 	waitfor GATHERINGDONE
 	pause .5
-
+	
+	gosub MoveLooper MoveToMagic
+	counter set 0
+	
 ## Finished burgling  Time to do Magic!
 BoxPoppinRoutine:
 	send .research
@@ -84,8 +126,6 @@ GoingToCrossing:
 ## We in Crossing, run the Raven!
 	send .raven
 	waitfor RAVENDONE
-	send .ptravel elb
-	waitfor DonePortalhax
 #	gosub MoveLooper MoveToGems
 
 HealerSub:
@@ -94,8 +134,10 @@ HealerSub:
 	counter set 0
 	pause 1
 	put join list;sit
-	waitfor Yrisa crosses Yosto's name from the list.
-
+	match healdone Yrisa crosses Yosto's name from the list.
+	match healdone crosses your name off the waiting list.
+	matchwait 
+healdone:
 	
 #
 # Lets Deposit all our moneys

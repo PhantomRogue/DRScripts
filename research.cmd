@@ -48,6 +48,18 @@ Check.Research:
 			goto Do.Research
 		}
 	}
+	if %this.magic = augmentation then
+	{
+		if ($Augmentation.LearningRate < 5) then goto Do.Research
+	}
+	if %this.magic = warding then
+	{
+		if ($Warding.LearningRate < 5) then goto Do.Research
+	}
+	if %this.magic = utility then
+	{
+		if ($Utility.LearningRate < 5) then goto Do.Research
+	}
 	if %this.magic = field then
 	{
 		if (($Primary_Magic.LearningRate < 5) || ($Sorcery.Learning Rate < 5) || ($Arcana.LearningRate < 5)) then goto Do.Research
@@ -63,8 +75,9 @@ Check.Research:
 	}
 	else
 	{
-		# Done Researching	
-		#parse DONERESEARCH
+		#Done Researching	
+		put #parse DONERESEARCH
+		put #script abort research
 	}
 	
 Do.Research:

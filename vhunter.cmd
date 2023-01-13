@@ -10,6 +10,7 @@
 ###   If you want an AFK hunter, use .1hunter    ###
 ###                                              ###
 ####################################################
+action put quit when $health < 40
 action put #beep when says
 action put #beep when whispers
 action put #beep when hugs
@@ -24,6 +25,9 @@ action send stand when $prone = 1
 action send stand when $standing = 0
 action put stow left;\pstow right;\p%lastcommand when Free up your hands first
 action put tend my $1 when the bandages binding your (left arm|right arm|left hand|right hand|left leg|right leg|chest|abdomen|back|head|neck|left eye|right eye)
+action goto Dead when your death cry echoes
+action goto Dead when You are a ghost
+action goto Panic when (You're badly hurt, |You're smashed up,|You're very badly hurt)
 action goto Panic when (You're near death,|You're terribly wounded,|You're very beat up)
 action put tend my $1 when The bandages binding your (left arm|right arm|left hand|right hand|left leg|right leg|chest|abdomen|back|head|neck|left eye|right eye)
 action setvariable KillTime YES when BACKSTABTHISSHIT
@@ -102,7 +106,6 @@ var expRanged Bow|Crossbow
 var expBrawling Brawling
 ## End ExpertiseSets
 
-var coinsonground 0
 var CurrentType
 var ArrayIndex 0
 var changed 0
@@ -118,37 +121,34 @@ var DEBIL.CYCLIC.ON 0
 var SPELL.CYCLIC.ON 0
 
 #####################################################
-###                                               ###
-###             VARIABLES                         ###
-###                                               ###
+###                                               	#
+###             VARIABLES                         	#
+###                                               	#
+###		Parameter1 - Hunter Type 					#
+###						- BackTrain2HE				#
+###						- BackTrainOtherShit		#
+###		Parameter2 - Yes/No 						#
+###						Loop or Just Once			#
+###													#
 #####################################################
 
 
 var DoNecroHealing No
+if_1 then goto %1
 
-if_1 then 
-{
-## First Parameter is setup for Backtraining
-	var SkipHide Yes
-	setvariable weapons bastard sword|axe|spike|crossbow
-	setvariable WSkill Twohanded_Edged|Heavy_Thrown|Light_Thrown|Crossbow
-	var DEBIL frostbite.9
-	var DEBIL.CYCLIC 0
-	var SPELL fb.6
-	var SPELL.CYCLIC 0
+BackTrain2HE:
+	var SkipHide No
+	setvariable weapons claymore
+	setvariable WSkill Twohanded_Edged
 	goto goon
-}
-else
-{	
+
+BackTrainOtherShit:
 	var SkipHide Yes
-	setvariable weapons bastard sword|
-	setvariable WSkill Large_Edged|
-	var DEBIL frostbite.9
-	var DEBIL.CYCLIC 0
-	var SPELL fb.9
-	var SPELL.CYCLIC 0
+	var BackstabFull No
+	setvariable weapons broad|club|crossbow|broad
+	setvariable WSkill Heavy_Thrown|Light_Thrown|Crossbow|Large_Edged
 	goto goon
-}
+
 
 Ranged:
 if $charactername = Koiln then setvariable weapons bow
@@ -181,12 +181,9 @@ goto Loop
 ######################################################
 
 Loop:
-eval coinsonground count("$roomobjs", "coins")
-if %coinsonground > 5 then put dump junk
 if %total > 0 then gosub loopArray
 gosub CritterCheck
 gosub StanceCheck
-if $Tactics.LearningRate < 25 then gosub TacticsTrain
 if $Appraisal.LearningRate < 31 then gosub Appraise
 if $Guild = "Cleric" or $Guild = "Warrior Mage" or $Guild = "Necromancer" or $Guild = "Paladin" or $charactername = Lewix then gosub DebilCast
 if %WeaponType = "Magic" then gosub Magic_Kill
@@ -241,19 +238,11 @@ goto returnc
 TacticsTrain:
 put circl
 pause 5
-put bob
+put circl
 pause 5
 put circl
 pause 5
-put bob
-pause 5
 put circl
-pause 5
-put bob
-pause 5
-put circl
-pause 5
-put bob
 pause 5
 return
 
@@ -297,7 +286,7 @@ Setup_Magic:
 	pause 1
 	put stance shie
 	pause .5
-	put wie bas swo
+	put wie b s
 	return
 
 Setup_Melee:
@@ -355,27 +344,16 @@ loopArray:
 	return	
 
 HOLD:
-## Script completed a loop, lets exit
+## Script completed a loop, If we sent Parameter2 then We stop, else we loop
 if_2 then
 {
-	put echo IF2
-	put rel ee
 	put #parse HUNTINGISDONE
-	put #script abort dd
-	exit
-}
-if_1 then
-{
-	put echo IF1	
-	var ArrayIndex 0
-	gosub SetupWeapons
+	put #script abort vhunter
 }
 else
 {
-	put echo NOIF
-	put #parse HUNTINGISDONE
-	put rel ee
-	put #script abort dd
+	var ArrayIndex 0
+	gosub SetupWeapons
 }
 
 
@@ -435,7 +413,10 @@ SkinStuff:
 put skin
 pause 3
 put stow left
-put loot goods
+
+## If we are backtraining (Future proof the script incase I use this for other shit), we are checking the Parameter1 for looting boxes or just gems/coins, AKA Backtraining, we arent getting boxes
+if_1 then put loot treasure
+else put loot goods
 pause .5
 put exp
 return

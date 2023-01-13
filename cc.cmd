@@ -489,7 +489,6 @@ move s
 move s
 move s
 move se
-put hide
 goto CheckEXP
 
 
@@ -518,29 +517,6 @@ CheckEXP:
 IF $Athletics.LearningRate < 25 then
 goto MAIN
 else
-goto waitforit
-
-waitforit:
-pause
-put perc trans
-pause 10
-put perc xibar
-pause 10
-put perc psy
-pause 10
-put perc yav
-pause 10
-put perc plan
-pause 10
-put perc kat
-pause 10
-put perc perc
-pause 10
-put perc moonb
-pause 10
-goto CheckEXP
+put #parse CLIMBINGDONE
 
 
-DONE:
-put quit
-exit

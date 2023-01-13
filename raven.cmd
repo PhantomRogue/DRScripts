@@ -9,7 +9,7 @@
    }
    else
    {
-      put HUM $Song
+      put HUM quiet
    }
    pause 1
 
