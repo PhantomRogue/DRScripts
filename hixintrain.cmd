@@ -1,6 +1,6 @@
 #######################################################################
 ###
-###			Script to do Vakky Things
+###			Script to AFK Train Yosto the Necro
 ###
 ###		Uses Custom Scripts to Loop through doing Random shit
 ###		Version .1
@@ -12,33 +12,34 @@
 action exit when eval $health < 45
 action goto fullpouch when is too full to fit any more gems
 action goto fullpouch when You think the (.*) gem pouch is too full to fit another gem into
-action put tie pou;stow left when You've already got a wealth of gems in there
+action put tie pou when You've already got a wealth of gems in there
 action goto HealNow when You're not in any condition to be stalking anyone
-action quit when "Stop right there!"  The shout reverberates through the area as the guardsman charges towards you.  "You're under arrest!"
 
 debug 10
-	var MoveToMob rossm|138
-	var MoveToGemsFromHunt lang|map150|gems
-	var GiantsToPawn lang|pawn
-	var MoveToHealer map150|healer
-	var MoveFromHealer exit|139
-	var MoveToGems map150|gems
-
-#BackTrainingGiants
-	var MoveToBackTrain raven|180
-	var MoveFromBackTrain hib
-
-	var MoveToEngineering engineer
-
+var MoveToMob w gate|234
+var MoveFromHuntToTown crossing
+var MoveFromCrossingToTiger west|tiger|3
+var MoveFromTigerToPawn crossing|crossing|pawn
+var MoveToGemsFromHunt gems
+var HuntingToPawn exit|139|pawn
+var MoveToHealer 652|healer
+var MoveFromHealer exit|139
+var MoveToGems portal|375|gems
+var MoveToMagic rakash|23
+var MoveToEngineering engineer
+var MoveToBard 470
+var MoveToNEGate negate
+var MoveToBardFromNEGate cross|470
+	
+	
 var TotalLoops 0
 var WeHunting 0
 counter set 0
 
 
-echo
-echo Start anywhere in Lang/Theren area
-echo
 pause 1
+## Start in  Lang
+if_1 goto %1
 
 start:
 timer clear
@@ -47,99 +48,90 @@ timer start
 	gosub MoveLooper MoveToMob
 	setvariable WeHunting 1
 	counter set 0
-	send .vak YES
+	send .hixin
 	waitfor HUNTINGISDONE
-	send #script abort vak
-	put she
+	
+HuntingIsDone:	
+	send #script abort hixin
+	put she;stow right
 	setvariable 0
 
 	pause .5
 ## Hunting is done, go pop boxes
 	put ret;ret
 	pause 3
-	gosub MoveLooper GiantsToPawn
+
+	gosub MoveLooper MoveFromHuntToTown
+	counter set 0
+	
+	gosub MoveLooper MoveFromCrossingToTiger
 	counter set 0
 	
 # Go outside to burgle
-	put out;tie indi pou
+	send .hix remove
+	waitfor ARMORDONE
 	pause 2
 	send .burgle
 	waitfor BURGLECOMPLETE
-
+	pause 3
+	send .hix wear
+	waitfor ARMORDONE
+	pause 2
+	
+	pause 1
+	gosub MoveLooper MoveFromTigerToPawn
+	counter set 0
 
 ## Sell the Item
-	put go pawn;sell $lefthandnoun
+	put sell $righthandnoun;sell $lefthandnoun
 	pause 1
-	put empty left;out
+	put empty left;empty right
 	pause 1
+
+## Lets do an Work Order
+	#gosub MoveLooper MoveToEngineering
+	#counter set 0
+	#pause 1
+	#send .mastercraft
+	#waitfor MASTERCRAFT DONE
+	#pause 1	
+	
+Pawn:	
+## Back to Lang
+	#send .ptravel elb
+	#waitfor DonePortalhax
+	#pause 1
 	
 GatheringSub:	
 ## Lets do some Gathering for Outdoors EXP	
+	gosub MoveLooper MoveToNEGate
+	counter set 0
+	
 	send .rocks
 	waitfor GATHERINGDONE
 	pause .5
-
-## Finished burgling  Time to pop boxes
+	
+## Finished burgling  Time to do Performance!
 BoxPoppinRoutine:
-	send .newdisarm
-	match GoGetHealed YOUBLEWIT	
-	match MoveToArmor BOXESAREPOPPED
-	matchwait
-
-MoveToArmor:
-## Put armor back on
-	send .ved wear
-	pause 8
-	counter set 0
-	GoGetHealed:
-	pause 1
-	
-EngineeringSub:
-## Lets do 2 work orders, lets head to riverhaven
-	send .ptravel river
-	waitfor DonePortalhax
-	gosub MoveLooper MoveToEngineering
-	counter set 0
-	pause 2
-	put sano
-	pause 1
-	send .mastercraft
-	waitfor MASTERCRAFT DONE
-	pause 1
-
-BackTrain:
-	send .ptravel hib
-	waitfor DonePortalhax
-	pause 1
-	put sano
-	pause 1	
-	gosub MoveLooper MoveToBackTrain
-	counter set 0
-	pause 1
-	send .backtrainvak BackTrainTHE
-	waitfor HUNTINGISDONE
-	put she;stow right
-	pause 1
-	put ret;ret
-	gosub MoveLooper MoveFromBackTrain
+	gosub MoveLooper MoveToBardFromNEGate
 	counter set 0
 	
+	send .play cast
+	waitfor PERFORMANCEDONE
 	
-RavenSub:
-	send .ptravel cros
-	waitfor DonePortalhax
-	pause 1
+## Go do a Raven Run (App/Scholarship)
+GoingToCrossing:
 ## We in Crossing, run the Raven!
 	send .raven
 	waitfor RAVENDONE
-	
-HealerSub:
+
+	HealerSub:
 ## Go to the AutoHealer
 	gosub MoveLooper MoveToHealer
 	counter set 0
 	pause 1
 	put join list;sit
-	waitfor Yrisa crosses Vakroth's name from the list.
+	waitfor Yrisa crosses Hixin's name from the list.
 
 	
 #
@@ -157,11 +149,6 @@ HealerSub:
 
 
 LooperInfo:
-	## Lets go back to Elbains, since we were in Crossing for Scholarship
-	send .ptravel elb
-	waitfor DonePortalhax
-	pause 1
-	
 	goto start
 
 
@@ -172,14 +159,8 @@ MoveLooper1:
 	eval item element("%Mover", %c)  
     eval number count("%Mover", "|")  
     if %c > %number then return
-	
-MoveRedo:	
-    pause 1
 	send #goto %item
-	match MoveContinue YOUHAVEARRIVED
-	match MoveRedo MOVEMENTFAILED		
-	matchwait
-MoveContinue:
+	waitfor YOUHAVEARRIVED
 	counter add 1
 	goto MoveLooper1
 	
@@ -192,16 +173,16 @@ fullpouch:
 	if %WeHunting == 1 then gosub MoveLooper MoveToGemsFromHunt
 	else gosub MoveLooper MoveToGems
 	## We at the Gemsmith, remove pouch, put it in our water sack and get a new one
-	put rem pou;put pou in wa sa
+	put rem pou;put pou in backp
 	pause .5
-	put ask wick for pouch;ask clerk for pouch;wear pou
+	put ask wick for pouch;ask gems for pouch;wear pou
 	pause .5
 	counter set 0
 	gosub MoveLooper MoveFromHealer
 	goto BoxPoppinRoutine
 	
 HealNow:
-	put #script abort vak;#script abort newdisarm
+	put #script abort yosto;#script abort newdisarm
 	pause .5
 	put stow right;stow left
 	counter set 0

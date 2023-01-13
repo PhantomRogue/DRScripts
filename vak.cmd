@@ -8,6 +8,7 @@ action math Plats add $1 when You pick up (\d+) platinum
 action math Golds add $1 when You pick up (\d+) gold
 action math Silvers add $1 when You pick up (\d+) silver
 action math LeatherProcs add 1 when Your leathers flare
+action put stow left when You need a free hand to pick that up
 
 
 var gems1 agate|alexandrite|amber|amethyst|andalusite|aquamarine|bead|beryl|bloodgem|bloodstone|carnelian|chrysoberyl|carnelian|chalcedony|platinum bar|copper bar|silver bar|gold bar
@@ -45,8 +46,8 @@ if (%AFKVersion == 1 && %TotalBoxes > 10) then goto HunterDone
 
 put tb
 pause 10
-if $Shield_Usage.LearningRate < 30 then put stance shie
-else put stance parr
+if $Parry_Ability.LearningRate < 25 then put stance parr
+else put stance shie
 if $monstercount > 0 then gosub Kill_hide
 pause 5
 goto start

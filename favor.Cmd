@@ -283,7 +283,7 @@ goto getorb
 
 getorb:
 pause
-match checkexp You get
+match oknowgorub You get
 match getorb You drop
 match xaltar I could not find
 match xaltar What were you
