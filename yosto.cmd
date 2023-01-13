@@ -39,7 +39,7 @@ action var Guild $1;put #var Guild $1 when Guild:\s+(Barbarian|Bard|Cleric|Commo
 put info
 pause 5
 
-
+# debug 10
 if $Guild = Necromancer then include NecroHealer.cmd
 asdasdasdasd:
 put perc
@@ -125,34 +125,26 @@ var BowHide No
 
 var DoNecroHealing Yes
 
-Yosto:
-Yo:
-var SkipHide Yes
-var BowHide No
-setvariable weapons sabre
-setvariable WSkill Small_Edged
-var DEBIL pv.6
-var SPELL sv.7
-goto goon
 
-
-Melee:
-var SkipHide No
-setvariable weapons rapier
-setvariable WSkill Small_Edged
-goto goon
-
-Ranged:
-if $charactername = Koiln then setvariable weapons bow
-else setvariable weapons bow
-if $charactername = Koiln then setvariable WSkill Bow
-else setvariable WSkill Bow
-goto goon
-
-BackTrain:
-setvariable weapons truncheon|chain|club|sap
-setvariable WSkill Short_Staff|Heavy_Blunt|Medium_Blunt|Light_Blunt
-goto goon
+if_1 then 
+{
+## First Parameter is setup for Backtraining
+	var SkipHide Yes
+	setvariable weapons bola|falchion|bola
+	setvariable WSkill Light_Thrown|Large_Edged|Small_Blunt
+	var SPELL sv.8
+	var DEBIL pv.4
+	goto goon
+}
+else
+{	
+	var SkipHide No
+	setvariable weapons sabre|PM|latchbow
+	setvariable WSkill Small_Edged|Targeted_Magic|Crossbow
+	var SPELL sv.8
+	var DEBIL pv.4
+	goto goon
+}
 
 goon:
 if_4 then var ArrayIndex %4
@@ -173,6 +165,8 @@ goto Loop
 ######################################################
 
 Loop:
+eval coinsonground count("$roomobjs", ",")
+if %coinsonground > 5 then put dump junk
 if %total > 0 then gosub loopArray
 gosub CritterCheck
 gosub StanceCheck
@@ -332,8 +326,10 @@ loopArray:
 
 HOLD:
 ## Script completed a loop, lets exit
-#parse HUNTINGISDONE
-put #script abort yosto
+	put stow left;stow right
+	pause 1
+	put #parse HUNTINGISDONE
+	put #script abort yosto
 return
 
 CritterCheck:
@@ -404,8 +400,7 @@ NoBones:
 matchre arrstuffdone corpse is worthless now|Arrange what|^You might want to kill it first|what?|cannot be|so you can't arrange it either
 matchre skinit has already been arranged|don't know how to do that
 matchre ArrangeStuff1 Roundtime|You can't do that while entangled in a web
-if $Outfitting.Ranks > 50 then put arrange all 
-if $Outfitting.Ranks < 50 then put arrange
+put arrange
 matchwait
 
 Bone_Prep:
@@ -421,7 +416,8 @@ if $Guild == Necromancer then goto NecroStuff
 #if $Guild == Necromancer && $Thanatology.LearningRate < 33 then put perf diss on %sCritter
 #else put skin
 FromNecroSkin:
-put skin
+if $Skinning.LearningRate > 30 && $First_Aid.LearningRate < 30 then put dissect
+else put skin
 pause 3
 if %skill = "Brawling" then put empty right
 else put empty left

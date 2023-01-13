@@ -10,16 +10,18 @@
 ###   If you want an AFK hunter, use .1hunter    ###
 ###                                              ###
 ####################################################
-action put #beep when says
-action put #beep when whispers
-action put #beep when hugs
-action put #beep when grins
-action put #beep when waves to You
-action put #beep when waves at You
-action put #beep when winks at You
-action put #beep when You can use RESPOND
-action put #beep when shakes You
-action put #beep when leans on You
+
+#action put #beep when says
+#action put #beep when whispers
+#action put #beep when hugs
+#action put #beep when grins
+#action put #beep when waves to You
+#action put #beep when waves at You
+#action put #beep when winks at You
+#action put #beep when You can use RESPOND
+#action put #beep when shakes You
+#action put #beep when leans on You
+
 action send stand when $prone = 1
 action send stand when $standing = 0
 action put stow left;\pstow right;\p%lastcommand when Free up your hands first
@@ -175,6 +177,7 @@ if %coinsonground > 5 then put dump junk
 gosub loopArray
 gosub CritterCheck
 gosub StanceCheck
+gosub TacticsTrain
 if $Appraisal.LearningRate < 31 then gosub Appraise
 if $Guild = "Cleric" or $Guild = "Warrior Mage" or $Guild = "Necromancer" or $Guild = "Paladin" or $charactername = Lewix then gosub DebilCast
 if %WeaponType = "Magic" then gosub Magic_Kill
@@ -231,9 +234,13 @@ put circl
 pause 5
 put circl
 pause 5
-put circl
+put bob
 pause 5
 put circl
+pause 5
+put bob
+pause 5
+put circle
 pause 5
 return
 

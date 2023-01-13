@@ -131,7 +131,7 @@ Lew:
 Lewix:
 var SkipHide No
 var BowHide Yes
-setvariable weapons cusk|bastard sword| shortbow|bastard sword
+setvariable weapons cusk|bastard sword|shortbow|bastard sword
 setvariable WSkill Light_Thrown|Large_Edged|Bow|Twohanded_Edged
 var DEBIL HB.2
 var SPELL ec.3

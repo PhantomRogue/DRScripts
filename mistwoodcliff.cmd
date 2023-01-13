@@ -16,6 +16,7 @@ SubSkip:
 #---------------------------------------
 # VARIABLES
 #---------------------------------------
+	var NextRoom ^(?:Obvious (?:paths|exits)|It's pitch dark|You can't go there|You can't sneak in that direction)
 
 #---------------------------------------
 # ACTIONS
@@ -27,12 +28,10 @@ SubSkip:
 	put peer path
 	waitforre Peering closely at
 	put down
-     waitforre ^You also see|^Obvious|Clusters
+	waitforre %NextRoom
 	put %Dir
-     pause 0.3
-     pause 0.2
+	waitforre %NextRoom
 	put nw
-	waitforre ^Birds chitter in the branches
-	pause
+	waitforre %NextRoom
 	put #parse MOVE SUCCESSFUL
 	

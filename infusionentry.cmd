@@ -22,9 +22,11 @@ action setvariable aspect $1 when (dolphin|panther|cat|ram|cobra|wolf|boar|raven
 action setvariable coffin.ready $1 when bier bearing the image .* (dolphin|panther|cat|ram|cobra|wolf|boar|raven|lion|wren)
 action setvariable coffin.ready no when A steel-reinforced ebony coffin hangs in the air 
 action setvariable coffin.ready no when  A steel-reinforced ebony coffin lies on the floor near the biers
-
-
+action (moving) var Moving 1 when Obvious (path|exits)|Roundtime
+var Moving 0
+if ($roomid != 404) then gosub automove 404
 infusion:
+pause 0.2
 #action (aspect) activate
 put look sun
 pause 0.5
@@ -77,9 +79,11 @@ pull.rope:
 	matchwait 
 
 coffinready:
+pause 0.1
+pause 0.1
 put open coffin
-pause 0.1
-pause 0.1
+pause 0.4
+pause 0.3
 put go coffin
 pause 0.1
 pause 0.1
@@ -93,3 +97,72 @@ if $stunned then
 	}
 if $prone then put stand
 put #parse MOVE SUCCESSFUL
+pause 0.5
+exit
+
+return:
+return
+
+#### AUTOMOVE
+AUTOMOVE:
+     delay 0.0001
+     action (moving) on
+     var Moving 0
+     var randomloop 0
+     var Destination $0
+     var automovefailCounter 0
+     if ($standing = 0) then gosub AUTOMOVE_STAND
+     if ($roomid = 0) then gosub moveRandomDirection
+     if ("$roomid" = "%Destination") then return
+AUTOMOVE_GO:
+     pause 0.0001
+     matchre AUTOMOVE_FAILED ^(?:AUTOMAPPER )?MOVE(?:MENT)? FAILED
+     matchre AUTOMOVE_RETURN ^YOU HAVE ARRIVED(?:\!)?
+     matchre AUTOMOVE_RETURN ^SHOP CLOSED(?:\!)?
+     matchre AUTOMOVE_FAIL_BAIL ^DESTINATION NOT FOUND
+     put #goto %Destination
+     matchwait 4
+     if (%Moving = 0) then goto AUTOMOVE_FAILED
+     matchre AUTOMOVE_FAILED ^(?:AUTOMAPPER )?MOVE(?:MENT)? FAILED
+     matchre AUTOMOVE_RETURN ^YOU HAVE ARRIVED(?:\!)?
+     matchre AUTOMOVE_RETURN ^SHOP CLOSED(?:\!)?
+     matchre AUTOMOVE_FAIL_BAIL ^DESTINATION NOT FOUND
+     matchwait 45
+     goto AUTOMOVE_FAILED
+AUTOMOVE_STAND:
+     pause 0.1
+     matchre AUTOMOVE_STAND ^\.\.\.wait|^Sorry\,|^Please wait\.
+     matchre AUTOMOVE_STAND ^Roundtime\:?|^\[Roundtime\:?|^\(Roundtime\:?|^\[Roundtime|^Roundtime
+     matchre AUTOMOVE_STAND ^The weight of all your possessions prevents you from standing\.
+     matchre AUTOMOVE_STAND ^You are still stunned\.
+     matchre AUTOMOVE_RETURN ^You stand(?:\s*back)? up\.
+     matchre AUTOMOVE_RETURN ^You are already standing\.
+     send stand
+     matchwait
+AUTOMOVE_FAILED:
+     pause 0.1
+     # put #script abort automapper
+     pause 0.2
+     math automovefailCounter add 1
+     if (%automovefailCounter > 3) then goto AUTOMOVE_FAIL_BAIL
+     send #mapper reset
+     pause 0.1
+     put look
+     pause 0.5
+     pause 0.2
+     if ($roomid = 0) || (%automovefailCounter > 2) then gosub moveRandomDirection
+     goto AUTOMOVE_GO
+AUTOMOVE_FAIL_BAIL:
+     action (moving) off
+     put #echo
+     put #echo >Log Crimson *** AUTOMOVE FAILED. ***
+     put #echo >Log Destination: %Destination
+     put #echo Crimson *** AUTOMOVE FAILED.  ***
+     put #echo Crimson Destination: %Destination
+     put #echo
+     return
+AUTOMOVE_RETURN:
+     action (moving) off
+     pause 0.1
+     pause 0.2
+     return

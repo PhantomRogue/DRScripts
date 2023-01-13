@@ -18,6 +18,7 @@ setvariable EndingPouch 0
 setvariable Plats 0
 setvariable Golds 0
 setvariable GemCount 0
+setvariable GemsInBox 0
 send .ved remove
 pause 5
 
@@ -312,6 +313,7 @@ setvariable speed careful
 goto pickanalyze
 
 pickanalyze:
+pause 1
 save pickanalyze
 match pickanalyze Sorry,
 match pickanalyze \.\.\.wait
@@ -321,6 +323,7 @@ put pick analyze
 matchwait
 
 pick:
+pause 1
 save pick
 MATCH pick Sorry,
 MATCH pick \.\.\.wait
@@ -443,7 +446,7 @@ MATCH exp Rolling your shoulders to loosen them
 MATCH exp You move your hands
 MATCH exp You place some meat
 match exp You must be holding the object you wish to dismantle.
-match ecp Unable to locate the object you specified.
+match exp Unable to locate the object you specified.
 PUT dismantle my %boxtype
 MATCHWAIT
 
